@@ -20,23 +20,23 @@ export function HabitCheckInButton({ status, onCheckIn, onSkip, color }: HabitCh
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
-            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 flex gap-2 bg-white dark:bg-zinc-800 p-2 rounded-full shadow-lg border border-zinc-200 dark:border-zinc-700 z-10"
+            className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 flex gap-3 bg-surface-1 p-2 rounded-md shadow-modal border border-hairline z-20 whitespace-nowrap"
           >
             <button
               onClick={() => { onSkip(); setShowOptions(false); }}
-              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-full text-zinc-500 transition-colors"
+              className="p-3 bg-surface-2 hover:bg-surface-3 rounded-md text-ink-tertiary transition-all border border-hairline hover:border-hairline-strong shadow-sm active:scale-95"
               title="Skip for today"
               id="habit-skip-btn"
             >
-              <SkipForward size={18} />
+              <SkipForward size={20} />
             </button>
             <button
               onClick={() => { onCheckIn(); setShowOptions(false); }}
-              className="p-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full hover:opacity-90 transition-opacity"
+              className="p-3 bg-accent text-white rounded-md hover:bg-accent-hover transition-all shadow-glow-accent active:scale-95"
               title="Check in"
               id="habit-checkin-confirm-btn"
             >
-              <Check size={18} />
+              <Check size={20} />
             </button>
           </motion.div>
         )}
@@ -48,19 +48,19 @@ export function HabitCheckInButton({ status, onCheckIn, onSkip, color }: HabitCh
           else if (status === 'in_progress') onCheckIn();
         }}
         disabled={status === 'completed' || status === 'skipped'}
-        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
-          status === 'completed' ? 'bg-green-500 text-white shadow-green-500/20' :
-          status === 'skipped' ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400' :
-          status === 'in_progress' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xl scale-110' :
-          'bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
-        } shadow-sm group relative`}
+        className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all ${
+          status === 'completed' ? 'bg-accent text-white shadow-glow-accent' :
+          status === 'skipped' ? 'bg-surface-3 text-ink-tertiary opacity-40 italic' :
+          status === 'in_progress' ? 'shadow-glow-accent scale-110 border-2 border-white' :
+          'bg-surface-2 border border-hairline text-ink-tertiary hover:border-accent hover:text-accent hover:bg-surface-1'
+        } shadow-card group relative active:scale-95`}
         style={status === 'in_progress' ? { backgroundColor: color, color: '#fff' } : {}}
         id="habit-main-action-btn"
       >
-        {status === 'completed' ? <Check size={24} /> :
-         status === 'skipped' ? <SkipForward size={20} /> :
-         status === 'in_progress' ? <Plus size={24} /> :
-         <Plus size={24} className="group-hover:scale-110 transition-transform" />}
+        {status === 'completed' ? <Check size={28} strokeWidth={3} /> :
+         status === 'skipped' ? <SkipForward size={22} /> :
+         status === 'in_progress' ? <Plus size={28} strokeWidth={3} /> :
+         <Plus size={28} strokeWidth={3} className="group-hover:scale-110 transition-transform" />}
       </button>
     </div>
   );

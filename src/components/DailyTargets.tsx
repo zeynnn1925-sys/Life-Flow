@@ -92,19 +92,19 @@ export default function DailyTargets() {
 
   const getCategoryColor = (cat: Target['category']) => {
     switch (cat) {
-      case 'health': return '#ef4444'; // rose-500
-      case 'work': return '#3b82f6'; // blue-500
-      case 'finance': return '#f59e0b'; // amber-500
-      default: return '#fbbf24'; // yellow-400
+      case 'health': return 'var(--color-accent-danger)';
+      case 'work': return 'var(--color-accent-blue)';
+      case 'finance': return 'var(--color-accent-warning)';
+      default: return 'var(--color-accent-teal)';
     }
   };
 
   const getCategoryBg = (cat: Target['category']) => {
     switch (cat) {
-      case 'health': return 'text-rose-500 bg-rose-50';
-      case 'work': return 'text-blue-500 bg-blue-50';
-      case 'finance': return 'text-amber-500 bg-amber-50';
-      default: return 'text-yellow-500 bg-yellow-50';
+      case 'health': return 'text-accent-danger bg-accent-danger/10';
+      case 'work': return 'text-accent-blue bg-accent-blue/10';
+      case 'finance': return 'text-accent-warning bg-accent-warning/10';
+      default: return 'text-accent-teal bg-accent-teal/10';
     }
   };
 
@@ -126,24 +126,33 @@ export default function DailyTargets() {
   const COLORS = ['#10b981', '#3b82f6', '#94a3b8'];
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
+    <div className="relative min-h-full overflow-hidden lg:rounded-3xl p-1">
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+        style={{ 
+          backgroundImage: 'url("https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?q=80&w=2070&auto=format&fit=crop")',
+        }}
+      />
+      <div className="absolute inset-0 z-0 bg-canvas/60 backdrop-blur-[2px]" />
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6 relative z-10"
+      >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex bg-surface-2 p-1 rounded-pill border border-hairline shadow-sm">
           <button
             onClick={() => setActiveTab('list')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${activeTab === 'list' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500'}`}
+            className={`px-6 py-2 rounded-pill text-eyebrow font-bold transition-all flex items-center gap-2 uppercase tracking-widest ${activeTab === 'list' ? 'bg-accent text-white shadow-glow-accent' : 'text-ink-tertiary hover:text-ink'}`}
           >
             <TargetIcon className="w-4 h-4" />
             {t('myTargets')}
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${activeTab === 'analytics' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500'}`}
+            className={`px-6 py-2 rounded-pill text-eyebrow font-bold transition-all flex items-center gap-2 uppercase tracking-widest ${activeTab === 'analytics' ? 'bg-accent text-white shadow-glow-accent' : 'text-ink-tertiary hover:text-ink'}`}
           >
             <BarChart3 className="w-4 h-4" />
             {t('analytics')}
@@ -153,46 +162,46 @@ export default function DailyTargets() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 lg:sticky lg:top-24 h-fit">
-          <form onSubmit={addTarget} className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 space-y-4">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">{t('setNewTarget')}</h3>
+          <form onSubmit={addTarget} className="bg-surface-1 p-6 rounded-lg shadow-card border border-hairline space-y-4">
+            <h3 className="text-heading-sm font-bold text-ink mb-4">{t('setNewTarget')}</h3>
             <div>
-              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('goalName')}</label>
+              <label className="block text-eyebrow text-ink-tertiary uppercase mb-1.5">{t('goalName')}</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all bg-transparent dark:text-white"
+                className="w-full h-12 px-4 py-2 bg-surface-1 border border-hairline rounded-md focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink text-body-sm transition-all placeholder:text-ink-subtle"
                 placeholder="e.g. Drink Water, Read Pages"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('targetValue')}</label>
+                <label className="block text-eyebrow text-ink-tertiary uppercase mb-1.5">{t('targetValue')}</label>
                 <input
                   type="number"
                   value={targetValue}
                   onChange={(e) => setTargetValue(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all bg-transparent dark:text-white"
+                  className="w-full h-12 px-4 py-2 bg-surface-1 border border-hairline rounded-md focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink text-body-sm font-mono transition-all"
                   placeholder="0"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('unit')}</label>
+                <label className="block text-eyebrow text-ink-tertiary uppercase mb-1.5">{t('unit')}</label>
                 <input
                   type="text"
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all bg-transparent dark:text-white"
+                  className="w-full h-12 px-4 py-2 bg-surface-1 border border-hairline rounded-md focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink text-body-sm transition-all"
                   placeholder="Liters, Pages"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('category')}</label>
+              <label className="block text-eyebrow text-ink-tertiary uppercase mb-1.5">{t('category')}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Target['category'])}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all bg-white dark:bg-zinc-900 dark:text-white"
+                className="w-full h-12 px-4 py-2 bg-surface-1 border border-hairline rounded-md focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink text-body-sm transition-all appearance-none cursor-pointer"
               >
                 <option value="personal">{t('personal')}</option>
                 <option value="health">{t('health')}</option>
@@ -202,7 +211,7 @@ export default function DailyTargets() {
             </div>
             <button
               type="submit"
-              className="w-full bg-deep-space-blue text-white py-3 rounded-xl font-semibold hover:bg-deep-space-blue/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-deep-space-blue/20"
+              className="w-full bg-accent text-white h-12 rounded-pill font-bold hover:bg-accent-hover active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-glow-accent"
             >
               <Plus className="w-5 h-5" />
               {t('setTarget')}
@@ -221,8 +230,8 @@ export default function DailyTargets() {
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
                 {targets.length === 0 ? (
-                  <div className="col-span-full bg-white dark:bg-zinc-900 p-12 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 text-center text-zinc-400 dark:text-zinc-500">
-                    {t('noTargets')}
+                  <div className="col-span-full bg-surface-1 p-16 rounded-lg shadow-card border border-hairline border-dashed text-center">
+                    <p className="text-ink-tertiary italic text-body-sm">{t('noTargets')}</p>
                   </div>
                 ) : (
                   targets.map((target) => {
@@ -231,23 +240,22 @@ export default function DailyTargets() {
                     return (
                       <motion.div
                         key={target.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        whileHover={{ y: -4, scale: 1.02 }}
-                        className={`bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border transition-all ${isDone ? 'border-emerald-500/50 dark:border-emerald-500/30' : 'border-black/5 dark:border-white/5'}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className={`bg-surface-1 p-6 rounded-lg shadow-card border transition-all relative overflow-hidden group ${isDone ? 'border-accent shadow-glow-accent opacity-80' : 'border-hairline hover:border-hairline-strong'}`}
                       >
                         <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getCategoryBg(target.category)}`}>
+                          <div className="flex items-center gap-4">
+                            <div className={`w-12 h-12 rounded-md flex items-center justify-center border border-hairline-strong shadow-sm ${getCategoryBg(target.category)}`}>
                               {getCategoryIcon(target.category)}
                             </div>
                             <div>
-                              <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">{target.title}</h4>
-                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">{target.category}</span>
+                              <h4 className={`text-heading-xs font-bold transition-all ${isDone ? 'text-accent' : 'text-ink'}`}>{target.title.toUpperCase()}</h4>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-eyebrow text-ink-tertiary font-bold uppercase tracking-widest">{target.category}</span>
                                 {isDone && (
-                                  <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-bold uppercase tracking-wider">
+                                  <span className="flex items-center gap-1.5 text-eyebrow text-accent font-black uppercase tracking-widest">
                                     <Flame className="w-3 h-3" />
                                     {t('unlocked')}
                                   </span>
@@ -257,38 +265,39 @@ export default function DailyTargets() {
                           </div>
                           <button
                             onClick={() => setTargetToDelete(target.id)}
-                            className="p-1 text-zinc-300 hover:text-rose-600 transition-colors"
+                            className="p-2 text-ink-tertiary hover:text-danger transition-colors opacity-0 group-hover:opacity-100"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
 
-                        <div className="space-y-2 mt-4">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-zinc-600 dark:text-zinc-400 font-medium lowercase">
-                              {target.currentValue} / {target.targetValue} {target.unit}
-                            </span>
-                            <span className={`font-bold ${isDone ? 'text-emerald-500' : 'text-zinc-900 dark:text-zinc-100'}`}>{Math.round(progress)}%</span>
+                        <div className="space-y-4 mt-8">
+                          <div className="flex justify-between items-end">
+                            <div className="text-ink-tertiary">
+                              <span className="text-heading-sm font-black text-ink font-mono">{target.currentValue}</span>
+                              <span className="text-eyebrow font-bold uppercase ml-2">/ {target.targetValue} {target.unit}</span>
+                            </div>
+                            <div className={`text-heading-xs font-black ${isDone ? 'text-accent' : 'text-ink-subtle'}`}>{Math.round(progress)}%</div>
                           </div>
-                          <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                          <div className="h-3 bg-surface-2 rounded-pill overflow-hidden border border-hairline">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${progress}%` }}
-                              className={`h-full transition-all ${isDone ? 'bg-emerald-500' : 'bg-deep-space-blue'}`}
+                              className={`h-full transition-all ${isDone ? 'bg-accent shadow-glow-accent' : 'bg-accent/40'}`}
                             />
                           </div>
                         </div>
 
-                        <div className="flex gap-2 mt-4">
+                        <div className="flex gap-3 mt-8">
                           <button
                             onClick={() => updateProgress(target.id, -1)}
-                            className="flex-1 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all font-medium text-sm"
+                            className="flex-1 h-10 rounded-md bg-surface-2 border border-hairline text-ink-tertiary hover:bg-surface-3 transition-all font-bold text-xs uppercase"
                           >
                             -1
                           </button>
                           <button
                             onClick={() => updateProgress(target.id, 1)}
-                            className={`flex-1 py-2 rounded-lg text-white transition-all font-medium text-sm ${isDone ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-deep-space-blue hover:bg-deep-space-blue/90'}`}
+                            className={`flex-1 h-10 rounded-md text-white transition-all font-bold text-xs uppercase shadow-sm ${isDone ? 'bg-accent/50 cursor-not-allowed' : 'bg-accent hover:bg-accent-hover shadow-glow-accent'}`}
                           >
                             +1
                           </button>
@@ -306,30 +315,46 @@ export default function DailyTargets() {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 overflow-hidden">
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-deep-space-blue" />
+                <div className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline overflow-hidden group hover:border-hairline-strong transition-all">
+                  <h3 className="text-heading-sm font-black text-ink mb-8 flex items-center gap-3 uppercase tracking-tight">
+                    <TrendingUp className="w-6 h-6 text-accent" />
                     {t('overallProgress')}
                   </h3>
-                  <div className="h-[300px] w-full">
+                  <div className="h-[320px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} layout="vertical" margin={{ left: 20, right: 30 }}>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#E5E7EB" />
+                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="var(--color-hairline)" />
                         <XAxis type="number" hide domain={[0, 100]} />
                         <YAxis 
                           dataKey="name" 
                           type="category" 
-                          width={80} 
-                          tick={{ fontSize: 12, fill: '#6B7280' }}
+                          width={100} 
+                          tick={{ fontSize: 10, fill: 'var(--color-ink-tertiary)', fontWeight: 700 }}
+                          axisLine={false}
+                          tickLine={false}
                         />
                         <Tooltip 
-                          cursor={{ fill: '#F3F4F6' }}
-                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                          cursor={{ fill: 'var(--color-surface-2)', radius: 4 }}
+                          content={({ active, payload, label }: any) => {
+                            if (active && payload && payload.length) {
+                              return (
+                                <div className="bg-surface-3 p-4 rounded-md shadow-modal border border-hairline-strong backdrop-blur-xl">
+                                  <p className="text-eyebrow font-black text-ink-subtle uppercase tracking-widest mb-2 border-b border-hairline pb-1">{label}</p>
+                                  <div className="flex items-center justify-between gap-6">
+                                    <span className="text-body-sm font-bold text-ink uppercase tracking-tight">{t('progress')}</span>
+                                    <span className="text-body-sm font-black text-accent font-mono tracking-tighter">{payload[0].value}%</span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
                         />
                         <Bar 
                           dataKey="progress" 
                           radius={[0, 4, 4, 0]} 
-                          barSize={20}
+                          barSize={16}
+                          animationDuration={1500}
                         >
                           {chartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -341,39 +366,66 @@ export default function DailyTargets() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-black/5 dark:border-white/5">
-                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">{t('statusDistribution')}</h3>
-                    <div className="h-[200px]">
+                  <div className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline group hover:border-hairline-strong transition-all">
+                    <h3 className="text-heading-xs font-black text-ink mb-6 uppercase tracking-tight flex items-center gap-3">
+                      <PieIcon className="w-5 h-5 text-accent" />
+                      {t('statusDistribution')}
+                    </h3>
+                    <div className="h-[220px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
                             data={pieData}
                             innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
+                            outerRadius={85}
+                            paddingAngle={4}
                             dataKey="value"
+                            stroke="none"
+                            animationDuration={1500}
                           >
                             {pieData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              <Cell key={`cell-${index}`} fill={['var(--color-success)', 'var(--color-accent)', 'var(--color-ink-subtle)'][index % 3]} />
                             ))}
                           </Pie>
-                          <Tooltip />
-                          <Legend verticalAlign="bottom" height={36}/>
+                          <Tooltip 
+                            content={({ active, payload }: any) => {
+                              if (active && payload && payload.length) {
+                                return (
+                                  <div className="bg-surface-3 p-4 rounded-md shadow-modal border border-hairline-strong backdrop-blur-xl">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <div className="w-2 h-2 rounded-pill" style={{ backgroundColor: payload[0].payload.fill || payload[0].color }} />
+                                      <span className="text-eyebrow font-black text-ink-subtle uppercase tracking-widest">{payload[0].name}</span>
+                                    </div>
+                                    <div className="text-body-sm font-black text-ink font-mono tracking-tighter ml-4">{payload[0].value} {t('target')}</div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                          <Legend 
+                            verticalAlign="bottom" 
+                            height={36}
+                            formatter={(value) => <span className="text-eyebrow font-black text-ink-subtle uppercase tracking-widest ml-1">{value}</span>}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
                   </div>
 
-                  <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 flex flex-col justify-center items-center text-center space-y-2">
-                    <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-2">
-                      <Flame className="w-8 h-8 text-emerald-500" />
+                  <div className="bg-surface-1 p-10 rounded-lg shadow-card border border-hairline group hover:border-hairline-strong transition-all flex flex-col justify-center items-center text-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-pill -mr-16 -mt-16 blur-2xl" />
+                    <div className="w-20 h-20 bg-accent/10 rounded-pill flex items-center justify-center mb-6 shadow-sm border border-accent/20">
+                      <Flame className="w-10 h-10 text-accent animate-pulse" />
                     </div>
-                    <h4 className="text-3xl font-black text-zinc-900 dark:text-white">
-                      {targets.filter(t => t.currentValue >= t.targetValue).length} / {targets.length}
-                    </h4>
-                    <p className="text-sm font-medium text-zinc-500 uppercase tracking-widest">{t('targetsCompleted')}</p>
-                    <div className="pt-4 text-xs text-zinc-400 italic">
-                      "Keep it up! Consistency is the key."
+                    <div className="space-y-1">
+                      <h4 className="text-display-md font-black text-ink font-mono tracking-tighter">
+                        {targets.filter(t => t.currentValue >= t.targetValue).length} <span className="text-ink-tertiary opacity-40">/</span> {targets.length}
+                      </h4>
+                      <p className="text-eyebrow font-black text-ink-tertiary uppercase tracking-widest">{t('targetsCompleted')}</p>
+                    </div>
+                    <div className="mt-8 text-eyebrow font-bold text-ink-tertiary italic tracking-tight opacity-60 max-w-[180px] lowercase">
+                      "Keep it up! Consistency is the key to mastery."
                     </div>
                   </div>
                 </div>
@@ -394,5 +446,6 @@ export default function DailyTargets() {
         onCancel={() => setTargetToDelete(null)}
       />
     </motion.div>
+    </div>
   );
 }

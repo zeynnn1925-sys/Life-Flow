@@ -252,6 +252,11 @@ export const translations = {
     streak_warning: "Streak Warning",
     habit: "Habit",
     streak: "Streak",
+    add: "Add",
+    save: "Save",
+    progress: "Progress",
+    tasks: "Tasks",
+    performance: "Performance",
   },
   id: {
     appName: "LIFE FLOW",
@@ -506,6 +511,11 @@ export const translations = {
     streak_warning: "Peringatan Streak",
     habit: "Kebiasaan",
     streak: "Rangkaian",
+    add: "Tambah",
+    save: "Simpan",
+    progress: "Kemajuan",
+    tasks: "Tugas",
+    performance: "Performa",
   }
 };
 

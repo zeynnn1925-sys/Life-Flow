@@ -1,27 +1,270 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* ── CANVAS (dari Linear: near-black paling dalam) ── */
+  --color-canvas: #010102;
+  --color-surface-1: #0f1011;
+  --color-surface-2: #141516;
+  --color-surface-3: #18191a;
+  --color-surface-4: #1c1c1c;
+
+  /* ── BRAND PRIMARY (dari Revolut: cobalt-violet) ── */
+  --color-primary: #494fdf;
+  --color-primary-bright: #4f55f1;
+  --color-primary-deep: #3a40c4;
+  --color-on-primary: #ffffff;
+
+  /* ── ACCENT (dari Linear: lavender untuk CTA & focus) ── */
+  --color-accent: #5e6ad2;
+  --color-accent-hover: #828fff;
+  --color-accent-focus: #5e69d1;
+
+  /* ── INK / TEXT ── */
+  --color-ink: #f7f8f8;
+  --color-ink-muted: #d0d6e0;
+  --color-ink-subtle: #8a8f98;
+  --color-ink-tertiary: #62666d;
+
+  /* ── HAIRLINES / DIVIDERS ── */
+  --color-hairline: #23252a;
+  --color-hairline-strong: #34343a;
   
-  --color-deep-space-blue: #003049;
-  --color-flag-red: #d62828;
-  --color-vivid-tangerine: #f77f00;
-  --color-sunflower-gold: #fcbf49;
-  --color-vanilla-custard: #eae2b7;
+  /* ── SEMANTIC ── */
+  --color-success: #27a644;
+  --color-warning: #ec7e00;
+  --color-danger: #e23b4a;
+  --color-info: #007bc2;
+
+  /* ── TYPOGRAPHY ── */
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --text-display-xxl: 80px;
+  --text-display-xxl--line-height: 1.0;
+  --text-display-xxl--letter-spacing: -2px;
+  --text-display-xxl--font-weight: 700;
+
+  --text-display-xl: 56px;
+  --text-display-xl--line-height: 1.05;
+  --text-display-xl--letter-spacing: -1.8px;
+  --text-display-xl--font-weight: 700;
+
+  --text-display-lg: 40px;
+  --text-display-lg--line-height: 1.10;
+  --text-display-lg--letter-spacing: -1.0px;
+  --text-display-lg--font-weight: 600;
+
+  --text-display-md: 32px;
+  --text-display-md--line-height: 1.13;
+  --text-display-md--letter-spacing: -0.8px;
+  --text-display-md--font-weight: 600;
+
+  --text-heading-lg: 28px;
+  --text-heading-lg--line-height: 1.20;
+  --text-heading-lg--letter-spacing: -0.6px;
+  --text-heading-lg--font-weight: 600;
+
+  --text-heading-md: 22px;
+  --text-heading-md--line-height: 1.25;
+  --text-heading-md--letter-spacing: -0.4px;
+  --text-heading-md--font-weight: 500;
+
+  --text-heading-sm: 18px;
+  --text-heading-sm--line-height: 1.40;
+  --text-heading-sm--letter-spacing: -0.2px;
+  --text-heading-sm--font-weight: 500;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.50;
+  --text-body-lg--letter-spacing: -0.1px;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.50;
+  --text-body-md--letter-spacing: -0.05px;
+  --text-body-md--font-weight: 400;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.50;
+  --text-body-sm--letter-spacing: 0;
+  --text-body-sm--font-weight: 400;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 1.40;
+  --text-caption--letter-spacing: 0;
+  --text-caption--font-weight: 400;
+
+  --text-button: 14px;
+  --text-button--line-height: 1.20;
+  --text-button--letter-spacing: -0.14px;
+  --text-button--font-weight: 500;
+
+  --text-eyebrow: 13px;
+  --text-eyebrow--line-height: 1.30;
+  --text-eyebrow--letter-spacing: 0.4px;
+  --text-eyebrow--font-weight: 500;
+
+  /* ── BORDER RADIUS ── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-xxl: 20px;
+  --radius-3xl: 24px;
+  --radius-pill: 9999px;
+
+  /* ── SHADOWS ── */
+  --shadow-card: 0 0 0 1px var(--color-hairline);
+  --shadow-card-hover: 0 0 0 1px var(--color-hairline-strong);
+  --shadow-glow-primary: 0 0 40px rgba(73, 79, 223, 0.35);
+  --shadow-glow-accent: 0 0 40px rgba(94, 106, 210, 0.30);
+  --shadow-glow-violet: 0 0 60px rgba(106, 76, 245, 0.25);
+  --shadow-glow-magenta: 0 0 60px rgba(212, 77, 240, 0.20);
+  --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.8);
 
   @keyframes shimmer {
     100% {
       transform: translateX(100%);
     }
   }
+
+  @keyframes meshShift {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.05); }
+  }
+
+  @keyframes aurora {
+    from {
+      background-position: 50% 50%, 50% 50%;
+    }
+    to {
+      background-position: 350% 50%, 350% 50%;
+    }
+  }
+
+  @keyframes moveHorizontal {
+    0% {
+      transform: translateX(-50%) translateY(-10%);
+    }
+    50% {
+      transform: translateX(50%) translateY(10%);
+    }
+    100% {
+      transform: translateX(-50%) translateY(-10%);
+    }
+  }
+
+  @keyframes moveInCircle {
+    0% {
+      transform: rotate(0deg);
+    }
+    50% {
+      transform: rotate(180deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes moveVertical {
+    0% {
+      transform: translateY(-50%);
+    }
+    50% {
+      transform: translateY(50%);
+    }
+    100% {
+      transform: translateY(-50%);
+    }
+  }
+
+  @keyframes spotlight {
+    0% {
+      opacity: 0;
+      transform: translate(-72%, -62%) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -40%) scale(1);
+    }
+  }
+
+  @keyframes beam {
+    0% {
+      stroke-dashoffset: 1000;
+    }
+    100% {
+      stroke-dashoffset: -1000;
+    }
+  }
+}
+
+.animate-aurora {
+  animation: aurora 60s linear infinite;
+}
+
+.animate-first {
+  animation: moveVertical 30s ease infinite;
+}
+
+.animate-second {
+  animation: moveInCircle 20s reverse infinite;
+}
+
+.animate-third {
+  animation: moveInCircle 40s linear infinite;
+}
+
+.animate-fourth {
+  animation: moveHorizontal 40s ease infinite;
+}
+
+.animate-fifth {
+  animation: moveInCircle 20s ease infinite;
+}
+
+.animate-spotlight {
+  animation: spotlight 2s ease .75s 1 forwards;
+}
+
+.animate-beam {
+  stroke-dasharray: 500;
+  animation: beam 4s linear infinite;
+}
+
+.mesh-animate {
+  animation: meshShift 12s ease-in-out infinite;
+}
+
+:root {
+  /* Spotlight Gradients mapping */
+  --gradient-magenta: #d44df0;
+  --gradient-violet: #6a4cf5;
+  --gradient-orange: #ff7a3d;
+  --gradient-coral: #ff5577;
+  
+  /* Revolut Accent Palette (for JS data) */
+  --accent-teal: #00a87e;
+  --accent-blue: #007bc2;
+  --accent-green: #428619;
+  --accent-yellow: #b09000;
+  --accent-warning: #ec7e00;
+  --accent-pink: #e61e49;
+  --accent-danger: #e23b4a;
 }
 
 body {
-  @apply font-sans text-zinc-900 dark:text-zinc-100 bg-[#F8F9FA] dark:bg-zinc-950 antialiased;
+  @apply bg-canvas text-ink font-sans antialiased;
+  background-color: var(--color-canvas);
+}
+
+:focus-visible {
+  @apply outline-accent outline-offset-2 rounded-[4px];
+  outline: 2px solid var(--color-accent);
 }
 
 /* Custom Scrollbar */
@@ -34,10 +277,37 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e4e4e7;
+  background: var(--color-hairline-strong);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4d4d8;
+  background: var(--color-ink-tertiary);
+}
+
+.hero-section {
+  background: radial-gradient(
+    ellipse 80% 50% at 50% -10%,
+    rgba(106, 76, 245, 0.15) 0%,
+    transparent 70%
+  );
+}
+
+.finance-card-primary {
+  background: linear-gradient(135deg, #494fdf 0%, #3a40c4 100%);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 0 40px rgba(73, 79, 223, 0.3);
+}
+
+.finance-card-income {
+  background: linear-gradient(135deg, #00a87e 0%, #006400 100%);
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.finance-card-expense {
+  background: linear-gradient(135deg, #e61e49 0%, #8b0000 100%);
+  border-radius: 20px;
+  padding: 24px;
 }

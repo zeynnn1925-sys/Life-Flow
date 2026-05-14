@@ -26,7 +26,7 @@ export default function FinanceReports() {
     return cat ? cat.name : idOrName;
   };
 
-  const COLORS = ['#f77f00', '#d62828', '#fcbf49', '#eae2b7', '#003049'];
+  const COLORS = ['var(--color-accent)', 'var(--color-danger)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-primary)'];
 
   const chartData = useMemo(() => {
     const data: Record<string, { name: string; income: number; expense: number }> = {};
@@ -96,9 +96,9 @@ export default function FinanceReports() {
 
     const total = allocation.needs + allocation.wants + allocation.savings || 1;
     return [
-      { name: `${t('needs')} (50%)`, value: allocation.needs, percent: Math.round((allocation.needs / total) * 100), target: 50, color: '#d62828' },
-      { name: `${t('wants')} (30%)`, value: allocation.wants, percent: Math.round((allocation.wants / total) * 100), target: 30, color: '#eae2b7' },
-      { name: `${t('savings')} (20%)`, value: allocation.savings, percent: Math.round((allocation.savings / total) * 100), target: 20, color: '#fcbf49' },
+      { name: `${t('needs')} (50%)`, value: allocation.needs, percent: Math.round((allocation.needs / total) * 100), target: 50, color: 'var(--color-danger)' },
+      { name: `${t('wants')} (30%)`, value: allocation.wants, percent: Math.round((allocation.wants / total) * 100), target: 30, color: 'var(--color-warning)' },
+      { name: `${t('savings')} (20%)`, value: allocation.savings, percent: Math.round((allocation.savings / total) * 100), target: 20, color: 'var(--color-success)' },
     ];
   }, [transactions, categories]);
 
@@ -121,15 +121,15 @@ export default function FinanceReports() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-zinc-100 dark:border-zinc-800">
-          <p className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">{label}</p>
+        <div className="bg-surface-1 p-4 rounded-md shadow-card border border-hairline">
+          <p className="text-eyebrow text-ink-tertiary uppercase mb-3">{label}</p>
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-8 mb-1">
+            <div key={index} className="flex items-center justify-between gap-8 mb-2 last:mb-0">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{entry.name}</span>
+                <span className="text-body-sm font-bold text-ink">{entry.name}</span>
               </div>
-              <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Rp {entry.value.toLocaleString()}</span>
+              <span className="text-body-sm font-black text-ink font-mono">Rp {entry.value.toLocaleString()}</span>
             </div>
           ))}
         </div>
@@ -143,30 +143,30 @@ export default function FinanceReports() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-8"
+      className="space-y-12"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{t('analytics')}</h2>
-          <p className="text-zinc-500 dark:text-zinc-400">{t('analyticsDesc')}</p>
+          <h2 className="text-heading-md font-bold text-ink">{t('analytics')}</h2>
+          <p className="text-body-sm text-ink-tertiary mt-1">{t('analyticsDesc')}</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all shadow-sm"
+            className="flex items-center gap-2 px-6 h-10 bg-surface-1 border border-hairline rounded-md text-eyebrow font-bold text-ink-tertiary hover:text-ink hover:border-hairline-strong transition-all shadow-sm uppercase tracking-widest"
           >
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('exportCSV')}</span>
+            <span>{t('exportCSV')}</span>
           </button>
           
-          <div className="flex items-center bg-white dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-x-auto no-scrollbar max-w-full">
+          <div className="flex items-center bg-surface-2 p-1 rounded-pill border border-hairline shadow-sm overflow-x-auto no-scrollbar max-w-full">
             {(['daily', 'weekly', 'monthly'] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  period === p ? 'bg-deep-space-blue text-white shadow-md' : 'text-zinc-500 dark:text-zinc-400 hover:text-deep-space-blue dark:hover:text-blue-400'
+                className={`px-6 py-1.5 rounded-pill text-eyebrow font-bold transition-all whitespace-nowrap uppercase tracking-widest ${
+                  period === p ? 'bg-accent text-white shadow-glow-accent outline-none' : 'text-ink-tertiary hover:text-ink'
                 }`}
               >
                 {t(p)}
@@ -177,19 +177,17 @@ export default function FinanceReports() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Existing Charts */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-black/5 dark:border-white/5 shadow-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-vivid-tangerine" />
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
+              <TrendingUp className="w-5 h-5 text-accent" />
               {t('incomeVsExpense')}
             </h3>
-            <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest bg-zinc-50 dark:bg-zinc-800/50 px-2 py-1 rounded-lg">
+            <div className="text-[10px] font-black text-ink-tertiary uppercase tracking-widest bg-surface-2 px-2.5 py-1 rounded-md border border-hairline">
               {t('clickLegend')}
             </div>
           </div>
@@ -198,29 +196,29 @@ export default function FinanceReports() {
               <BarChart data={chartData}>
                 <defs>
                   <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f77f00" stopOpacity={1}/>
-                    <stop offset="95%" stopColor="#f77f00" stopOpacity={0.6}/>
+                    <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={1}/>
+                    <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0.6}/>
                   </linearGradient>
                   <linearGradient id="colorExpenseBar" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#d62828" stopOpacity={1}/>
-                    <stop offset="95%" stopColor="#d62828" stopOpacity={0.6}/>
+                    <stop offset="5%" stopColor="var(--color-danger)" stopOpacity={1}/>
+                    <stop offset="95%" stopColor="var(--color-danger)" stopOpacity={0.6}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f4f4f5' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-hairline)" opacity={0.3} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-tertiary)', fontSize: 10, fontWeight: 700 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-tertiary)', fontSize: 10, fontWeight: 700 }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-surface-2)', opacity: 0.4 }} />
                 <Legend 
-                  iconType="circle" 
-                  wrapperStyle={{ paddingTop: '20px' }} 
+                  iconType="rect" 
+                  wrapperStyle={{ paddingTop: '24px' } }
+                  formatter={(value) => <span className="text-ink-tertiary text-[10px] font-black uppercase tracking-widest ml-1">{value}</span>}
                   onClick={(e) => toggleData(String(e.dataKey))}
-                  style={{ cursor: 'pointer' }}
                 />
                 {!hiddenData.includes('income') && (
-                  <Bar dataKey="income" name={t('income')} fill="url(#colorIncome)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="income" name={t('income').toUpperCase()} fill="url(#colorIncome)" radius={[2, 2, 0, 0]} barSize={24} />
                 )}
                 {!hiddenData.includes('expense') && (
-                  <Bar dataKey="expense" name={t('expense')} fill="url(#colorExpenseBar)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="expense" name={t('expense').toUpperCase()} fill="url(#colorExpenseBar)" radius={[2, 2, 0, 0]} barSize={24} />
                 )}
               </BarChart>
             </ResponsiveContainer>
@@ -228,49 +226,48 @@ export default function FinanceReports() {
         </motion.div>
 
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-black/5 dark:border-white/5 shadow-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <Filter className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
+              <DollarSign className="w-5 h-5 text-ink-tertiary" />
               {t('budgetHealth')} (50/30/20)
             </h3>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-8">
             {budgetAllocation.map((item) => (
-              <div key={item.name} className="space-y-2">
+              <div key={item.name} className="space-y-3">
                 <div className="flex justify-between items-end">
                   <div>
-                    <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{item.name}</div>
-                    <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-widest">{t('target')}: {item.target}%</div>
+                    <div className="text-body-sm font-black text-ink uppercase tracking-tight">{item.name}</div>
+                    <div className="text-eyebrow text-ink-tertiary uppercase mt-0.5">{t('target')}: {item.target}%</div>
                   </div>
                   <div className="text-right">
-                    <div className={`text-lg font-black ${item.percent > item.target ? 'text-flag-red' : 'text-vivid-tangerine'}`}>
+                    <div className={`text-heading-sm font-black transition-colors ${item.percent > item.target ? 'text-danger' : 'text-accent'}`}>
                       {item.percent}%
                     </div>
-                    <div className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold">Rp {item.value.toLocaleString()}</div>
+                    <div className="text-eyebrow text-ink-tertiary font-bold font-mono">Rp {item.value.toLocaleString()}</div>
                   </div>
                 </div>
                 <div className="relative group">
-                  <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="h-4 bg-surface-2 rounded-pill overflow-hidden border border-hairline p-0.5">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${item.percent}%` }}
-                      className="h-full rounded-full"
+                      className="h-full rounded-pill shadow-sm"
                       style={{ backgroundColor: item.color }}
                     />
                   </div>
-                  {/* Tooltip */}
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-900 text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-ink text-surface-1 text-[10px] font-black rounded-md opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-20 shadow-xl scale-95 group-hover:scale-100">
                     Rp {item.value.toLocaleString()}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900" />
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-6 border-transparent border-t-ink" />
                   </div>
                 </div>
                 {item.percent > item.target && (
-                  <p className="text-[10px] text-flag-red font-medium italic">
+                  <p className="text-eyebrow text-danger font-black italic mt-1.5 flex items-center gap-1.5">
+                    <TrendingUp className="w-3 h-3" />
                     {t('overspendingMsg').replace('{percent}', (item.percent - item.target).toString())}
                   </p>
                 )}
@@ -283,18 +280,17 @@ export default function FinanceReports() {
       <AIFinanceAdvisor transactions={transactions} categories={categories} />
 
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.3 }}
-        className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-black/5 dark:border-white/5 shadow-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card"
       >
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <PieChartIcon className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />
+        <div className="flex items-center justify-between mb-8">
+          <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
+            <PieChartIcon className="w-5 h-5 text-ink-tertiary" />
             {t('expenseBreakdown')}
           </h3>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
           <div className="lg:col-span-1 h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -317,21 +313,22 @@ export default function FinanceReports() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="lg:col-span-2 flex flex-wrap gap-2 content-start">
+          <div className="lg:col-span-2 flex flex-wrap gap-2.5 content-start">
             {allCategories.map((cat, idx) => {
               const catObj = categories.find(c => c.name === cat);
               const catColor = catObj ? catObj.color : COLORS[idx % COLORS.length];
+              const isHidden = hiddenCategories.includes(cat);
               return (
               <button
                 key={cat}
                 onClick={() => toggleCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border flex items-center gap-2 ${
-                  hiddenCategories.includes(cat)
-                    ? 'bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 text-zinc-300'
-                    : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 shadow-sm hover:border-zinc-400'
+                className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2.5 shadow-sm active:scale-95 ${
+                  isHidden
+                    ? 'bg-surface-2 border-hairline text-ink-tertiary opacity-40 italic'
+                    : 'bg-surface-1 border-hairline-strong text-ink hover:border-accent hover:shadow-md'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: catColor }} />
+                <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: isHidden ? '#ccc' : catColor }} />
                 {cat}
               </button>
             )})}
@@ -340,79 +337,92 @@ export default function FinanceReports() {
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-vivid-tangerine/10 p-6 rounded-3xl border border-vivid-tangerine/20">
-          <div className="text-vivid-tangerine text-sm font-bold uppercase tracking-widest mb-1">{t('totalSavings')}</div>
-          <div className="text-3xl font-black text-deep-space-blue dark:text-blue-400">Rp {(totalIncome - totalExpense).toLocaleString()}</div>
-          <div className="mt-2 text-vivid-tangerine/60 text-xs font-medium">{t('netBalanceDesc')}</div>
+        <div className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
+          <div className="text-eyebrow text-accent font-black uppercase tracking-widest mb-2 flex items-center gap-2">
+            <TrendingUp size={14} />
+            {t('totalSavings')}
+          </div>
+          <div className="text-heading-md font-black text-ink font-mono tracking-tighter">Rp {(totalIncome - totalExpense).toLocaleString()}</div>
+          <div className="mt-4 text-eyebrow text-ink-tertiary lowercase font-bold">{t('netBalanceDesc')}</div>
         </div>
-        <div className="bg-flag-red/10 p-6 rounded-3xl border border-flag-red/20">
-          <div className="text-flag-red text-sm font-bold uppercase tracking-widest mb-1">{t('burnRate')}</div>
-          <div className="text-3xl font-black text-deep-space-blue dark:text-blue-400">Rp {Math.round(totalExpense / (chartData.length || 1)).toLocaleString()}</div>
-          <div className="mt-2 text-flag-red/60 text-xs font-medium">{t('burnRateDesc').replace('{period}', t(period))}</div>
+        
+        <div className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-danger/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
+          <div className="text-eyebrow text-danger font-black uppercase tracking-widest mb-2 flex items-center gap-2">
+            <Download size={14} className="rotate-180" />
+            {t('burnRate')}
+          </div>
+          <div className="text-heading-md font-black text-ink font-mono tracking-tighter">Rp {Math.round(totalExpense / (chartData.length || 1)).toLocaleString()}</div>
+          <div className="mt-4 text-eyebrow text-ink-tertiary lowercase font-bold">{t('burnRateDesc').replace('{period}', t(period))}</div>
         </div>
-        <div className="bg-deep-space-blue p-6 rounded-3xl border border-deep-space-blue/20 dark:border-blue-400/20">
-          <div className="text-sunflower-gold text-sm font-bold uppercase tracking-widest mb-1">{t('savingsRate')}</div>
-          <div className="text-3xl font-black text-white">
+
+        <div className="bg-ink p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-surface-1/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
+          <div className="text-eyebrow text-accent font-black uppercase tracking-widest mb-2 flex items-center gap-2">
+            <Filter size={14} />
+            {t('savingsRate')}
+          </div>
+          <div className="text-heading-md font-black text-ink font-mono tracking-tighter">
             {totalIncome > 0 ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100) : 0}%
           </div>
-          <div className="mt-2 text-zinc-400 dark:text-zinc-500 text-xs font-medium">{t('savingsRateDesc')}</div>
+          <div className="mt-4 text-eyebrow text-ink-tertiary lowercase font-bold font-mono opacity-60">{t('savingsRateDesc')}</div>
         </div>
       </div>
 
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4 }}
-        className="bg-white dark:bg-zinc-900 rounded-3xl border border-black/5 dark:border-white/5 shadow-sm overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-surface-1 rounded-lg border border-hairline shadow-card overflow-hidden"
       >
-        <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />
+        <div className="p-8 border-b border-hairline flex items-center justify-between bg-surface-1/50">
+          <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
+            <TrendingUp className="w-5 h-5 text-ink-tertiary" />
             {t('transactionHistory')}
           </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-zinc-50/50">
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-800">{t('date')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-800">{t('description')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-800">{t('category')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-800">{t('type')}</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-800 text-right">{t('amount')}</th>
+              <tr className="bg-surface-2">
+                <th className="px-8 py-5 text-eyebrow font-black text-ink-tertiary uppercase tracking-widest border-b border-hairline">{t('date')}</th>
+                <th className="px-8 py-5 text-eyebrow font-black text-ink-tertiary uppercase tracking-widest border-b border-hairline">{t('description')}</th>
+                <th className="px-8 py-5 text-eyebrow font-black text-ink-tertiary uppercase tracking-widest border-b border-hairline">{t('category')}</th>
+                <th className="px-8 py-5 text-eyebrow font-black text-ink-tertiary uppercase tracking-widest border-b border-hairline">{t('type')}</th>
+                <th className="px-8 py-5 text-eyebrow font-black text-ink-tertiary uppercase tracking-widest border-b border-hairline text-right">{t('amount')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-50">
+            <tbody className="divide-y divide-hairline">
               {transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-zinc-400 dark:text-zinc-500 italic">
+                  <td colSpan={5} className="px-8 py-16 text-center text-ink-tertiary italic text-body-sm">
                     {t('noTransactions')}
                   </td>
                 </tr>
               ) : (
                 [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((tx) => (
-                  <tr key={tx.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
-                      {new Date(tx.date).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  <tr key={tx.id} className="hover:bg-surface-2 transition-all group">
+                    <td className="px-8 py-5 text-[11px] font-bold text-ink-tertiary whitespace-nowrap font-mono">
+                      {new Date(tx.date).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{tx.description}</div>
-                      {tx.notes && <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 italic">{tx.notes}</div>}
+                    <td className="px-8 py-5">
+                      <div className="text-body-sm font-black text-ink group-hover:text-accent transition-colors">{tx.description}</div>
+                      {tx.notes && <div className="text-[10px] text-ink-tertiary mt-1 font-medium">{tx.notes}</div>}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                    <td className="px-8 py-5">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-surface-2 border border-hairline text-ink-subtle">
                         {getCategoryName(tx.category)}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        tx.type === 'income' ? 'bg-vivid-tangerine/10 text-vivid-tangerine' : 'bg-flag-red/10 text-flag-red'
+                    <td className="px-8 py-5">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${
+                        tx.type === 'income' ? 'bg-accent/10 border-accent/20 text-accent' : 'bg-danger/10 border-danger/20 text-danger'
                       }`}>
                         {t(tx.type)}
                       </span>
                     </td>
-                    <td className={`px-6 py-4 text-sm font-bold text-right whitespace-nowrap ${
-                      tx.type === 'income' ? 'text-vivid-tangerine' : 'text-flag-red'
+                    <td className={`px-8 py-5 text-body-sm font-black text-right whitespace-nowrap font-mono ${
+                      tx.type === 'income' ? 'text-accent' : 'text-danger'
                     }`}>
                       {tx.type === 'income' ? '+' : '-'} Rp {tx.amount.toLocaleString()}
                     </td>

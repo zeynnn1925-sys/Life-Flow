@@ -12,39 +12,39 @@ export function HabitStreakMilestone({ streak }: HabitStreakMilestoneProps) {
   const progress = (streak / nextMilestone) * 100;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600 dark:text-amber-400">
-            <Trophy size={20} />
+    <div className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline hover:border-hairline-strong transition-all group">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-warning/10 border border-warning/20 rounded-xl flex items-center justify-center text-warning shadow-sm transition-transform group-hover:rotate-12">
+            <Trophy size={24} />
           </div>
-          <h4 className="font-bold text-zinc-900 dark:text-white">Streak Milestone</h4>
+          <h4 className="text-heading-sm font-black text-ink uppercase tracking-tight">Streak Milestone</h4>
         </div>
-        <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Next: {nextMilestone} Days</span>
+        <span className="text-eyebrow font-black text-ink-tertiary uppercase tracking-widest">Next: {nextMilestone} Days</span>
       </div>
 
-      <div className="relative h-4 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-4">
+      <div className="relative h-6 bg-surface-2 rounded-pill overflow-hidden mb-8 border border-hairline shadow-inner p-1">
         <motion.div 
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-400 to-orange-500 font-bold flex items-center justify-end px-2"
+          className="h-full rounded-pill bg-warning shadow-glow-warning flex items-center justify-end px-3"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
         >
-          {progress > 10 && <Star size={10} className="text-white fill-white" />}
+          {progress > 15 && <Star size={12} className="text-white fill-white animate-pulse" />}
         </motion.div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-4">
         {milestones.map(m => (
           <div 
             key={m}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl border ${
+            className={`flex flex-col items-center gap-2 p-3 rounded-md transition-all border ${
               streak >= m 
-                ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-900/30' 
-                : 'bg-zinc-50 border-zinc-100 dark:bg-zinc-800/10 dark:border-zinc-800/30 grayscale opacity-40'
+                ? 'bg-surface-1 border-warning/40 shadow-glow-warning text-warning' 
+                : 'bg-surface-2 border-hairline text-ink-tertiary opacity-30 grayscale'
             }`}
           >
-            <Zap size={14} className={streak >= m ? 'text-amber-600' : 'text-zinc-400'} />
-            <span className="text-[10px] font-bold">{m}d</span>
+            <Zap size={18} className="transition-transform group-hover:scale-110" />
+            <span className="text-[11px] font-black font-mono">{m}d</span>
           </div>
         ))}
       </div>

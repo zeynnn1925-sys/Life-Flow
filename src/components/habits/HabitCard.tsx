@@ -6,6 +6,7 @@ import { HabitStreakRing } from './HabitStreakRing';
 import { HabitCheckInButton } from './HabitCheckInButton';
 import { useHabitCheckIn } from '../../hooks/useHabitCheckIn';
 import { Flame, Info, Settings } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface HabitCardProps {
   habit: Habit;
@@ -15,6 +16,7 @@ interface HabitCardProps {
 }
 
 export function HabitCard({ habit, logToday, status, onEdit }: HabitCardProps) {
+  const { t } = useLanguage();
   const { handleCheckIn, handleSkip } = useHabitCheckIn();
   const IconComponent = (LucideIcons as any)[habit.icon] || LucideIcons.Circle;
 
@@ -24,35 +26,35 @@ export function HabitCard({ habit, logToday, status, onEdit }: HabitCardProps) {
     <motion.div
       layout
       onClick={onEdit}
-      className={`relative p-5 rounded-3xl transition-all cursor-pointer ${
+      className={`relative p-8 rounded-lg transition-all cursor-pointer ${
         status === 'completed' 
-          ? 'bg-zinc-50 dark:bg-zinc-900/50 border-2 border-green-500/20' 
-          : 'bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800'
-      } shadow-sm hover:shadow-md group`}
+          ? 'bg-surface-3 border-2 border-hairline-strong' 
+          : 'bg-surface-1 border border-hairline'
+      } shadow-card hover:shadow-glow-accent hover:border-accent/40 group`}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-4">
-          <HabitStreakRing progress={progress} color={habit.color} size={56} strokeWidth={3}>
+      <div className="flex items-start justify-between mb-8">
+        <div className="flex items-center gap-6">
+          <HabitStreakRing progress={progress} color={habit.color} size={64} strokeWidth={4}>
             <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
+              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all group-hover:scale-110"
               style={{ backgroundColor: `${habit.color}15`, color: habit.color }}
             >
-              <IconComponent size={20} />
+              <IconComponent size={24} />
             </div>
           </HabitStreakRing>
           
           <div>
-            <h3 className="font-bold text-zinc-900 dark:text-white leading-tight">
+            <h3 className="text-heading-sm font-black text-ink leading-none tracking-tight uppercase">
               {habit.title}
             </h3>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+            <div className="flex items-center gap-3 mt-2">
+              <span className="text-eyebrow font-black text-ink-tertiary uppercase tracking-widest">
                 {habit.category}
               </span>
               {habit.currentStreak > 0 && (
-                <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded-md">
-                  <Flame size={12} className="text-amber-500 fill-amber-500" />
-                  <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                <div className="flex items-center gap-1.5 bg-warning/10 border border-warning/20 px-2.5 py-1 rounded-md shadow-sm">
+                  <Flame size={12} className="text-warning fill-warning" />
+                  <span className="text-[10px] font-black text-warning">
                     {habit.currentStreak}
                   </span>
                 </div>
@@ -71,40 +73,43 @@ export function HabitCard({ habit, logToday, status, onEdit }: HabitCardProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-auto">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <div className="h-1.5 w-24 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-              <motion.div 
-                className="h-full rounded-full"
-                style={{ backgroundColor: habit.color }}
-                initial={{ width: 0 }}
-                animate={{ width: `${progress * 100}%` }}
-              />
-            </div>
-            <span className="text-[10px] font-bold text-zinc-400">
+      <div className="flex items-end justify-between mt-auto">
+        <div className="flex flex-col gap-3 w-full max-w-[12rem]">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-eyebrow font-black text-ink-tertiary uppercase tracking-widest">
+              {t('progress')}
+            </span>
+            <span className="text-[10px] font-black text-ink font-mono">
               {logToday?.completedCount || 0}/{habit.targetCount} {habit.unit}
             </span>
+          </div>
+          <div className="h-2 bg-surface-2 rounded-pill overflow-hidden border border-hairline shadow-inner p-0.5">
+            <motion.div 
+              className="h-full rounded-pill shadow-sm"
+              style={{ backgroundColor: habit.color }}
+              initial={{ width: 0 }}
+              animate={{ width: `${progress * 100}%` }}
+            />
           </div>
         </div>
 
         <button 
           onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
-          className="text-zinc-300 hover:text-zinc-500 transition-colors" 
+          className="w-10 h-10 flex items-center justify-center bg-surface-2 border border-hairline rounded-md text-ink-tertiary hover:text-accent hover:border-accent hover:shadow-sm transition-all" 
           id="habit-info-btn"
         >
-          <Settings size={16} />
+          <Settings size={18} />
         </button>
       </div>
       
       {status === 'completed' && (
-        <div className="absolute top-2 right-2">
+        <div className="absolute -top-2 -right-2">
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="flex items-center justify-center bg-green-500 text-white p-1 rounded-full shadow-lg"
+            initial={{ scale: 0, rotate: -45 }}
+            animate={{ scale: 1, rotate: 0 }}
+            className="flex items-center justify-center bg-accent text-white p-2 rounded-full shadow-glow-accent border-2 border-white"
           >
-            <LucideIcons.Check size={12} strokeWidth={4} />
+            <LucideIcons.Check size={14} strokeWidth={4} />
           </motion.div>
         </div>
       )}

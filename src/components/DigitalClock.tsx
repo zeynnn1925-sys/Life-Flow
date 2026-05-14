@@ -15,10 +15,10 @@ export default function DigitalClock() {
 
   return (
     <div className="hidden sm:flex flex-col items-end">
-      <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+      <span className="text-eyebrow font-black text-ink-tertiary uppercase tracking-widest leading-none mb-1 opacity-70">
         {time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
       </span>
-      <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 font-mono">
+      <span className="text-body-sm font-black text-ink font-mono tracking-tight bg-surface-2 px-3 py-1 rounded shadow-inner border border-hairline/50">
         {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
       </span>
     </div>

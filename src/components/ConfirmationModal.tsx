@@ -38,35 +38,35 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-md bg-surface-3 rounded-xxl shadow-modal border border-hairline-strong overflow-hidden backdrop-blur-xl"
           >
-            <div className="p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                  type === 'danger' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
+            <div className="p-8">
+              <div className="flex flex-col items-center text-center gap-6 mb-8">
+                <div className={`w-16 h-16 rounded-pill flex items-center justify-center border shadow-sm ${
+                  type === 'danger' ? 'bg-danger/10 border-danger/30 text-danger' : 'bg-accent/10 border-accent/30 text-accent'
                 }`}>
-                  <AlertTriangle className="w-6 h-6" />
+                  <AlertTriangle className="w-8 h-8" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{title}</h3>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{message}</p>
+                <div className="space-y-2">
+                  <h3 className="text-heading-md font-black text-ink uppercase tracking-tight">{title}</h3>
+                  <p className="text-body-sm text-ink-tertiary">{message}</p>
                 </div>
               </div>
               
-              <div className="flex gap-3 mt-8">
+              <div className="flex gap-4">
                 <button
                   onClick={onCancel}
-                  className="flex-1 px-4 py-3 rounded-xl font-bold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 transition-all"
+                  className="flex-1 h-12 rounded-pill font-bold text-ink-tertiary bg-surface-2 border border-hairline hover:bg-surface-3 transition-all uppercase tracking-widest text-eyebrow"
                 >
                   {cancelText}
                 </button>
                 <button
                   onClick={() => {
                     onConfirm();
-                    onCancel();
+                    // onCancel(); // Assuming we want the caller to handle closing if needed, but usually it closes.
                   }}
-                  className={`flex-1 px-4 py-3 rounded-xl font-bold text-white transition-all ${
-                    type === 'danger' ? 'bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-600/20' : 'bg-deep-space-blue hover:bg-deep-space-blue/90 shadow-lg shadow-deep-space-blue/20'
+                  className={`flex-1 h-12 rounded-pill font-bold text-white transition-all uppercase tracking-widest text-eyebrow shadow-sm ${
+                    type === 'danger' ? 'bg-danger hover:bg-danger/90 shadow-glow-primary/20' : 'bg-accent hover:bg-accent-hover shadow-glow-accent'
                   }`}
                 >
                   {confirmText}
@@ -76,9 +76,9 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             
             <button 
               onClick={onCancel}
-              className="absolute top-4 right-4 p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-all"
+              className="absolute top-6 right-6 p-2 hover:bg-surface-2 rounded-pill transition-all group"
             >
-              <X className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />
+              <X className="w-5 h-5 text-ink-tertiary group-hover:text-ink" />
             </button>
           </motion.div>
         </div>

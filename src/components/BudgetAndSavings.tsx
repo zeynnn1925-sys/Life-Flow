@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Target, Wallet, Trash2, TrendingUp, AlertCircle, Check } from 'lucide-react';
+import { Plus, Target, Wallet, Trash2, TrendingUp, AlertCircle, Check, X } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Budget, SavingsGoal } from '../types';
@@ -86,33 +86,33 @@ export function BudgetAndSavings() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div className="max-w-7xl mx-auto py-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
         <div>
-          <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
+          <h1 className="text-display-md font-black text-ink tracking-tight uppercase">
             {t('budgets') || 'Budgets'} & {t('savingsGoals') || 'Savings Goals'}
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-body-sm text-ink-tertiary mt-2 lowercase font-medium">
             Plan your spending and save for the future.
           </p>
         </div>
-        <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1 rounded-xl w-full md:w-auto">
+        <div className="flex bg-surface-2 p-1 rounded-pill border border-hairline shadow-sm w-full md:w-auto">
           <button
             onClick={() => setActiveTab('budgets')}
-            className={`flex-1 md:flex-none px-6 py-2 rounded-lg font-medium transition-all ${
+            className={`flex-1 md:flex-none px-8 py-2 rounded-pill text-eyebrow font-black uppercase tracking-widest transition-all ${
               activeTab === 'budgets'
-                ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+                ? 'bg-accent text-white shadow-glow-accent'
+                : 'text-ink-tertiary hover:text-ink'
             }`}
           >
             {t('budgets') || 'Budgets'}
           </button>
           <button
             onClick={() => setActiveTab('savings')}
-            className={`flex-1 md:flex-none px-6 py-2 rounded-lg font-medium transition-all ${
+            className={`flex-1 md:flex-none px-8 py-2 rounded-pill text-eyebrow font-black uppercase tracking-widest transition-all ${
               activeTab === 'savings'
-                ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+                ? 'bg-accent text-white shadow-glow-accent'
+                : 'text-ink-tertiary hover:text-ink'
             }`}
           >
             {t('savingsGoals') || 'Savings Goals'}
@@ -121,12 +121,12 @@ export function BudgetAndSavings() {
       </div>
 
       {activeTab === 'budgets' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{t('monthlyBudgets')}</h2>
+            <h2 className="text-heading-sm font-black text-ink uppercase tracking-tight">{t('monthlyBudgets')}</h2>
             <button
               onClick={() => setShowBudgetForm(!showBudgetForm)}
-              className="flex items-center gap-2 px-4 py-2 bg-deep-space-blue text-white rounded-xl font-medium hover:bg-deep-space-blue/90 transition-all"
+              className="flex items-center gap-2 px-6 h-11 bg-accent text-white rounded-pill text-eyebrow font-black uppercase tracking-widest hover:bg-accent-hover transition-all shadow-glow-accent"
             >
               <Plus className="w-4 h-4" />
               {t('setBudget') || 'Set Budget'}
@@ -135,17 +135,17 @@ export function BudgetAndSavings() {
 
           {showBudgetForm && (
             <motion.form
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               onSubmit={handleAddBudget}
-              className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 grid grid-cols-1 md:grid-cols-3 gap-4"
+              className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline grid grid-cols-1 md:grid-cols-3 gap-6"
             >
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('category')}</label>
+                <label className="block text-eyebrow text-ink-tertiary uppercase mb-2">{t('category')}</label>
                 <select
                   value={budgetCategory}
                   onChange={(e) => setBudgetCategory(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent focus:ring-2 focus:ring-deep-space-blue outline-none"
+                  className="w-full h-12 px-4 rounded-md border border-hairline bg-surface-1 text-ink focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all appearance-none cursor-pointer"
                   required
                 >
                   <option value="">{t('selectCategory')}</option>
@@ -155,25 +155,25 @@ export function BudgetAndSavings() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('budgetLimit') || 'Budget Limit'}</label>
+                <label className="block text-eyebrow text-ink-tertiary uppercase mb-2">{t('budgetLimit') || 'Budget Limit'}</label>
                 <input
                   type="number"
                   value={budgetAmount}
                   onChange={(e) => setBudgetAmount(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent focus:ring-2 focus:ring-deep-space-blue outline-none"
+                  className="w-full h-12 px-4 rounded-md border border-hairline bg-surface-1 text-ink font-mono focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all"
                   placeholder="0"
                   required
                 />
               </div>
               <div className="flex items-end">
-                <button type="submit" className="w-full px-4 py-2 bg-deep-space-blue text-white rounded-xl font-medium hover:bg-deep-space-blue/90 transition-all">
+                <button type="submit" className="w-full h-12 bg-accent text-white rounded-pill font-black text-eyebrow uppercase tracking-widest hover:bg-accent-hover transition-all shadow-glow-accent">
                   Save Budget
                 </button>
               </div>
             </motion.form>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {budgets.map(budget => {
               const category = categories.find(c => c.id === budget.categoryId);
               const spent = monthlySpending[budget.categoryId] || 0;
@@ -181,50 +181,57 @@ export function BudgetAndSavings() {
               const isOver = spent > budget.amount;
 
               return (
-                <div key={budget.id} className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${category?.color || '#ccc'}20`, color: category?.color || '#ccc' }}>
-                        <Wallet className="w-5 h-5" />
+                <div key={budget.id} className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline group hover:border-hairline-strong transition-all">
+                  <div className="flex justify-between items-start mb-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-md flex items-center justify-center border border-hairline-strong shadow-sm" style={{ backgroundColor: `${category?.color || '#333'}20`, color: category?.color || '#333' }}>
+                        <Wallet className="w-6 h-6" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-zinc-900 dark:text-white">{category?.name || 'Unknown'}</h3>
-                        <p className="text-sm text-zinc-500">{t('monthlyBudget')}</p>
+                        <h3 className="text-body-sm font-black text-ink uppercase tracking-tight">{category?.name || 'Unknown'}</h3>
+                        <p className="text-eyebrow text-ink-tertiary mt-0.5 lowercase font-medium">{t('monthlyBudget')}</p>
                       </div>
                     </div>
-                    <button onClick={() => deleteBudget(budget.id)} className="text-zinc-400 hover:text-red-500 transition-colors">
+                    <button 
+                      onClick={() => deleteBudget(budget.id)} 
+                      className="p-2 text-ink-tertiary hover:text-danger hover:bg-danger/10 rounded-md transition-all opacity-0 group-hover:opacity-100"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm font-medium">
-                      <span className={isOver ? 'text-red-500' : 'text-zinc-700 dark:text-zinc-300'}>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-end">
+                      <span className={`text-heading-sm font-black font-mono transition-colors ${isOver ? 'text-danger' : 'text-ink'}`}>
                         Rp {spent.toLocaleString()}
                       </span>
-                      <span className="text-zinc-500">
-                        Rp {budget.amount.toLocaleString()}
+                      <span className="text-eyebrow text-ink-tertiary font-bold font-mono">
+                        / Rp {budget.amount.toLocaleString()}
                       </span>
                     </div>
-                    <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all ${isOver ? 'bg-red-500' : percentage > 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                        style={{ width: `${percentage}%` }}
+                    <div className="h-2.5 bg-surface-2 rounded-pill overflow-hidden border border-hairline">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percentage}%` }}
+                        className={`h-full rounded-pill transition-all ${isOver ? 'bg-danger shadow-glow-primary/20' : percentage > 80 ? 'bg-warning' : 'bg-accent shadow-glow-accent'}`}
                       />
                     </div>
                     {isOver && (
-                      <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
-                        <AlertCircle className="w-3 h-3" /> Over budget by Rp {(spent - budget.amount).toLocaleString()}
-                      </p>
+                      <div className="flex items-center gap-2 p-3 bg-danger/10 rounded-md border border-danger/20">
+                        <AlertCircle className="w-4 h-4 text-danger" />
+                        <p className="text-eyebrow text-danger font-black italic">
+                          Over by Rp {(spent - budget.amount).toLocaleString()}
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
               );
             })}
             {budgets.length === 0 && !showBudgetForm && (
-              <div className="col-span-full text-center py-12 bg-zinc-50 dark:bg-zinc-800/20 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800">
-                <Wallet className="w-12 h-12 text-zinc-300 dark:text-zinc-600 mx-auto mb-3" />
-                <p className="text-zinc-500 dark:text-zinc-400">{t('noBudgetsSet')}</p>
+              <div className="col-span-full py-16 bg-surface-1 rounded-lg border border-hairline border-dashed text-center">
+                <Wallet className="w-12 h-12 text-ink-tertiary mx-auto mb-4 opacity-20" />
+                <p className="text-ink-tertiary italic text-body-sm lowercase">{t('noBudgetsSet')}</p>
               </div>
             )}
           </div>
@@ -232,12 +239,12 @@ export function BudgetAndSavings() {
       )}
 
       {activeTab === 'savings' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{t('savingsGoals')}</h2>
+            <h2 className="text-heading-sm font-black text-ink uppercase tracking-tight">{t('savingsGoals')}</h2>
             <button
               onClick={() => setShowSavingsForm(!showSavingsForm)}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-all"
+              className="flex items-center gap-2 px-6 h-11 bg-accent text-white rounded-pill text-eyebrow font-black uppercase tracking-widest hover:bg-accent-hover transition-all shadow-glow-accent"
             >
               <Plus className="w-4 h-4" />
               {t('addSavingsGoal') || 'Add Goal'}
@@ -246,85 +253,89 @@ export function BudgetAndSavings() {
 
           {showSavingsForm && (
             <motion.form
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               onSubmit={handleAddSavingsGoal}
-              className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 grid grid-cols-1 md:grid-cols-4 gap-4"
+              className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline grid grid-cols-1 md:grid-cols-4 gap-6"
             >
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('goalName')}</label>
+                <label className="block text-eyebrow text-ink-tertiary uppercase mb-2">{t('goalName')}</label>
                 <input
                   type="text"
                   value={savingsTitle}
                   onChange={(e) => setSavingsTitle(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full h-12 px-4 rounded-md border border-hairline bg-surface-1 text-ink focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all"
                   placeholder="e.g. New Laptop"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('targetAmount') || 'Target Amount'}</label>
+                <label className="block text-eyebrow text-ink-tertiary uppercase mb-2">{t('targetAmount') || 'Target Amount'}</label>
                 <input
                   type="number"
                   value={savingsTarget}
                   onChange={(e) => setSavingsTarget(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full h-12 px-4 rounded-md border border-hairline bg-surface-1 text-ink font-mono focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all"
                   placeholder="0"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('deadline') || 'Deadline'} (Optional)</label>
+                <label className="block text-eyebrow text-ink-tertiary uppercase mb-2">{t('deadline') || 'Deadline'} (Optional)</label>
                 <input
                   type="date"
                   value={savingsDeadline}
                   onChange={(e) => setSavingsDeadline(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full h-12 px-4 rounded-md border border-hairline bg-surface-1 text-ink focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all cursor-pointer"
                 />
               </div>
               <div className="flex items-end">
-                <button type="submit" className="w-full px-4 py-2 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-all">
+                <button type="submit" className="w-full h-12 bg-accent text-white rounded-pill font-black text-eyebrow uppercase tracking-widest hover:bg-accent-hover transition-all shadow-glow-accent">
                   Save Goal
                 </button>
               </div>
             </motion.form>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {savingsGoals.map(goal => {
               const percentage = Math.min(100, (goal.currentAmount / goal.targetAmount) * 100);
               const isComplete = goal.currentAmount >= goal.targetAmount;
 
               return (
-                <div key={goal.id} className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isComplete ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'}`}>
-                        {isComplete ? <Check className="w-5 h-5" /> : <Target className="w-5 h-5" />}
+                <div key={goal.id} className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline group hover:border-hairline-strong transition-all relative overflow-hidden">
+                  <div className="flex justify-between items-start mb-8">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-md flex items-center justify-center border shadow-sm transition-all ${isComplete ? 'bg-accent/10 border-accent/20 text-accent' : 'bg-surface-2 border-hairline text-ink-tertiary'}`}>
+                        {isComplete ? <Check className="w-6 h-6" /> : <Target className="w-6 h-6" />}
                       </div>
                       <div>
-                        <h3 className="font-bold text-zinc-900 dark:text-white">{goal.title}</h3>
-                        {goal.deadline && <p className="text-xs text-zinc-500">{t('by')} {new Date(goal.deadline).toLocaleDateString()}</p>}
+                        <h3 className="text-body-sm font-black text-ink uppercase tracking-tight">{goal.title}</h3>
+                        {goal.deadline && <p className="text-eyebrow text-ink-tertiary mt-0.5 lowercase font-medium">{t('by')} {new Date(goal.deadline).toLocaleDateString()}</p>}
                       </div>
                     </div>
-                    <button onClick={() => deleteSavingsGoal(goal.id)} className="text-zinc-400 hover:text-red-500 transition-colors">
+                    <button 
+                      onClick={() => deleteSavingsGoal(goal.id)} 
+                      className="p-2 text-ink-tertiary hover:text-danger hover:bg-danger/10 rounded-md transition-all opacity-0 group-hover:opacity-100"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="space-y-2 mb-4">
-                    <div className="flex justify-between text-sm font-medium">
-                      <span className="text-zinc-700 dark:text-zinc-300">
+                  <div className="space-y-4 mb-8">
+                    <div className="flex justify-between items-end text-eyebrow">
+                      <span className="text-ink font-black font-mono">
                         Rp {goal.currentAmount.toLocaleString()}
                       </span>
-                      <span className="text-zinc-500">
-                        Rp {goal.targetAmount.toLocaleString()}
+                      <span className="text-ink-tertiary font-bold font-mono">
+                        / Rp {goal.targetAmount.toLocaleString()}
                       </span>
                     </div>
-                    <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all ${isComplete ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                        style={{ width: `${percentage}%` }}
+                    <div className="h-2.5 bg-surface-2 rounded-pill overflow-hidden border border-hairline">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percentage}%` }}
+                        className={`h-full rounded-pill transition-all ${isComplete ? 'bg-accent shadow-glow-accent' : 'bg-accent/40 shadow-sm'}`}
                       />
                     </div>
                   </div>
@@ -336,26 +347,26 @@ export function BudgetAndSavings() {
                         value={fundsAmount}
                         onChange={(e) => setFundsAmount(e.target.value)}
                         placeholder="Amount"
-                        className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-zinc-200 dark:border-zinc-800 bg-transparent focus:ring-2 focus:ring-emerald-500 outline-none"
+                        className="flex-1 h-10 px-4 rounded-md border border-hairline bg-surface-1 text-ink font-mono focus:border-accent outline-none text-xs"
                       />
                       <button 
                         onClick={() => handleAddFunds(goal)}
-                        className="px-3 py-1.5 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700"
+                        className="px-4 bg-accent text-white text-xs font-black uppercase tracking-widest rounded-md hover:bg-accent-hover shadow-sm"
                       >
                         Add
                       </button>
                       <button 
                         onClick={() => { setAddingFundsTo(null); setFundsAmount(''); }}
-                        className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-sm font-medium rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                        className="px-3 bg-surface-2 text-ink-tertiary text-xs font-bold rounded-md hover:bg-surface-3 transition-all"
                       >
-                        Cancel
+                        <X size={16} />
                       </button>
                     </div>
                   ) : (
                     <button
                       onClick={() => setAddingFundsTo(goal.id)}
                       disabled={isComplete}
-                      className="w-full py-2 mt-2 flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full h-11 flex items-center justify-center gap-2 text-eyebrow font-black uppercase tracking-widest text-accent bg-accent/5 border border-accent/10 hover:bg-accent/10 hover:border-accent/20 rounded-md transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <TrendingUp className="w-4 h-4" />
                       {isComplete ? 'Goal Reached!' : (t('addFunds') || 'Add Funds')}
@@ -365,9 +376,9 @@ export function BudgetAndSavings() {
               );
             })}
             {savingsGoals.length === 0 && !showSavingsForm && (
-              <div className="col-span-full text-center py-12 bg-zinc-50 dark:bg-zinc-800/20 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800">
-                <Target className="w-12 h-12 text-zinc-300 dark:text-zinc-600 mx-auto mb-3" />
-                <p className="text-zinc-500 dark:text-zinc-400">{t('noSavingsGoals')}</p>
+              <div className="col-span-full py-16 bg-surface-1 rounded-lg border border-hairline border-dashed text-center">
+                <Target className="w-12 h-12 text-ink-tertiary mx-auto mb-4 opacity-20" />
+                <p className="text-ink-tertiary italic text-body-sm lowercase">{t('noSavingsGoals')}</p>
               </div>
             )}
           </div>

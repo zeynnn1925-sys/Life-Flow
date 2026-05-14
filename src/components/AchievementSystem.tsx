@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Trophy, Star, Award, Zap, Target, CheckCircle2, Lock } from 'lucide-react';
 import { Achievement, Target as TargetType, Transaction, Task } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import { LampContainer } from './ui/lamp';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
@@ -45,6 +46,8 @@ export default function AchievementSystem() {
   const { t } = useLanguage();
   const { unlockedAchievements, saveUnlockedAchievement, targets, transactions, tasks } = useData();
 
+  // ... (stats useMemo unchanged)
+
   const stats = useMemo(() => {
     const completedTargets = targets.filter(t => t.currentValue >= t.targetValue).length;
     const balance = transactions.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
@@ -78,7 +81,7 @@ export default function AchievementSystem() {
     .reduce((acc, a) => acc + a.points, 0);
 
   const getIcon = (iconName: string, unlocked: boolean) => {
-    const props = { className: `w-6 h-6 ${unlocked ? 'text-deep-space-blue dark:text-blue-400' : 'text-zinc-300'}` };
+    const props = { className: `w-8 h-8 ${unlocked ? 'text-accent' : 'text-ink-tertiary opacity-40'}` };
     switch (iconName) {
       case 'Target': return <Target {...props} />;
       case 'Zap': return <Zap {...props} />;
@@ -95,18 +98,28 @@ export default function AchievementSystem() {
       transition={{ duration: 0.5 }}
       className="space-y-8"
     >
-      <div className="bg-deep-space-blue p-8 rounded-3xl shadow-xl text-white relative overflow-hidden">
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-black mb-2">{t('yourAchievements')}</h2>
-            <p className="text-zinc-400 dark:text-zinc-500">{t('achievementDesc')}</p>
-          </div>
-          <div className="text-right">
-            <div className="text-4xl font-black text-vivid-tangerine">{totalPoints}</div>
-            <div className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">{t('totalPoints')}</div>
-          </div>
-        </div>
-        <div className="absolute -right-12 -top-12 w-48 h-48 bg-vivid-tangerine/10 rounded-full blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl bg-neutral-950">
+        <LampContainer className="h-[25rem] w-full pt-10">
+          <motion.div
+            initial={{ opacity: 0.5, y: 100 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: 0.3,
+              duration: 0.8,
+              ease: "easeInOut",
+            }}
+            className="flex flex-col items-center"
+          >
+            <Trophy className="w-16 h-16 text-accent mb-6 drop-shadow-glow" />
+            <h2 className="bg-gradient-to-br from-slate-100 to-slate-400 py-4 bg-clip-text text-center text-5xl font-black tracking-tight text-transparent md:text-7xl uppercase">
+              {t('yourAchievements')}
+            </h2>
+            <div className="flex items-baseline gap-4 mt-4">
+              <span className="text-6xl font-black text-accent font-mono tracking-tighter drop-shadow-sm">{totalPoints}</span>
+              <span className="text-eyebrow font-black uppercase tracking-widest text-slate-400">{t('totalPoints')}</span>
+            </div>
+          </motion.div>
+        </LampContainer>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -115,38 +128,41 @@ export default function AchievementSystem() {
           return (
             <motion.div
               key={achievement.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-              className={`p-6 rounded-3xl border transition-all ${
+              className={`p-8 rounded-lg border transition-all relative overflow-hidden group ${
                 isUnlocked 
-                  ? 'bg-white dark:bg-zinc-900 border-black/5 dark:border-white/5 shadow-sm' 
-                  : 'bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 opacity-75'
+                  ? 'bg-surface-1 border-hairline shadow-card hover:border-accent hover:shadow-glow-accent' 
+                  : 'bg-surface-2 border-hairline opacity-60'
               }`}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                  isUnlocked ? 'bg-zinc-100 dark:bg-zinc-800' : 'bg-zinc-200 dark:bg-zinc-700'
+              {isUnlocked && (
+                <div className="absolute top-0 left-0 w-1 h-full bg-accent" />
+              )}
+              
+              <div className="flex items-start justify-between mb-8">
+                <div className={`w-14 h-14 rounded-md flex items-center justify-center border shadow-sm transition-all group-hover:scale-110 ${
+                  isUnlocked ? 'bg-surface-2 border-hairline-strong shadow-glow-accent/10' : 'bg-surface-3 border-hairline'
                 }`}>
-                  {isUnlocked ? getIcon(achievement.icon, true) : <Lock className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />}
+                  {isUnlocked ? getIcon(achievement.icon, true) : <Lock className="w-5 h-5 text-ink-tertiary" />}
                 </div>
-                <div className={`text-xs font-bold px-2 py-1 rounded-full ${
-                  isUnlocked ? 'bg-vivid-tangerine/10 text-vivid-tangerine' : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400'
+                <div className={`text-eyebrow font-black px-3 py-1.5 rounded-md border tracking-widest shadow-sm ${
+                  isUnlocked ? 'bg-accent/10 border-accent/20 text-accent' : 'bg-surface-3 border-hairline text-ink-tertiary'
                 }`}>
                   {achievement.points} PTS
                 </div>
               </div>
               
-              <h3 className={`font-bold text-lg ${isUnlocked ? 'text-deep-space-blue dark:text-blue-400' : 'text-zinc-400 dark:text-zinc-500'}`}>
-                {t(achievement.title as any)}
+              <h3 className={`text-heading-sm font-black transition-colors ${isUnlocked ? 'text-ink' : 'text-ink-tertiary'}`}>
+                {t(achievement.title as any).toUpperCase()}
               </h3>
-              <p className={`text-sm mt-1 ${isUnlocked ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-400 dark:text-zinc-500'}`}>
+              <p className={`text-body-sm mt-2 font-medium ${isUnlocked ? 'text-ink-subtle' : 'text-ink-tertiary'}`}>
                 {t(achievement.description as any)}
               </p>
 
               {isUnlocked && (
-                <div className="mt-4 flex items-center gap-2 text-vivid-tangerine text-xs font-bold uppercase tracking-wider">
+                <div className="mt-8 flex items-center gap-2 text-accent text-eyebrow font-black uppercase tracking-widest">
                   <CheckCircle2 className="w-4 h-4" />
                   {t('unlocked')}
                 </div>

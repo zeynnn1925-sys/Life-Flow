@@ -2,42 +2,43 @@ import React from 'react';
 
 export function Logo({ className = "w-8 h-8", color = "currentColor" }: { className?: string, color?: string }) {
   return (
-    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* Stylized L (Left Side) */}
+    <svg 
+      viewBox="0 0 100 100" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg" 
+      className={className}
+    >
+      {/* L Shape (Left) */}
       <path 
-        d="M22 18V72H32V82H22V18Z" 
-        fill={color}
-      />
-      <path 
-        d="M22 72H42L38 82H22V72Z" 
+        d="M20 20V70C20 75.5228 24.4772 80 30 80H40L35 70H30V20H20Z" 
         fill={color}
       />
       
-      {/* Stylized F (Right Side) */}
+      {/* F Shape (Right) */}
       <path 
-        d="M78 18H48V28H78V18Z" 
+        d="M80 20H50V30H80V20Z" 
         fill={color}
       />
       <path 
-        d="M48 18V82H38V18H48Z" 
+        d="M50 20V80L40 70V20H50Z" 
         fill={color}
       />
       <path 
-        d="M48 45H72V55H48V45Z" 
+        d="M50 45H75V55H50V45Z" 
         fill={color}
       />
-
-      {/* The "Flow" Connection - Recreating the curved bridge faithfully */}
+      
+      {/* Central Flowing Connection */}
       <path 
         fillRule="evenodd" 
         clipRule="evenodd" 
-        d="M38 82C30 82 25 70 25 50C25 30 35 18 50 18C65 18 75 30 75 50C75 70 70 82 62 82L58 72C65 72 65 60 65 50C65 40 60 28 50 28C40 28 35 40 35 50C35 60 35 72 42 72L38 82Z" 
+        d="M40 80C30 80 25 70 25 50C25 30 35 20 50 20C65 20 75 30 75 50C75 70 70 80 60 80L55 70C62 70 65 60 65 50C65 40 60 30 50 30C40 30 35 40 35 50C40.6667 50 35 63.3333 45 70L40 80ZM50 58C54.4183 58 58 54.4183 58 50C58 45.5817 54.4183 42 50 42C45.5817 42 42 45.5817 42 50C42 54.4183 45.5817 58 50 58Z" 
         fill={color} 
       />
       
-      {/* Central Purple Eye - The signature detail */}
-      <circle cx="50" cy="50" r="8" fill="#7C3AED" />
-      <circle cx="50" cy="50" r="3" fill="black" />
+      {/* Core Purple Signal */}
+      <circle cx="50" cy="50" r="8" fill="#6A4CF5" />
+      <circle cx="50" cy="50" r="3" fill="#010102" />
     </svg>
   );
 }

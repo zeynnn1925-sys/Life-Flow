@@ -19,33 +19,33 @@ export function WeeklyHabitGrid({ habits, logs }: WeeklyHabitGridProps) {
   });
 
   return (
-    <div className="overflow-x-auto pb-4">
-      <table className="w-full min-w-[600px]">
+    <div className="overflow-x-auto pb-4 no-scrollbar">
+      <table className="w-full min-w-[700px] border-collapse">
         <thead>
-          <tr>
-            <th className="text-left py-4 px-2 text-xs font-bold text-zinc-400 uppercase tracking-widest">Habit</th>
+          <tr className="border-b border-hairline">
+            <th className="text-left py-6 px-4 text-eyebrow font-black text-ink-tertiary uppercase tracking-widest">Habit</th>
             {days.map(day => (
-              <th key={day.date} className="py-4 px-2 text-center">
-                <span className="text-xs font-bold text-zinc-500 lowercase">{day.display}</span>
-                <div className="text-[10px] text-zinc-400 mt-0.5">{day.date.split('-')[2]}</div>
+              <th key={day.date} className="py-6 px-4 text-center">
+                <span className="text-[10px] font-black text-ink uppercase tracking-widest">{day.display}</span>
+                <div className="text-[10px] text-ink-tertiary font-mono font-bold mt-1 opacity-50">{day.date.split('-')[2]}</div>
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
+        <tbody className="divide-y divide-hairline">
           {habits.map(habit => {
             const Icon = (LucideIcons as any)[habit.icon] || LucideIcons.Circle;
             return (
-              <tr key={habit.id} className="group">
-                <td className="py-4 px-2">
-                  <div className="flex items-center gap-3">
+              <tr key={habit.id} className="group hover:bg-surface-2 transition-colors">
+                <td className="py-5 px-4">
+                  <div className="flex items-center gap-4">
                     <div 
-                      className="p-2 rounded-xl group-hover:scale-110 transition-transform"
+                      className="w-10 h-10 rounded-md flex items-center justify-center transition-all group-hover:scale-110 shadow-sm border border-hairline"
                       style={{ backgroundColor: `${habit.color}15`, color: habit.color }}
                     >
-                      <Icon size={16} />
+                      <Icon size={18} />
                     </div>
-                    <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">{habit.title}</span>
+                    <span className="text-body-sm font-black text-ink uppercase tracking-tight">{habit.title}</span>
                   </div>
                 </td>
                 {days.map(day => {
@@ -54,15 +54,15 @@ export function WeeklyHabitGrid({ habits, logs }: WeeklyHabitGridProps) {
                   const isSkipped = log?.skipped;
                   
                   return (
-                    <td key={day.date} className="py-4 px-2 text-center">
+                    <td key={day.date} className="py-5 px-4 text-center">
                       <div className="flex justify-center">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                          isCompleted ? '' : isSkipped ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400' : 'bg-zinc-50 dark:bg-zinc-800/30'
+                        <div className={`w-10 h-10 rounded-md flex items-center justify-center transition-all shadow-sm ${
+                          isCompleted ? 'shadow-glow-accent' : isSkipped ? 'bg-surface-3 text-ink-tertiary opacity-40 italic' : 'bg-surface-2 border border-hairline'
                         }`}
                         style={isCompleted ? { backgroundColor: habit.color, color: '#fff' } : {}}
                         >
-                          {isCompleted && <LucideIcons.Check size={16} strokeWidth={3} />}
-                          {isSkipped && <LucideIcons.FastForward size={14} />}
+                          {isCompleted && <LucideIcons.Check size={20} strokeWidth={4} />}
+                          {isSkipped && <LucideIcons.FastForward size={16} />}
                         </div>
                       </div>
                     </td>

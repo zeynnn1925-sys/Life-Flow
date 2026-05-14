@@ -221,8 +221,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] dark:bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-deep-space-blue/20 dark:border-blue-400/20 border-t-deep-space-blue rounded-full animate-spin" />
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
@@ -273,7 +273,7 @@ export default function App() {
               backgroundImage: 'url("https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2011&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
           <div className="relative z-10">
             <FinanceTracker />
           </div>
@@ -287,7 +287,7 @@ export default function App() {
               backgroundImage: 'url("https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=2071&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
           <div className="relative z-10">
             <BudgetAndSavings />
           </div>
@@ -301,7 +301,7 @@ export default function App() {
               backgroundImage: 'url("https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
           <div className="relative z-10">
             <FinanceReports />
           </div>
@@ -315,7 +315,7 @@ export default function App() {
               backgroundImage: 'url("https://images.unsplash.com/photo-1543286386-713bdd548da4?q=80&w=2070&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
           <div className="relative z-10">
             <FinancialVisualization />
           </div>
@@ -329,7 +329,7 @@ export default function App() {
               backgroundImage: 'url("https://images.unsplash.com/photo-1506784365847-bbad939e9335?q=80&w=2068&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
           <div className="relative z-10">
             <DailySchedule />
           </div>
@@ -343,7 +343,7 @@ export default function App() {
               backgroundImage: 'url("https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=2070&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
           <div className="relative z-10">
             <AIPlanner />
           </div>
@@ -357,7 +357,7 @@ export default function App() {
               backgroundImage: 'url("https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?q=80&w=2070&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
           <div className="relative z-10">
             <DailyTargets />
           </div>
@@ -366,7 +366,7 @@ export default function App() {
       case 'habits': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-white/50 backdrop-blur-[2px]"
+            className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]"
           />
           <div className="relative z-10">
             <HabitTrackerPage />
@@ -381,7 +381,7 @@ export default function App() {
               backgroundImage: 'url("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
           <div className="relative z-10">
             <AchievementSystem />
           </div>
@@ -395,7 +395,7 @@ export default function App() {
               backgroundImage: 'url("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[2px]" />
           <div className="relative z-10">
             <NotificationSettings />
           </div>
@@ -403,112 +403,119 @@ export default function App() {
       );
       default: return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
-          {/* Background Image */}
-          <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-50"
-            style={{ 
-              backgroundImage: 'url("https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=2070&auto=format&fit=crop")',
-            }}
-          />
-          {/* Subtle Overlay */}
-          <div className="absolute inset-0 z-0 bg-white/30 backdrop-blur-[1px]" />
-          
+          {/* Dashboard Background */}
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
+            <img
+              src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2072&auto=format&fit=crop"
+              alt=""
+              aria-hidden="true"
+              className="h-full w-full object-cover object-top"
+              style={{ opacity: 0.08 }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#010102]" />
+          </div>
+
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative z-10 space-y-8"
+            className="relative z-10 space-y-12"
           >
-            <header>
-            <motion.h1 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-3xl md:text-4xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight font-sans no-underline"
-            >
-              {t('welcome')} {user?.displayName?.split(' ')[0] || ''}
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-zinc-500 dark:text-zinc-400 mt-1 italic font-medium"
-            >
-              "{t('slogan')}"
-            </motion.p>
-            <motion.p 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-zinc-400 dark:text-zinc-500 text-sm mt-2"
-            >
-              {t('happeningToday')}
-            </motion.p>
-          </header>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-              className="bg-white dark:bg-zinc-900 p-4 lg:p-6 rounded-2xl lg:rounded-3xl shadow-sm border border-black/5 dark:border-white/5"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-vivid-tangerine/10 rounded-2xl flex items-center justify-center text-vivid-tangerine">
-                  <TrendingUp className="w-6 h-6" />
-                </div>
-                <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">{t('finance')}</span>
+            <header className="hero-section -mx-4 lg:-mx-8 px-8 lg:px-12 py-10 lg:py-16 rounded-3xl mb-12">
+              <div className="max-w-4xl">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 mb-6"
+                >
+                  <div className="w-8 h-px bg-accent" />
+                  <span className="text-eyebrow text-accent font-black uppercase tracking-[0.2em]">{t('dashboard')}</span>
+                </motion.div>
+                <motion.h1 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-display-lg md:text-display-xl text-ink tracking-tight font-black leading-none"
+                >
+                  {t('welcome')} {user?.displayName?.split(' ')[0] || ''}
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-ink-subtle mt-4 text-body-lg font-medium opacity-80 max-w-lg"
+                >
+                  {t('slogan')}
+                </motion.p>
               </div>
-              <div className="text-3xl font-black text-deep-space-blue dark:text-blue-400">Rp {summary.balance.toLocaleString()}</div>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">{t('balance')}</p>
-            </motion.div>
+            </header>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-              className="bg-white dark:bg-zinc-900 p-4 lg:p-6 rounded-2xl lg:rounded-3xl shadow-sm border border-black/5 dark:border-white/5"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-sunflower-gold/10 rounded-2xl flex items-center justify-center text-sunflower-gold">
-                  <Clock className="w-6 h-6" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                whileHover={{ y: -6, scale: 1.02 }}
+                className="finance-card-primary group cursor-pointer relative overflow-hidden"
+                onClick={() => setActiveView('finance')}
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-pill -mr-16 -mt-16 blur-2xl group-hover:bg-white/10 transition-all" />
+                <div className="flex items-center justify-between mb-8">
+                  <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md shadow-card border border-white/10">
+                    <TrendingUp className="w-7 h-7" />
+                  </div>
+                  <span className="text-eyebrow text-white/60 font-black uppercase tracking-widest">{t('finance')}</span>
                 </div>
-                <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">{t('schedule')}</span>
-              </div>
-              <div className="text-3xl font-black text-deep-space-blue dark:text-blue-400">{summary.completedTasks} / {summary.totalTasks}</div>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">{t('completedTasks')}</p>
-            </motion.div>
+                <div className="text-display-md text-white font-mono tracking-tighter">Rp {summary.balance.toLocaleString()}</div>
+                <p className="text-white/60 text-eyebrow font-bold uppercase mt-2 tracking-widest">{t('balance')}</p>
+              </motion.div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-              className="bg-white dark:bg-zinc-900 p-4 lg:p-6 rounded-2xl lg:rounded-3xl shadow-sm border border-black/5 dark:border-white/5"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-flag-red/10 rounded-2xl flex items-center justify-center text-flag-red">
-                  <TargetIcon className="w-6 h-6" />
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                whileHover={{ y: -6, scale: 1.02 }}
+                className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline hover:border-hairline-strong transition-all group"
+                onClick={() => setActiveView('schedule')}
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center text-accent shadow-sm border border-accent/20 transition-transform group-hover:rotate-6">
+                    <Calendar className="w-7 h-7" />
+                  </div>
+                  <span className="text-eyebrow text-ink-tertiary font-black uppercase tracking-widest">{t('schedule')}</span>
                 </div>
-                <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">{t('targets')}</span>
-              </div>
-              <div className="text-3xl font-black text-deep-space-blue dark:text-blue-400">{Math.round(summary.targetProgress)}%</div>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">{t('overallProgress')}</p>
-            </motion.div>
-          </div>
+                <div className="text-heading-lg text-ink font-mono tracking-tighter">{summary.completedTasks} <span className="text-ink-tertiary opacity-40">/</span> {summary.totalTasks}</div>
+                <p className="text-eyebrow text-ink-tertiary font-bold uppercase mt-2 tracking-widest">{t('tasks')}</p>
+              </motion.div>
 
-          {/* Weekly Overview Chart */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                whileHover={{ y: -6, scale: 1.02 }}
+                className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline hover:border-hairline-strong transition-all group"
+                onClick={() => setActiveView('targets')}
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div className="w-14 h-14 bg-warning/10 rounded-xl flex items-center justify-center text-warning shadow-sm border border-warning/20 transition-transform group-hover:-rotate-6">
+                    <TargetIcon className="w-7 h-7" />
+                  </div>
+                  <span className="text-eyebrow text-ink-tertiary font-black uppercase tracking-widest">{t('targets')}</span>
+                </div>
+                <div className="text-heading-lg text-ink font-mono tracking-tighter">{Math.round(summary.targetProgress)}%</div>
+                <p className="text-eyebrow text-ink-tertiary font-bold uppercase mt-2 tracking-widest">{t('performance')}</p>
+              </motion.div>
+            </div>
+
           <motion.section 
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.42 }}
-            className="bg-white dark:bg-zinc-900 p-4 lg:p-6 rounded-2xl lg:rounded-3xl shadow-sm border border-black/5 dark:border-white/5"
+            className="bg-surface-1 p-6 rounded-lg shadow-card border border-hairline"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-deep-space-blue dark:text-blue-400" />
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-heading-sm font-bold text-ink flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-accent" />
                 {t('weeklyOverview')}
               </h2>
             </div>
@@ -517,24 +524,25 @@ export default function App() {
                 <AreaChart data={weeklyChartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f77f00" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#f77f00" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
                     </linearGradient>
                     <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#d62828" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#d62828" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="var(--color-danger)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--color-danger)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} />
-                  <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} />
-                  <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-hairline)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-subtle)', fontSize: 11 }} />
+                  <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-subtle)', fontSize: 11 }} />
+                  <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-subtle)', fontSize: 11 }} />
                   <RechartsTooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                    labelStyle={{ fontWeight: 'bold', color: '#71717a', marginBottom: '4px' }}
+                    contentStyle={{ backgroundColor: 'var(--color-surface-3)', borderRadius: '12px', border: '1px solid var(--color-hairline-strong)', boxShadow: 'var(--shadow-modal)' }}
+                    labelStyle={{ fontWeight: 'bold', color: 'var(--color-ink)', marginBottom: '4px' }}
+                    itemStyle={{ fontSize: '12px' }}
                   />
-                  <Area yAxisId="left" type="monotone" dataKey="tasks" name={t('tasksCompleted')} stroke="#f77f00" strokeWidth={3} fillOpacity={1} fill="url(#colorTasks)" />
-                  <Area yAxisId="right" type="monotone" dataKey="expense" name={t('expenses')} stroke="#d62828" strokeWidth={3} fillOpacity={1} fill="url(#colorExpense)" />
+                  <Area yAxisId="left" type="monotone" dataKey="tasks" name={t('tasksCompleted')} stroke="var(--color-accent)" strokeWidth={2} fillOpacity={1} fill="url(#colorTasks)" />
+                  <Area yAxisId="right" type="monotone" dataKey="expense" name={t('expenses')} stroke="var(--color-danger)" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -542,89 +550,93 @@ export default function App() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <motion.section 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
-              className="bg-white dark:bg-zinc-900 p-6 lg:p-8 rounded-2xl lg:rounded-3xl shadow-sm border border-black/5 dark:border-white/5 lg:col-span-2"
+              className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline lg:col-span-2 relative overflow-hidden group"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t('dailyInspiration')}</h2>
-                <Sparkles className="text-vivid-tangerine w-5 h-5" />
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Sparkles className="w-24 h-24 text-primary" />
               </div>
-              <div 
-                className="cursor-pointer group"
-                onClick={() => setActiveView('ai_planner')}
-              >
-                <p className="text-lg italic text-zinc-600 dark:text-zinc-400 group-hover:text-deep-space-blue dark:hover:text-blue-400 transition-colors">
-                  {dailyQuote 
-                    ? `"${dailyQuote.text}"`
-                    : "Click to get your daily dose of inspiration..."}
-                </p>
-                <p className="text-sm font-bold text-zinc-400 dark:text-zinc-500 mt-2">
-                  {dailyQuote 
-                    ? `— ${dailyQuote.author}`
-                    : ""}
-                </p>
+              <div className="relative z-10">
+                <h2 className="text-eyebrow text-ink-tertiary uppercase mb-4">{t('dailyInspiration')}</h2>
+                <div 
+                  className="cursor-pointer"
+                  onClick={() => setActiveView('ai_planner')}
+                >
+                  <p className="text-heading-md leading-relaxed text-ink-muted">
+                    {dailyQuote 
+                      ? `"${dailyQuote.text}"`
+                      : "Click to get your daily dose of inspiration..."}
+                  </p>
+                  <p className="text-body-sm font-bold text-ink-tertiary mt-4">
+                    {dailyQuote 
+                      ? `— ${dailyQuote.author}`
+                      : ""}
+                  </p>
+                </div>
               </div>
             </motion.section>
 
             <motion.section 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-white dark:bg-zinc-900 p-6 lg:p-8 rounded-2xl lg:rounded-3xl shadow-sm border border-black/5 dark:border-white/5"
+              className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline"
             >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t('quickActions')}</h2>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-heading-sm font-bold text-ink">{t('quickActions')}</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveView('finance')}
-                  className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all text-left group"
+                  className="p-4 rounded-md bg-surface-2 hover:bg-surface-3 border border-hairline transition-all text-left"
                 >
-                  <Wallet className="w-6 h-6 text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-100 mb-2 transition-colors" />
-                  <div className="font-semibold text-zinc-900 dark:text-zinc-100">{t('expense')}</div>
-                  <div className="text-xs text-zinc-500 dark:text-zinc-400">{t('trackSpending')}</div>
+                  <Wallet className="w-5 h-5 text-ink-subtle mb-3" />
+                  <div className="font-semibold text-ink text-body-sm">{t('expense')}</div>
+                  <div className="text-[10px] text-ink-tertiary">{t('trackSpending')}</div>
                 </motion.button>
                 <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveView('schedule')}
-                  className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all text-left group"
+                  className="p-4 rounded-md bg-surface-2 hover:bg-surface-3 border border-hairline transition-all text-left"
                 >
-                  <Calendar className="w-6 h-6 text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-100 mb-2 transition-colors" />
-                  <div className="font-semibold text-zinc-900 dark:text-zinc-100">{t('newTask')}</div>
-                  <div className="text-xs text-zinc-500 dark:text-zinc-400">{t('planNextHour')}</div>
+                  <Calendar className="w-5 h-5 text-ink-subtle mb-3" />
+                  <div className="font-semibold text-ink text-body-sm">{t('newTask')}</div>
+                  <div className="text-[10px] text-ink-tertiary">{t('planNextHour')}</div>
                 </motion.button>
                 <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveView('ai_planner')}
-                  className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all text-left group"
+                  className="p-4 rounded-md bg-surface-2 hover:bg-surface-3 border border-hairline transition-all text-left"
                 >
-                  <Sparkles className="w-6 h-6 text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-100 mb-2 transition-colors" />
-                  <div className="font-semibold text-zinc-900 dark:text-zinc-100">{t('aiPlanner')}</div>
-                  <div className="text-xs text-zinc-500 dark:text-zinc-400">{t('aiPlanDesc')}</div>
+                  <Sparkles className="w-5 h-5 text-ink-subtle mb-3" />
+                  <div className="font-semibold text-ink text-body-sm">{t('aiPlanner')}</div>
+                  <div className="text-[10px] text-ink-tertiary">{t('aiPlanDesc')}</div>
                 </motion.button>
               </div>
             </motion.section>
 
             <motion.section 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-deep-space-blue p-6 lg:p-8 rounded-2xl lg:rounded-3xl shadow-xl text-white relative overflow-hidden"
+              className="bg-primary p-8 rounded-xxl shadow-glow-primary text-white relative overflow-hidden"
             >
-              <div className="relative z-10">
-                <h2 className="text-xl font-bold mb-2">{t('stayProductive')}</h2>
-                <p className="text-zinc-300 text-sm mb-6">{t('stayProductiveDesc')}</p>
+              <div className="relative z-10 h-full flex flex-col justify-between">
+                <div>
+                  <h2 className="text-display-md mb-2">{t('stayProductive')}</h2>
+                  <p className="text-white/70 text-body-sm mb-8">{t('stayProductiveDesc')}</p>
+                </div>
                 <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveView('targets')}
-                  className="bg-vivid-tangerine text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-vivid-tangerine/90 transition-all flex items-center gap-2"
+                  className="bg-white text-primary px-8 py-3 rounded-pill font-bold text-button w-fit shadow-lg flex items-center gap-2"
                 >
                   {t('viewTargets')} <ChevronRight className="w-4 h-4" />
                 </motion.button>
@@ -632,27 +644,14 @@ export default function App() {
               <motion.div 
                 animate={{ 
                   scale: [1, 1.2, 1],
-                  opacity: [0.5, 0.8, 0.5]
+                  opacity: [0.3, 0.5, 0.3]
                 }}
                 transition={{ 
                   duration: 4,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="absolute -right-8 -bottom-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" 
-              />
-              <motion.div 
-                animate={{ 
-                  scale: [1, 1.5, 1],
-                  opacity: [0.3, 0.6, 0.3]
-                }}
-                transition={{ 
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 1
-                }}
-                className="absolute -left-8 -top-8 w-32 h-32 bg-vivid-tangerine/10 rounded-full blur-2xl" 
+                className="absolute -right-8 -bottom-8 w-48 h-48 bg-white/10 rounded-full blur-3xl" 
               />
             </motion.section>
           </div>
@@ -666,36 +665,39 @@ export default function App() {
 };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] dark:bg-zinc-950 flex">
+    <div className="min-h-screen bg-canvas flex">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 transition-transform duration-300 lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-surface-1 border-r border-hairline transition-transform duration-300 lg:relative lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="h-full flex flex-col p-6">
-          <div className="mb-6 px-2">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-8 h-8 bg-white dark:bg-zinc-900 rounded-lg flex items-center justify-center text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200 dark:border-zinc-800">
-                <Logo className="w-6 h-6" />
+          <div className="mb-8 px-2">
+            <div className="flex items-center gap-4 mb-1">
+              <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-white shadow-card border border-white/10 transition-transform group-hover:scale-105 duration-500">
+                <Logo className="w-9 h-9" />
               </div>
-              <span className="text-xl font-black text-deep-space-blue dark:text-blue-400 tracking-[0.15em] font-mono">{t('appName')}</span>
+              <div className="flex flex-col">
+                <span className="text-xl font-black text-ink tracking-tighter uppercase leading-none">{t('appName')}</span>
+                <span className="text-[10px] font-bold text-accent uppercase tracking-widest leading-tight mt-1">Flow</span>
+              </div>
             </div>
-            <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-11 leading-tight">{t('slogan')}</p>
+            <p className="text-[10px] font-bold text-ink-tertiary uppercase tracking-widest ml-11 leading-tight">{t('slogan')}</p>
           </div>
 
-          <nav className="flex-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
+          <nav className="flex-1 space-y-6 overflow-y-auto pr-2">
             {navGroups.map((group, groupIndex) => (
-              <div key={group.title} className="space-y-2">
-                <h3 className="px-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+              <div key={group.title} className="space-y-1">
+                <h3 className="px-4 text-eyebrow text-ink-tertiary uppercase mb-2">
                   {group.title}
                 </h3>
                 <div className="space-y-1">
@@ -711,10 +713,10 @@ export default function App() {
                         setActiveView(item.id as View);
                         if (window.innerWidth < 1024) setIsSidebarOpen(false);
                       }}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-medium ${
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-md transition-all font-black uppercase tracking-tight ${
                         activeView === item.id 
-                          ? 'bg-deep-space-blue text-white shadow-lg shadow-deep-space-blue/20' 
-                          : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-deep-space-blue dark:hover:text-blue-400'
+                          ? 'bg-surface-2 text-ink border-l-4 border-accent shadow-sm' 
+                          : 'text-ink-tertiary hover:bg-surface-2 hover:text-ink-muted opacity-60 hover:opacity-100'
                       }`}
                     >
                       <item.icon className="w-5 h-5" />
@@ -726,23 +728,23 @@ export default function App() {
             ))}
           </nav>
 
-          <div className="mt-auto pt-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+          <div className="mt-auto pt-6 border-t border-hairline space-y-4">
             {/* Language Switcher */}
             <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
+              <div className="flex items-center gap-2 text-ink-subtle">
                 <Globe className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-widest">{t('language')}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">{t('language')}</span>
               </div>
-              <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
+              <div className="flex bg-surface-2 p-1 rounded-md">
                 <button 
                   onClick={() => setLanguage('en')}
-                  className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${language === 'en' ? 'bg-white dark:bg-zinc-900 text-deep-space-blue dark:text-blue-400 shadow-sm' : 'text-zinc-400 dark:text-zinc-500'}`}
+                  className={`px-2 py-1 text-[10px] font-bold rounded-sm transition-all ${language === 'en' ? 'bg-surface-3 text-ink shadow-sm' : 'text-ink-tertiary'}`}
                 >
                   EN
                 </button>
                 <button 
                   onClick={() => setLanguage('id')}
-                  className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${language === 'id' ? 'bg-white dark:bg-zinc-900 text-deep-space-blue dark:text-blue-400 shadow-sm' : 'text-zinc-400 dark:text-zinc-500'}`}
+                  className={`px-2 py-1 text-[10px] font-bold rounded-sm transition-all ${language === 'id' ? 'bg-surface-3 text-ink shadow-sm' : 'text-ink-tertiary'}`}
                 >
                   ID
                 </button>
@@ -754,13 +756,13 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-0">
-        <header className="h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40">
+        <header className="h-14 bg-canvas/85 backdrop-blur-lg border-b border-hairline flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40">
           <div className="flex items-center gap-6">
             <div className="lg:hidden flex items-center gap-3">
-              <div className="w-8 h-8 bg-white dark:bg-zinc-900 rounded-lg flex items-center justify-center text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200 dark:border-zinc-800">
-                <Logo className="w-6 h-6" />
+              <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-white border border-white/10">
+                <Logo className="w-8 h-8" />
               </div>
-              <span className="text-xl font-black text-deep-space-blue dark:text-blue-400 tracking-[0.15em] font-mono">{t('appName')}</span>
+              <span className="text-xl font-black text-ink tracking-tighter uppercase">{t('appName')}</span>
             </div>
           </div>
           
@@ -769,20 +771,20 @@ export default function App() {
             
             <button
               onClick={toggleTheme}
-              className="p-2 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:hover:bg-zinc-800 rounded-full transition-colors"
+              className="p-2 text-ink-subtle hover:bg-surface-1 rounded-md transition-colors"
               title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
             >
-              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
 
             <div className="relative">
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:hover:bg-zinc-800 rounded-full relative"
+                className="p-2 text-ink-subtle hover:bg-surface-1 rounded-md relative"
               >
-                <Bell className="w-5 h-5" />
+                <Bell className="w-4 h-4" />
                 {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-900" />
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-danger rounded-full border border-canvas" />
                 )}
               </button>
 
@@ -792,27 +794,27 @@ export default function App() {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-80 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden z-50"
+                    className="absolute right-0 mt-2 w-80 bg-surface-3 rounded-xxl shadow-modal border border-hairline-strong overflow-hidden z-50 backdrop-blur-xl"
                   >
-                    <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-                      <span className="font-bold text-zinc-900 dark:text-zinc-100">{t('notifications')}</span>
+                    <div className="p-4 border-b border-hairline flex items-center justify-between">
+                      <span className="font-bold text-ink">{t('notifications')}</span>
                       {notifications.length > 0 && (
-                        <span className="text-xs text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">{notifications.length} {t('newNotifications')}</span>
+                        <span className="text-eyebrow text-ink-tertiary uppercase">{notifications.length} {t('newNotifications')}</span>
                       )}
                     </div>
-                    <div className="divide-y divide-zinc-50 max-h-96 overflow-y-auto">
+                    <div className="divide-y divide-hairline max-h-96 overflow-y-auto">
                       {notifications.length === 0 ? (
-                        <div className="p-8 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+                        <div className="p-8 text-center text-ink-subtle text-body-sm">
                           {t('noNotifications')}
                         </div>
                       ) : (
                         notifications.map(notification => (
-                          <div key={notification.id} className="p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors flex gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                              notification.type === 'schedule' ? 'bg-blue-50 text-blue-600' :
-                              notification.type === 'target' ? 'bg-amber-50 text-amber-600' :
-                              notification.type === 'achievement' ? 'bg-emerald-50 text-emerald-600' :
-                              'bg-rose-50 text-rose-600'
+                          <div key={notification.id} className="p-4 hover:bg-surface-1 transition-colors flex gap-3">
+                            <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
+                              notification.type === 'schedule' ? 'bg-info/10 text-info' :
+                              notification.type === 'target' ? 'bg-warning/10 text-warning' :
+                              notification.type === 'achievement' ? 'bg-success/10 text-success' :
+                              'bg-danger/10 text-danger'
                             }`}>
                               {notification.type === 'schedule' && <Calendar className="w-4 h-4" />}
                               {notification.type === 'target' && <TargetIcon className="w-4 h-4" />}
@@ -820,15 +822,15 @@ export default function App() {
                               {notification.type === 'finance' && <CreditCard className="w-4 h-4" />}
                             </div>
                             <div>
-                              <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{notification.title}</div>
-                              <div className="text-xs text-zinc-500 dark:text-zinc-400">{notification.message}</div>
-                              <div className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 font-medium">{notification.time}</div>
+                              <div className="text-body-sm font-bold text-ink">{notification.title}</div>
+                              <div className="text-caption text-ink-muted">{notification.message}</div>
+                              <div className="text-[10px] text-ink-tertiary mt-1 font-medium">{notification.time}</div>
                             </div>
                           </div>
                         ))
                       )}
                     </div>
-                    <button className="w-full p-3 text-xs font-bold text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:text-zinc-100 transition-colors bg-zinc-50 dark:bg-zinc-800/50 border-t border-zinc-100 dark:border-zinc-800">
+                    <button className="w-full p-3 text-caption font-bold text-ink-subtle hover:text-ink transition-colors bg-surface-2 border-t border-hairline">
                       {t('viewAllNotifications')}
                     </button>
                   </motion.div>
@@ -836,20 +838,20 @@ export default function App() {
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center gap-3 pl-4 border-l border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center gap-3 pl-4 border-l border-hairline">
               {user?.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full object-cover border border-zinc-200 dark:border-zinc-800" referrerPolicy="no-referrer" />
+                <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-pill object-cover border border-hairline" referrerPolicy="no-referrer" />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-zinc-500 dark:text-zinc-400 font-bold text-xs">
+                <div className="w-8 h-8 rounded-pill bg-surface-2 flex items-center justify-center text-ink-muted font-bold text-xs border border-hairline">
                   {user?.displayName?.charAt(0) || 'U'}
                 </div>
               )}
               <div className="hidden md:block overflow-hidden max-w-[120px]">
-                <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{user?.displayName || t('userAccount')}</div>
+                <div className="text-body-sm font-bold text-ink truncate">{user?.displayName || t('userAccount')}</div>
               </div>
               <button 
                 onClick={signOut}
-                className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-full transition-colors"
+                className="p-2 text-danger hover:bg-danger/10 rounded-md transition-colors"
                 title={t('logout')}
               >
                 <LogOut className="w-4 h-4" />
@@ -866,7 +868,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)]"
+              className="min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] p-4 lg:p-0"
             >
               {renderView()}
             </motion.div>
@@ -875,7 +877,7 @@ export default function App() {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 z-50 px-6 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] flex justify-between items-center">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface-1/90 backdrop-blur-xl border-t border-hairline z-50 px-6 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] flex justify-between items-center">
         {[
           { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
           { id: 'finance', label: t('finance'), icon: Wallet },
@@ -887,12 +889,15 @@ export default function App() {
             key={item.id}
             id={`nav-${item.id}`}
             onClick={() => setActiveView(item.id as View)}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${
+            className={`flex flex-col items-center gap-1 p-2 transition-colors relative ${
               activeView === item.id
-                ? 'text-deep-space-blue dark:text-blue-400'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-deep-space-blue dark:hover:text-blue-400'
+                ? 'text-accent'
+                : 'text-ink-tertiary hover:text-accent'
             }`}
           >
+            {activeView === item.id && (
+              <span className="absolute top-0 w-1 h-1 bg-accent rounded-full" />
+            )}
             <item.icon className="w-6 h-6" />
             <span className="text-[10px] font-medium">{item.label}</span>
           </button>
@@ -900,10 +905,10 @@ export default function App() {
         <button
           id="nav-menu"
           onClick={() => setIsSidebarOpen(true)}
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${
+          className={`flex flex-col items-center gap-1 p-2 transition-colors ${
             !['dashboard', 'finance', 'visualization', 'schedule', 'ai_planner'].includes(activeView)
-              ? 'text-deep-space-blue dark:text-blue-400'
-              : 'text-zinc-500 dark:text-zinc-400 hover:text-deep-space-blue dark:hover:text-blue-400'
+              ? 'text-accent'
+              : 'text-ink-tertiary hover:text-accent'
           }`}
         >
           <Menu className="w-6 h-6" />

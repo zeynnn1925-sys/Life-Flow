@@ -1,18 +1,19 @@
 import React, { useMemo } from 'react';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
 import { motion } from 'motion/react';
 import { BarChart3, PieChart as PieChartIcon, TrendingDown, Calendar } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
+import { BackgroundGradientAnimation } from './ui/background-gradient-animation';
 
 export default function FinancialVisualization() {
   const { language, t } = useLanguage();
   const { transactions, categories } = useData();
 
-  // 1. Monthly Expenses Data (Bar Chart)
+  // ... (useMemo logic remains same)
   const monthlyExpensesData = useMemo(() => {
     const data: Record<string, number> = {};
     const now = new Date();
@@ -35,7 +36,6 @@ export default function FinancialVisualization() {
     return Object.entries(data).map(([name, amount]) => ({ name, amount }));
   }, [transactions, language]);
 
-  // 2. Category Breakdown Data (Pie Chart)
   const categoryData = useMemo(() => {
     const data: Record<string, { value: number, color: string }> = {};
     
@@ -57,15 +57,15 @@ export default function FinancialVisualization() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-xl border border-zinc-100 dark:border-zinc-800">
-          <p className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">{label}</p>
+        <div className="bg-surface-3 p-6 rounded-md shadow-modal border border-hairline-strong backdrop-blur-xl">
+          <p className="text-eyebrow font-black text-ink-subtle uppercase tracking-widest mb-4 border-b border-hairline pb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-8">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
-                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{entry.name}</span>
+            <div key={index} className="flex items-center justify-between gap-12 mb-2 last:mb-0">
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-pill shadow-sm" style={{ backgroundColor: entry.color || entry.fill }} />
+                <span className="text-body-sm font-bold text-ink">{entry.name}</span>
               </div>
-              <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Rp {entry.value.toLocaleString()}</span>
+              <span className="text-body-sm font-black font-mono text-ink tracking-tighter">Rp {entry.value.toLocaleString()}</span>
             </div>
           ))}
         </div>
@@ -75,38 +75,48 @@ export default function FinancialVisualization() {
   };
 
   return (
-    <div className="space-y-8">
-      <header>
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{t('financialVisualization')}</h2>
-        <p className="text-zinc-500 dark:text-zinc-400">{t('analyticsDesc')}</p>
-      </header>
+    <div className="relative min-h-screen overflow-hidden rounded-3xl">
+      <div className="absolute inset-0 z-0">
+        <BackgroundGradientAnimation 
+          containerClassName="h-full w-full"
+          interactive={false}
+          gradientBackgroundStart="transparent"
+          gradientBackgroundEnd="transparent"
+        />
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="relative z-10 space-y-12 p-1">
+        <header>
+          <h2 className="text-display-md font-black text-ink tracking-tight uppercase">{t('financialVisualization')}</h2>
+          <p className="text-body-sm text-ink-tertiary mt-2 lowercase font-medium">{t('analyticsDesc')}</p>
+        </header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Monthly Expenses Bar Chart */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-black/5 dark:border-white/5 shadow-sm"
+          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card group hover:border-hairline-strong transition-all"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-vivid-tangerine" />
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-heading-sm font-black text-ink uppercase tracking-tight flex items-center gap-3">
+              <BarChart3 className="w-6 h-6 text-accent" />
               {t('monthlyExpenses')}
             </h3>
-            <Calendar className="w-4 h-4 text-zinc-400" />
+            <Calendar className="w-5 h-5 text-ink-tertiary/40" />
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[320px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyExpensesData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f4f4f5' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-hairline)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-tertiary)', fontSize: 10, fontWeight: 700 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-tertiary)', fontSize: 10, fontWeight: 700 }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-surface-2)', radius: 4 }} />
                 <Bar 
                   dataKey="amount" 
                   name={t('expense')} 
-                  fill="#d62828" 
-                  radius={[6, 6, 0, 0]} 
+                  fill="var(--color-danger)" 
+                  radius={[4, 4, 0, 0]} 
                   animationDuration={1500}
                 />
               </BarChart>
@@ -119,35 +129,40 @@ export default function FinancialVisualization() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-black/5 dark:border-white/5 shadow-sm"
+          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card group hover:border-hairline-strong transition-all"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <PieChartIcon className="w-5 h-5 text-sunflower-gold" />
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-heading-sm font-black text-ink uppercase tracking-tight flex items-center gap-3">
+              <PieChartIcon className="w-6 h-6 text-accent" />
               {t('mainCategories')}
             </h3>
-            <TrendingDown className="w-4 h-4 text-zinc-400" />
+            <TrendingDown className="w-5 h-5 text-ink-tertiary/40" />
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[320px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={categoryData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
+                  innerRadius={70}
                   outerRadius={100}
-                  paddingAngle={8}
+                  paddingAngle={4}
                   dataKey="value"
                   nameKey="name"
                   animationDuration={1500}
                 >
                   {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend verticalAlign="bottom" height={36}/>
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36} 
+                  iconType="circle"
+                  formatter={(value) => <span className="text-eyebrow font-black text-ink-subtle uppercase tracking-widest ml-1">{value}</span>}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -155,26 +170,22 @@ export default function FinancialVisualization() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-800">
-          <div className="text-zinc-400 dark:text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">{t('monthlyExpenses')} (Avg)</div>
-          <div className="text-2xl font-black text-zinc-900 dark:text-zinc-100">
-            Rp {Math.round(monthlyExpensesData.reduce((acc, d) => acc + d.amount, 0) / (monthlyExpensesData.length || 1)).toLocaleString()}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          { label: t('monthlyExpenses') + ' (avg)', value: Math.round(monthlyExpensesData.reduce((acc, d) => acc + d.amount, 0) / (monthlyExpensesData.length || 1)), color: 'text-ink' },
+          { label: t('expense') + ' (total)', value: transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0), color: 'text-danger' },
+          { label: t('income') + ' (total)', value: transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0), color: 'text-success' }
+        ].map((item, idx) => (
+          <div key={idx} className="bg-surface-1 p-10 rounded-lg border border-hairline shadow-card relative overflow-hidden group">
+            <div className={`absolute top-0 left-0 w-1 h-full ${item.color.replace('text-', 'bg-')}`} />
+            <div className="text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-4 opacity-60">{item.label}</div>
+            <div className={`text-display-md font-black font-mono tracking-tighter ${item.color}`}>
+              Rp {item.value.toLocaleString()}
+            </div>
           </div>
-        </div>
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-800">
-          <div className="text-zinc-400 dark:text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">{t('expense')} (Total)</div>
-          <div className="text-2xl font-black text-flag-red">
-            Rp {transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0).toLocaleString()}
-          </div>
-        </div>
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-800">
-          <div className="text-zinc-400 dark:text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">{t('income')} (Total)</div>
-          <div className="text-2xl font-black text-vivid-tangerine">
-            Rp {transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0).toLocaleString()}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
-  );
+  </div>
+);
 }

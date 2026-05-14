@@ -352,51 +352,64 @@ export default function FinanceTracker() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-6"
+      className="space-y-6 relative overflow-hidden p-1"
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2072&auto=format&fit=crop"
+          alt=""
+          aria-hidden="true"
+          className="h-full w-full object-cover object-center"
+          style={{ opacity: 0.07 }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#010102]/40 via-transparent to-[#010102]/90" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          whileHover={{ y: -4, scale: 1.02 }}
-          className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-black/5 dark:border-white/5"
+          className="finance-card-primary"
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-zinc-500 dark:text-zinc-400 font-medium uppercase tracking-wider">{t('totalBalance')}</span>
-            <Wallet className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-eyebrow text-white/60 uppercase">{t('totalBalance')}</span>
+            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md">
+              <Wallet className="w-5 h-5" />
+            </div>
           </div>
-          <div className={`text-3xl font-semibold ${balance >= 0 ? 'text-deep-space-blue dark:text-blue-400' : 'text-flag-red'}`}>
+          <div className="text-display-md text-white">
             Rp {balance.toLocaleString()}
           </div>
         </motion.div>
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          whileHover={{ y: -4, scale: 1.02 }}
-          className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-black/5 dark:border-white/5"
+          className="finance-card-income"
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-zinc-500 dark:text-zinc-400 font-medium uppercase tracking-wider">{t('income')}</span>
-            <TrendingUp className="w-5 h-5 text-vivid-tangerine" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-eyebrow text-white/60 uppercase">{t('income')}</span>
+            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md">
+              <TrendingUp className="w-5 h-5" />
+            </div>
           </div>
-          <div className="text-3xl font-semibold text-vivid-tangerine">
+          <div className="text-display-md text-white">
             Rp {totalIncome.toLocaleString()}
           </div>
         </motion.div>
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
-          whileHover={{ y: -4, scale: 1.02 }}
-          className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-black/5 dark:border-white/5"
+          className="finance-card-expense"
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-zinc-500 dark:text-zinc-400 font-medium uppercase tracking-wider">{t('expense')}</span>
-            <TrendingDown className="w-5 h-5 text-flag-red" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-eyebrow text-white/60 uppercase">{t('expense')}</span>
+            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md">
+              <TrendingDown className="w-5 h-5" />
+            </div>
           </div>
-          <div className="text-3xl font-semibold text-flag-red">
+          <div className="text-display-md text-white">
             Rp {totalExpense.toLocaleString()}
           </div>
         </motion.div>
@@ -404,9 +417,9 @@ export default function FinanceTracker() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-24 h-fit">
-          <form onSubmit={addTransaction} className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 space-y-4">
+          <form onSubmit={addTransaction} className="bg-surface-1 p-6 rounded-lg shadow-card border border-hairline space-y-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{t('addTransaction')}</h3>
+              <h3 className="text-heading-sm font-bold text-ink">{t('addTransaction')}</h3>
               <div className="flex items-center gap-2">
                 <input 
                   type="file" 
@@ -420,7 +433,7 @@ export default function FinanceTracker() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isScanning}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-3 py-1.5 text-button font-medium text-accent bg-accent/10 hover:bg-accent/20 rounded-pill transition-all disabled:opacity-50"
                   title={t('scanReceipt') || 'Scan Receipt'}
                 >
                   {isScanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
@@ -432,7 +445,7 @@ export default function FinanceTracker() {
                     setNewCatType(type);
                     setIsManagingCategories(true);
                   }}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-all"
+                  className="flex items-center gap-2 px-3 py-1.5 text-button font-medium text-ink-subtle bg-surface-2 hover:bg-surface-3 rounded-pill transition-all border border-hairline"
                   title={t('manageCategories')}
                 >
                   <Settings2 className="w-4 h-4" />
@@ -442,38 +455,38 @@ export default function FinanceTracker() {
             </div>
             
             <div>
-              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('description')}</label>
+              <label className="block text-eyebrow text-ink-tertiary uppercase mb-1.5">{t('description')}</label>
               <input
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all"
+                className="w-full h-12 px-4 py-2 bg-surface-1 border border-hairline rounded-md focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink text-body-sm placeholder:text-ink-subtle transition-all"
                 placeholder="e.g. Salary, Coffee, Rent"
               />
             </div>
             
             <div>
-              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('amount')}</label>
+              <label className="block text-eyebrow text-ink-tertiary uppercase mb-1.5">{t('amount')}</label>
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all"
+                className="w-full h-12 px-4 py-2 bg-surface-1 border border-hairline rounded-md focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink text-body-sm font-mono placeholder:text-ink-subtle transition-all"
                 placeholder="0"
               />
             </div>
-
+ 
             <div>
-              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('notes')}</label>
+              <label className="block text-eyebrow text-ink-tertiary uppercase mb-1.5">{t('notes')}</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all resize-none"
+                className="w-full px-4 py-2 bg-surface-1 border border-hairline rounded-md focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink text-body-sm placeholder:text-ink-subtle transition-all resize-none"
                 placeholder={t('notes')}
                 rows={2}
               />
             </div>
-
+ 
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -481,8 +494,8 @@ export default function FinanceTracker() {
                   setType('income');
                   setSelectedCategoryId(categories.find(c => c.type === 'income')?.id || '');
                 }}
-                className={`py-2 rounded-xl text-sm font-medium transition-all ${
-                  type === 'income' ? 'bg-vivid-tangerine text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700'
+                className={`py-2 rounded-pill text-button font-medium transition-all ${
+                  type === 'income' ? 'bg-primary text-white' : 'bg-surface-2 text-ink-muted border border-hairline hover:border-hairline-strong'
                 }`}
               >
                 {t('income')}
@@ -493,17 +506,17 @@ export default function FinanceTracker() {
                   setType('expense');
                   setSelectedCategoryId(categories.find(c => c.type === 'expense')?.id || '');
                 }}
-                className={`py-2 rounded-xl text-sm font-medium transition-all ${
-                  type === 'expense' ? 'bg-flag-red text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700'
+                className={`py-2 rounded-pill text-button font-medium transition-all ${
+                  type === 'expense' ? 'bg-danger text-white' : 'bg-surface-2 text-ink-muted border border-hairline hover:border-hairline-strong'
                 }`}
               >
                 {t('expense')}
               </button>
             </div>
-
+ 
             <div>
-              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('category')}</label>
-              <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+              <label className="block text-eyebrow text-ink-tertiary uppercase mb-1.5">{t('category')}</label>
+              <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2">
                 {Object.entries(
                   filteredCategories.reduce((acc, cat) => {
                     const group = cat.group || 'Other';
@@ -513,7 +526,7 @@ export default function FinanceTracker() {
                   }, {} as Record<string, Category[]>)
                 ).map(([group, cats]) => (
                   <div key={group} className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">{getTranslatedGroupName(group)}</span>
+                    <span className="text-[10px] font-bold text-ink-tertiary uppercase tracking-widest">{getTranslatedGroupName(group)}</span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {(cats as Category[]).map(cat => {
                         const Icon = ICON_MAP[cat.icon] || ShoppingBag;
@@ -522,10 +535,10 @@ export default function FinanceTracker() {
                             key={cat.id}
                             type="button"
                             onClick={() => setSelectedCategoryId(cat.id)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-sm ${
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md border transition-all text-body-sm ${
                               selectedCategoryId === cat.id
-                                ? 'border-deep-space-blue dark:border-blue-400 bg-deep-space-blue text-white'
-                                : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 bg-white dark:bg-zinc-900'
+                                ? 'border-accent bg-accent/20 text-ink'
+                                : 'border-hairline text-ink-subtle hover:border-hairline-strong bg-surface-1'
                             }`}
                           >
                             <Icon className="w-4 h-4" />
@@ -538,23 +551,23 @@ export default function FinanceTracker() {
                 ))}
               </div>
             </div>
-
-            <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
+ 
+            <div className="flex items-center justify-between p-3 bg-surface-2 rounded-md border border-hairline">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isRecurring}
                   onChange={(e) => setIsRecurring(e.target.checked)}
-                  className="w-4 h-4 rounded border-zinc-300 text-deep-space-blue dark:text-blue-400 focus:ring-deep-space-blue dark:ring-blue-400"
+                  className="w-4 h-4 rounded border-hairline text-accent focus:ring-accent"
                 />
-                <span className="text-sm font-medium text-zinc-700">{t('recurring')}</span>
+                <span className="text-body-sm font-medium text-ink-muted">{t('recurring')}</span>
               </label>
               
               {isRecurring && (
                 <select
                   value={recurringFrequency}
                   onChange={(e) => setRecurringFrequency(e.target.value as any)}
-                  className="px-3 py-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all text-sm shadow-sm"
+                  className="px-3 py-1.5 bg-surface-1 border border-hairline rounded-md focus:border-accent outline-none transition-all text-caption text-ink shadow-sm cursor-pointer"
                 >
                   <option value="daily">{t('daily')}</option>
                   <option value="weekly">{t('weekly')}</option>
@@ -563,10 +576,10 @@ export default function FinanceTracker() {
                 </select>
               )}
             </div>
-
+ 
             <button
               type="submit"
-              className="w-full bg-deep-space-blue text-white py-3 rounded-xl font-semibold hover:bg-deep-space-blue/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-deep-space-blue/20"
+              className="w-full bg-accent text-white py-3 rounded-pill font-bold shadow-glow-accent hover:bg-accent-hover active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
               {t('addTransaction')}
@@ -575,25 +588,27 @@ export default function FinanceTracker() {
         </div>
 
         <div className="lg:col-span-2">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 overflow-hidden">
-            <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-              <div className="flex items-center gap-4">
+          <div className="bg-surface-1 rounded-lg shadow-card border border-hairline overflow-hidden">
+            <div className="p-6 border-b border-hairline flex items-center justify-between bg-surface-1/50">
+              <div className="flex items-center gap-6">
                 <button
                   id="tab-recent"
                   onClick={() => setActiveTab('recent')}
-                  className={`text-lg font-semibold transition-colors ${activeTab === 'recent' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400'}`}
+                  className={`text-heading-sm font-bold transition-all relative ${activeTab === 'recent' ? 'text-ink' : 'text-ink-tertiary hover:text-ink-subtle'}`}
                 >
                   {t('recentTransactions')}
+                  {activeTab === 'recent' && <motion.div layoutId="tab-underline" className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-accent" />}
                 </button>
                 <button
                   id="tab-recurring"
                   onClick={() => setActiveTab('recurring')}
-                  className={`text-lg font-semibold transition-colors ${activeTab === 'recurring' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400'}`}
+                  className={`text-heading-sm font-bold transition-all relative ${activeTab === 'recurring' ? 'text-ink' : 'text-ink-tertiary hover:text-ink-subtle'}`}
                 >
                   {t('recurring')}
+                  {activeTab === 'recurring' && <motion.div layoutId="tab-underline" className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-accent" />}
                 </button>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <button
                   onClick={() => {
                     const getCategoryName = (idOrName: string) => {
@@ -602,113 +617,117 @@ export default function FinanceTracker() {
                     };
                     exportTransactions(transactions, user?.displayName || 'User', getCategoryName, t);
                   }}
-                  className="p-2 text-zinc-400 dark:text-zinc-500 hover:text-deep-space-blue dark:hover:text-blue-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
+                  className="p-2 text-ink-tertiary hover:text-accent hover:bg-surface-2 rounded-md transition-all"
                   title={t('exportCSV')}
                 >
                   <DollarSign className="w-5 h-5" />
                 </button>
-                <PieChart className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />
+                <PieChart className="w-5 h-5 text-ink-tertiary" />
               </div>
             </div>
-            <div className="divide-y divide-zinc-100 max-h-[600px] overflow-y-auto">
-              <AnimatePresence initial={false}>
+            <div className="divide-y divide-hairline max-h-[600px] overflow-y-auto">
+              <AnimatePresence initial={false} mode="wait">
                 {activeTab === 'recent' ? (
                   transactions.length === 0 ? (
-                    <div className="p-12 text-center text-zinc-400 dark:text-zinc-500">
+                    <div className="p-16 text-center text-ink-tertiary text-body-sm italic">
                       {t('noTransactions')}
                     </div>
                   ) : (
-                    transactions.map((t) => {
-                      const cat = getCategory(t.category);
-                      const Icon = cat ? (ICON_MAP[cat.icon] || ShoppingBag) : (t.type === 'income' ? TrendingUp : TrendingDown);
-                      return (
-                        <motion.div
-                          key={t.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div 
-                              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                              style={{ backgroundColor: `${cat?.color || (t.type === 'income' ? '#f77f00' : '#d62828')}20`, color: cat?.color || (t.type === 'income' ? '#f77f00' : '#d62828') }}
-                            >
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-medium text-deep-space-blue dark:text-blue-400 truncate">{t.description}</div>
-                              {t.notes && <div className="text-xs text-zinc-400 dark:text-zinc-500 italic truncate max-w-[200px]">{t.notes}</div>}
-                              <div className="text-xs text-zinc-500 dark:text-zinc-400 flex flex-wrap items-center gap-x-2 gap-y-1">
-                                <span>{new Date(t.date).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}</span>
-                                <span className="w-1 h-1 bg-zinc-300 rounded-full hidden sm:block" />
-                                <span className="truncate">{getTranslatedCategoryName(cat?.name || 'Uncategorized')}</span>
+                    <div key="recent">
+                      {transactions.map((t) => {
+                        const cat = getCategory(t.category);
+                        const Icon = cat ? (ICON_MAP[cat.icon] || ShoppingBag) : (t.type === 'income' ? TrendingUp : TrendingDown);
+                        return (
+                          <motion.div
+                            key={t.id}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-2 transition-colors border-l-2 border-transparent hover:border-accent"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div 
+                                className="w-10 h-10 rounded-md flex items-center justify-center shrink-0 shadow-sm"
+                                style={{ backgroundColor: `${cat?.color || (t.type === 'income' ? '#00a87e' : '#e61e49')}15`, color: cat?.color || (t.type === 'income' ? '#00a87e' : '#e61e49'), border: `1px solid ${cat?.color || (t.type === 'income' ? '#00a87e' : '#e61e49')}30` }}
+                              >
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-bold text-ink text-body-sm truncate">{t.description}</div>
+                                {t.notes && <div className="text-[10px] text-ink-subtle italic truncate max-w-[200px]">{t.notes}</div>}
+                                <div className="text-caption text-ink-tertiary flex items-center gap-2">
+                                  <span>{new Date(t.date).toLocaleDateString()}</span>
+                                  <span className="w-1 h-1 bg-hairline-strong rounded-full" />
+                                  <span className="truncate">{getTranslatedCategoryName(cat?.name || 'Uncategorized')}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex items-center justify-between sm:justify-end gap-4 sm:w-auto w-full pl-0 sm:pl-0">
-                            <div className={`font-semibold ${t.type === 'income' ? 'text-vivid-tangerine' : 'text-flag-red'}`}>
-                              {t.type === 'income' ? '+' : '-'} Rp {t.amount.toLocaleString()}
+                            <div className="flex items-center justify-between sm:justify-end gap-6 sm:w-auto w-full">
+                              <div className={`font-bold text-body-md font-mono ${t.type === 'income' ? 'text-success' : 'text-danger'}`}>
+                                {t.type === 'income' ? '+' : '-'} Rp {t.amount.toLocaleString()}
+                              </div>
+                              <button
+                                onClick={() => deleteTransaction(t.id)}
+                                className="p-2 text-ink-tertiary hover:text-danger rounded-md hover:bg-danger/10 transition-all opacity-40"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
-                            <button
-                              onClick={() => deleteTransaction(t.id)}
-                              className="p-2 text-zinc-400 dark:text-zinc-500 hover:text-rose-600 transition-colors shrink-0"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </motion.div>
-                      );
-                    })
+                          </motion.div>
+                        );
+                      })}
+                    </div>
                   )
                 ) : (
                   recurringTransactions.length === 0 ? (
-                    <div className="p-12 text-center text-zinc-400 dark:text-zinc-500">
+                    <div className="p-16 text-center text-ink-tertiary text-body-sm italic">
                       {t('noRecurringTransactions')}
                     </div>
                   ) : (
-                    recurringTransactions.map((rt) => {
-                      const cat = getCategory(rt.category);
-                      const Icon = cat ? (ICON_MAP[cat.icon] || ShoppingBag) : (rt.type === 'income' ? TrendingUp : TrendingDown);
-                      return (
-                        <motion.div
-                          key={rt.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div 
-                              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                              style={{ backgroundColor: `${cat?.color || (rt.type === 'income' ? '#f77f00' : '#d62828')}20`, color: cat?.color || (rt.type === 'income' ? '#f77f00' : '#d62828') }}
-                            >
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-medium text-deep-space-blue dark:text-blue-400 truncate">{rt.description}</div>
-                              {rt.notes && <div className="text-xs text-zinc-400 dark:text-zinc-500 italic truncate max-w-[200px]">{rt.notes}</div>}
-                              <div className="text-xs text-zinc-500 dark:text-zinc-400 flex flex-wrap items-center gap-x-2 gap-y-1">
-                                <span className="capitalize">{t(rt.frequency)}</span>
-                                <span className="w-1 h-1 bg-zinc-300 rounded-full hidden sm:block" />
-                                <span className="truncate">{getTranslatedCategoryName(cat?.name || 'Uncategorized')}</span>
+                    <div key="recurring">
+                      {recurringTransactions.map((rt) => {
+                        const cat = getCategory(rt.category);
+                        const Icon = cat ? (ICON_MAP[cat.icon] || ShoppingBag) : (rt.type === 'income' ? TrendingUp : TrendingDown);
+                        return (
+                          <motion.div
+                            key={rt.id}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-2 transition-colors border-l-2 border-transparent hover:border-accent"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div 
+                                className="w-10 h-10 rounded-md flex items-center justify-center shrink-0 shadow-sm"
+                                style={{ backgroundColor: `${cat?.color || (rt.type === 'income' ? '#00a87e' : '#e61e49')}15`, color: cat?.color || (rt.type === 'income' ? '#00a87e' : '#e61e49'), border: `1px solid ${cat?.color || (rt.type === 'income' ? '#00a87e' : '#e61e49')}30` }}
+                              >
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-bold text-ink text-body-sm truncate">{rt.description}</div>
+                                {rt.notes && <div className="text-[10px] text-ink-subtle italic truncate max-w-[200px]">{rt.notes}</div>}
+                                <div className="text-caption text-ink-tertiary flex items-center gap-2">
+                                  <span className="capitalize">{t(rt.frequency)}</span>
+                                  <span className="w-1 h-1 bg-hairline-strong rounded-full" />
+                                  <span className="truncate">{getTranslatedCategoryName(cat?.name || 'Uncategorized')}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex items-center justify-between sm:justify-end gap-4 sm:w-auto w-full pl-0 sm:pl-0">
-                            <div className={`font-semibold ${rt.type === 'income' ? 'text-vivid-tangerine' : 'text-flag-red'}`}>
-                              {rt.type === 'income' ? '+' : '-'} Rp {rt.amount.toLocaleString()}
+                            <div className="flex items-center justify-between sm:justify-end gap-6 sm:w-auto w-full">
+                              <div className={`font-bold text-body-md font-mono ${rt.type === 'income' ? 'text-success' : 'text-danger'}`}>
+                                {rt.type === 'income' ? '+' : '-'} Rp {rt.amount.toLocaleString()}
+                              </div>
+                              <button
+                                onClick={() => deleteRecurringTransaction(rt.id)}
+                                className="p-2 text-ink-tertiary hover:text-danger rounded-md hover:bg-danger/10 transition-all opacity-40"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
-                            <button
-                              onClick={() => deleteRecurringTransaction(rt.id)}
-                              className="p-2 text-zinc-400 dark:text-zinc-500 hover:text-rose-600 transition-colors shrink-0"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </motion.div>
-                      );
-                    })
+                          </motion.div>
+                        );
+                      })}
+                    </div>
                   )
                 )}
               </AnimatePresence>
@@ -732,14 +751,14 @@ export default function FinanceTracker() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-lg bg-surface-3 rounded-xxl shadow-modal border border-hairline-strong overflow-hidden backdrop-blur-xl"
             >
-              <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+              <div className="p-6 border-b border-hairline flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t('manageCategories')}</h3>
+                  <h3 className="text-heading-sm font-bold text-ink">{t('manageCategories')}</h3>
                   <button
                     onClick={() => setShowResetConfirm(true)}
-                    className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest hover:text-rose-600 transition-colors"
+                    className="text-eyebrow text-ink-tertiary uppercase hover:text-danger transition-colors"
                   >
                     {t('resetCategories')}
                   </button>
@@ -751,23 +770,23 @@ export default function FinanceTracker() {
                     setNewCatName('');
                     setNewCatGroup('');
                   }}
-                  className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-all"
+                  className="p-2 hover:bg-surface-2 rounded-md transition-all"
                 >
-                  <X className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />
+                  <X className="w-5 h-5 text-ink-subtle" />
                 </button>
               </div>
 
               <div id="category-modal-content" className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                 {/* Add/Edit Category */}
-                <div className="space-y-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">
+                <div className="space-y-4 p-5 bg-surface-2 rounded-xl border border-hairline">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-eyebrow text-ink uppercase">
                       {editingCategoryId ? t('editCategory') : t('newCategory')}
                     </h4>
                     {editingCategoryId && (
                       <button 
                         onClick={cancelEdit}
-                        className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:text-zinc-100 uppercase tracking-widest"
+                        className="text-[10px] font-bold text-ink-subtle hover:text-ink uppercase tracking-widest"
                       >
                         {t('cancel')}
                       </button>
@@ -779,12 +798,12 @@ export default function FinanceTracker() {
                       value={newCatName}
                       onChange={(e) => setNewCatName(e.target.value)}
                       placeholder={t('categoryName')}
-                      className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all bg-white dark:bg-zinc-900"
+                      className="w-full h-11 px-4 py-2 bg-surface-3 border border-hairline rounded-md focus:border-accent outline-none transition-all text-ink text-body-sm"
                     />
                     <select
                       value={newCatGroup}
                       onChange={(e) => setNewCatGroup(e.target.value)}
-                      className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all bg-white dark:bg-zinc-900 text-sm"
+                      className="w-full h-11 px-4 py-2 bg-surface-3 border border-hairline rounded-md focus:border-accent outline-none transition-all text-ink text-body-sm cursor-pointer"
                     >
                       <option value="">{t('selectGroup')}</option>
                       {newCatType === 'income' ? (
@@ -807,8 +826,8 @@ export default function FinanceTracker() {
                           setNewCatType('income');
                           setNewCatGroup('Pendapatan Rutin');
                         }}
-                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-                          newCatType === 'income' ? 'bg-vivid-tangerine text-white' : 'bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800'
+                        className={`flex-1 py-1.5 rounded-pill text-[11px] font-bold uppercase tracking-wider transition-all ${
+                          newCatType === 'income' ? 'bg-primary text-white' : 'bg-surface-3 text-ink-tertiary border border-hairline'
                         }`}
                       >
                         {t('income')}
@@ -818,8 +837,8 @@ export default function FinanceTracker() {
                           setNewCatType('expense');
                           setNewCatGroup('Needs');
                         }}
-                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-                          newCatType === 'expense' ? 'bg-flag-red text-white' : 'bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800'
+                        className={`flex-1 py-1.5 rounded-pill text-[11px] font-bold uppercase tracking-wider transition-all ${
+                          newCatType === 'expense' ? 'bg-danger text-white' : 'bg-surface-3 text-ink-tertiary border border-hairline'
                         }`}
                       >
                         {t('expense')}
@@ -828,18 +847,18 @@ export default function FinanceTracker() {
                   </div>
                   
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">{t('selectIcon')}</label>
-                    <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
+                    <label className="block text-[10px] font-bold text-ink-tertiary uppercase tracking-widest mb-3">{t('selectIcon')}</label>
+                    <div className="grid grid-cols-6 sm:grid-cols-10 gap-2">
                       {Object.keys(ICON_MAP).map(iconName => {
                         const Icon = ICON_MAP[iconName];
                         return (
                           <button
                             key={iconName}
                             onClick={() => setNewCatIcon(iconName)}
-                            className={`p-2 rounded-lg transition-all ${
+                            className={`p-2.5 rounded-md transition-all ${
                               newCatIcon === iconName 
-                                ? 'bg-zinc-900 text-white' 
-                                : 'bg-white dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500 border border-zinc-100 dark:border-zinc-800 hover:border-zinc-300'
+                                ? 'bg-accent text-white' 
+                                : 'bg-surface-3 text-ink-subtle border border-hairline hover:border-hairline-strong'
                             }`}
                           >
                             <Icon className="w-4 h-4" />
@@ -848,24 +867,24 @@ export default function FinanceTracker() {
                       })}
                     </div>
                   </div>
-
+ 
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">{t('categoryColor')}</label>
-                    <div className="flex flex-wrap gap-2 items-center">
+                    <label className="block text-[10px] font-bold text-ink-tertiary uppercase tracking-widest mb-3">{t('categoryColor')}</label>
+                    <div className="flex flex-wrap gap-2.5 items-center">
                       {[
-                        '#003049', '#f77f00', '#fcbf49', '#eae2b7', '#d62828',
-                        '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#71717a'
+                        '#494fdf', '#5e6ad2', '#00a87e', '#e61e49', '#ec7e00',
+                        '#007bc2', '#428619', '#d44df0', '#6a4cf5', '#ff7a3d'
                       ].map(color => (
                         <button
                           key={color}
                           onClick={() => setNewCatColor(color)}
-                          className={`w-8 h-8 rounded-full border-2 transition-all ${
-                            newCatColor === color ? 'border-deep-space-blue dark:border-blue-400 scale-110 shadow-md' : 'border-transparent hover:scale-105'
+                          className={`w-7 h-7 rounded-full border-2 transition-all ${
+                            newCatColor === color ? 'border-white scale-110 shadow-lg' : 'border-transparent hover:scale-110'
                           }`}
                           style={{ backgroundColor: color }}
                         />
                       ))}
-                      <div className="relative w-8 h-8 rounded-full overflow-hidden border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 transition-all">
+                      <div className="relative w-7 h-7 rounded-full overflow-hidden border border-hairline hover:border-hairline-strong transition-all">
                         <input
                           type="color"
                           value={newCatColor}
@@ -875,52 +894,52 @@ export default function FinanceTracker() {
                       </div>
                     </div>
                   </div>
-
+ 
                   <button
                     onClick={addCategory}
-                    className="w-full bg-deep-space-blue text-white py-2 rounded-xl font-bold text-sm hover:bg-deep-space-blue/90 transition-all"
+                    className="w-full bg-accent text-white py-3 rounded-pill font-bold text-button shadow-glow-accent hover:bg-accent-hover transition-all mt-2"
                   >
                     {editingCategoryId ? t('updateCategory') : t('createCategory')}
                   </button>
                 </div>
-
+ 
                 {/* Categories List */}
                 <div className="space-y-6">
                   {(['income', 'expense'] as const).map((catType) => (
                     <div key={catType} className="space-y-3">
-                      <h4 className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 ${
-                        catType === 'income' ? 'text-vivid-tangerine' : 'text-flag-red'
+                      <h4 className={`text-eyebrow uppercase flex items-center gap-2 ${
+                        catType === 'income' ? 'text-success' : 'text-danger'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${catType === 'income' ? 'bg-vivid-tangerine' : 'bg-flag-red'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${catType === 'income' ? 'bg-success' : 'bg-danger'}`} />
                         {catType === 'income' ? t('incomeCategories') : t('expenseCategories')}
                       </h4>
-                      <div className="divide-y divide-zinc-100 bg-zinc-50/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 px-4">
+                      <div className="divide-y divide-hairline bg-surface-2 rounded-xl border border-hairline px-4">
                         {categories.filter(c => c.type === catType).length === 0 ? (
-                          <div className="py-4 text-xs text-zinc-400 dark:text-zinc-500 text-center italic">{t('noCategories')}</div>
+                          <div className="py-6 text-caption text-ink-tertiary text-center italic">{t('noCategories')}</div>
                         ) : (
                           categories.filter(c => c.type === catType).map(cat => {
                             const Icon = ICON_MAP[cat.icon] || ShoppingBag;
                             return (
-                              <div key={cat.id} className="py-3 flex items-center justify-between group">
+                              <div key={cat.id} className="py-3.5 flex items-center justify-between group">
                                 <div className="flex items-center gap-3">
                                   <div 
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                    style={{ backgroundColor: `${cat.color}20`, color: cat.color }}
+                                    className="w-9 h-9 rounded-md flex items-center justify-center shadow-sm"
+                                    style={{ backgroundColor: `${cat.color}20`, color: cat.color, border: `1px solid ${cat.color}30` }}
                                   >
                                     <Icon className="w-4 h-4" />
                                   </div>
-                                  <div className="text-sm font-bold text-deep-space-blue dark:text-blue-400">{getTranslatedCategoryName(cat.name)}</div>
+                                  <div className="text-body-sm font-bold text-ink">{getTranslatedCategoryName(cat.name)}</div>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <button
                                     onClick={() => editCategory(cat)}
-                                    className="p-2 text-zinc-300 hover:text-deep-space-blue dark:hover:text-blue-400 transition-colors opacity-0 group-hover:opacity-100"
+                                    className="p-2 text-ink-subtle hover:text-accent rounded-md hover:bg-accent/10 transition-colors"
                                   >
-                                    <Plus className="w-4 h-4 rotate-45" /> {/* Using Plus rotated as a simple edit/configure icon if Settings2 is too big */}
+                                    <Settings2 className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => deleteCategory(cat.id)}
-                                    className="p-2 text-zinc-300 hover:text-rose-600 transition-colors opacity-0 group-hover:opacity-100"
+                                    className="p-2 text-ink-subtle hover:text-danger rounded-md hover:bg-danger/10 transition-colors"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>

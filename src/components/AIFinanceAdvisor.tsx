@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { GoogleGenAI } from '@google/genai';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { BackgroundBeams } from './ui/background-beams';
 
 interface AIFinanceAdvisorProps {
   transactions: Transaction[];
@@ -84,27 +85,32 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-deep-space-blue to-zinc-900 p-6 rounded-3xl border border-black/10 shadow-lg text-white mt-8"
-    >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h3 className="text-xl font-bold flex items-center gap-2 text-white">
-            <Sparkles className="w-5 h-5 text-sunflower-gold shrink-0" />
+    <div className="relative min-h-full overflow-hidden p-1">
+      <BackgroundBeams className="opacity-40" />
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-surface-1 p-6 rounded-lg shadow-card border border-hairline mt-8 relative overflow-hidden z-10"
+      >
+        <div className="absolute top-0 left-0 w-1 h-full bg-accent" />
+        
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+        <div className="flex-1">
+          <h3 className="text-heading-sm font-bold flex items-center gap-2 text-ink uppercase tracking-tight">
+            <Sparkles className="w-5 h-5 text-accent shrink-0" />
             {language === 'id' ? 'Penasihat AI 50/30/20' : '50/30/20 AI Advisor'}
           </h3>
-          <p className="text-zinc-400 dark:text-zinc-500 text-sm mt-1">
+          <p className="text-body-sm text-ink-tertiary mt-1.5 leading-relaxed">
             {language === 'id' 
-              ? 'Dapatkan rekomendasi AI untuk mencapai alokasi 50/30/20 yang tepat.' 
-              : 'Get AI recommendations to achieve the exact 50/30/20 allocation.'}
+              ? 'Analisis cerdas berdasarkan metode alokasi 50/30/20 untuk stabilitas keuangan Anda.' 
+              : 'Smart analysis based on the 50/30/20 allocation method for your financial stability.'}
           </p>
         </div>
         <button
           onClick={getAdvice}
           disabled={loading}
-          className="w-full sm:w-auto px-4 py-2 bg-sunflower-gold text-deep-space-blue dark:text-blue-400 font-bold rounded-xl hover:bg-sunflower-gold/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm shrink-0"
+          className="w-full sm:w-auto px-6 h-12 bg-accent text-white font-bold rounded-pill hover:bg-accent-hover active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-glow-accent shrink-0"
         >
           {loading ? (
             <>
@@ -121,23 +127,27 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
       </div>
 
       {error && (
-        <div className="bg-flag-red/20 border border-flag-red/30 p-4 rounded-xl flex items-start gap-3 text-flag-red mb-4">
+        <div className="bg-danger/10 border border-danger/20 p-4 rounded-md flex items-start gap-4 text-danger mb-6 animate-shake">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-          <p className="text-sm font-medium">{error}</p>
+          <p className="text-body-sm font-bold">{error}</p>
         </div>
       )}
 
       {advice && (
         <motion.div 
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="bg-white/5 border border-white/10 p-5 rounded-2xl prose prose-invert prose-sm max-w-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-surface-2 border border-hairline p-6 rounded-md relative"
         >
-          <div className="markdown-body">
+          <div className="absolute top-4 right-4 opacity-5">
+            <Sparkles size={48} />
+          </div>
+          <div className="markdown-body text-ink prose prose-sm max-w-none prose-headings:text-ink prose-p:text-ink-subtle prose-strong:text-ink prose-li:text-ink-subtle">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{advice}</ReactMarkdown>
           </div>
         </motion.div>
       )}
     </motion.div>
+    </div>
   );
 }

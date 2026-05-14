@@ -18,14 +18,14 @@ export function HabitHeatmap({ logs, color }: HabitHeatmapProps) {
   });
 
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-1.5 p-4 bg-surface-2 rounded-md border border-hairline shadow-inner">
       {days.map((day, i) => (
         <div
           key={day.date}
-          className="w-3 h-3 rounded-sm transition-all"
+          className="w-3.5 h-3.5 rounded-xs transition-all hover:scale-125 hover:z-10 shadow-sm"
           style={{ 
-            backgroundColor: day.intensity > 0 ? color : undefined,
-            opacity: day.intensity === 0 ? 0.1 : 0.2 + (day.intensity * 0.2)
+            backgroundColor: day.intensity > 0 ? color : 'var(--color-ink-tertiary)',
+            opacity: day.intensity === 0 ? 0.05 : 0.2 + (day.intensity * 0.2)
           }}
           title={`${day.date}: ${day.intensity} completions`}
         />

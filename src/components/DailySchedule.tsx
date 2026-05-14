@@ -119,119 +119,75 @@ export default function DailySchedule() {
   }, [selectedDate]);
 
   const renderDailyView = () => (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 overflow-hidden">
-      <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 sm:gap-4 flex-1">
-          <button onClick={() => changeDate(-1)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors shrink-0">
+    <div className="bg-surface-1 rounded-lg shadow-card border border-hairline overflow-hidden">
+      <div className="p-6 border-b border-hairline flex items-center justify-between gap-4 bg-surface-1/50">
+        <div className="flex items-center gap-2 sm:gap-6 flex-1">
+          <button onClick={() => changeDate(-1)} className="p-2 hover:bg-surface-2 rounded-md transition-colors shrink-0 text-ink-tertiary hover:text-ink">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 text-center flex-1 truncate">
-            {selectedDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+          <h3 className="text-heading-sm font-bold text-ink text-center flex-1 truncate">
+            {selectedDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </h3>
-          <button onClick={() => changeDate(1)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors shrink-0">
+          <button onClick={() => changeDate(1)} className="p-2 hover:bg-surface-2 rounded-md transition-colors shrink-0 text-ink-tertiary hover:text-ink">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
-        <Clock className="w-5 h-5 text-zinc-400 dark:text-zinc-500 hidden sm:block shrink-0" />
+        <Clock className="w-5 h-5 text-ink-tertiary hidden sm:block shrink-0" />
       </div>
-      <div className="divide-y divide-zinc-100">
-        <AnimatePresence initial={false}>
+      <div className="divide-y divide-hairline">
+        <AnimatePresence initial={false} mode="wait">
           {filteredTasks.length === 0 ? (
-            <div className="p-12 text-center text-zinc-400 dark:text-zinc-500">
+            <div className="p-16 text-center text-ink-tertiary text-body-sm italic">
               {t('noTasks')}
             </div>
           ) : (
-            filteredTasks.map((task) => (
-              <motion.div
-                key={task.id}
-                layout
-                initial={{ opacity: 0, x: 20 }}
-                animate={
-                  task.completed 
-                    ? { opacity: 0.6, x: 0, scale: 0.98 } 
-                    : { opacity: 1, x: 0, scale: 1 }
-                }
-                transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
-                exit={{ opacity: 0, x: -20 }}
-                className={`p-4 flex items-center justify-between group transition-colors relative overflow-hidden ${
-                  task.completed ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-                }`}
-              >
-                <AnimatePresence>
-                  {task.completed && (
-                    <motion.div
-                      initial={{ opacity: 0, x: '-100%' }}
-                      animate={{ opacity: [0, 0.2, 0], x: '100%' }}
-                      transition={{ duration: 0.8, ease: "easeInOut" }}
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent pointer-events-none z-0"
-                    />
-                  )}
-                </AnimatePresence>
-
-                <div className="flex items-center gap-4 relative z-10">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => toggleTask(task.id)}
-                    className={`relative transition-colors ${task.completed ? 'text-emerald-500' : 'text-zinc-300 hover:text-zinc-400 dark:text-zinc-500'}`}
-                  >
-                    <AnimatePresence>
-                      {task.completed && (
-                        <motion.div
-                          initial={{ scale: 0.5, opacity: 1 }}
-                          animate={{ scale: 2.5, opacity: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
-                          className="absolute inset-0 rounded-full bg-emerald-400/50 dark:bg-emerald-500/30"
-                        />
-                      )}
-                    </AnimatePresence>
-
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={task.completed ? 'completed' : 'pending'}
-                        initial={{ scale: 0.5, opacity: 0, rotate: -45 }}
-                        animate={{ scale: 1.2, opacity: 1, rotate: 0 }}
-                        transition={{ 
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 15
-                        }}
-                        className="flex items-center justify-center"
-                      >
-                        <motion.div
-                          animate={task.completed ? { scale: [1, 1.2, 1] } : {}}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                        >
-                          {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
-                        </motion.div>
-                      </motion.div>
-                    </AnimatePresence>
-                  </motion.button>
-                  <div>
-                    <div className={`font-medium relative inline-block transition-colors duration-300 ${task.completed ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
-                      {task.title}
-                      <motion.div
-                        initial={false}
-                        animate={{ width: task.completed ? '100%' : '0%' }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                        className="absolute left-0 top-1/2 h-[2px] bg-zinc-500 dark:bg-zinc-400 -translate-y-1/2"
-                      />
-                    </div>
-                    <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
-                      <Clock className="w-3 h-3" />
-                      {task.startTime} {task.endTime && `- ${task.endTime}`}
+            <div key="tasks">
+              {filteredTasks.map((task) => (
+                <motion.div
+                  key={task.id}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={`p-4 flex items-center justify-between group transition-colors relative border-l-2 ${
+                    task.completed ? 'bg-surface-2/50 border-ink-tertiary' : 'hover:bg-surface-2 border-transparent hover:border-accent'
+                  }`}
+                >
+                  <div className="flex items-center gap-4 relative z-10">
+                    <button
+                      onClick={() => toggleTask(task.id)}
+                      className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all ${
+                        task.completed ? 'bg-accent border-accent text-white' : 'border-hairline-strong bg-surface-1 text-transparent hover:border-accent'
+                      }`}
+                    >
+                      <CheckCircle2 className={`w-4 h-4 ${task.completed ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} transition-all`} />
+                    </button>
+                    <div>
+                      <div className={`text-body-sm font-bold transition-all relative inline-block ${task.completed ? 'text-ink-tertiary' : 'text-ink'}`}>
+                        {task.title}
+                        {task.completed && <div className="absolute left-0 top-1/2 w-full h-0.5 bg-ink-tertiary/30 -translate-y-1/2" />}
+                      </div>
+                      <div className="text-[10px] text-ink-tertiary flex items-center gap-1.5 mt-0.5">
+                        <Clock className="w-3 h-3" />
+                        <span className="font-mono">{task.startTime}</span>
+                        {task.endTime && (
+                          <>
+                            <span className="text-hairline-strong">—</span>
+                            <span className="font-mono">{task.endTime}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <button
-                  onClick={() => setTaskToDelete(task.id)}
-                  className="p-2 text-zinc-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-all relative z-10"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </motion.div>
-            ))
+                  <button
+                    onClick={() => setTaskToDelete(task.id)}
+                    className="p-2 text-ink-tertiary hover:text-danger rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </motion.div>
+              ))}
+            </div>
           )}
         </AnimatePresence>
       </div>
@@ -239,22 +195,22 @@ export default function DailySchedule() {
   );
 
   const renderWeeklyView = () => (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 overflow-hidden">
-      <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button onClick={() => changeDate(-7)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+    <div className="bg-surface-1 rounded-lg shadow-card border border-hairline overflow-hidden">
+      <div className="p-6 border-b border-hairline flex items-center justify-between bg-surface-1/50">
+        <div className="flex items-center gap-6">
+          <button onClick={() => changeDate(-7)} className="p-2 hover:bg-surface-2 rounded-md transition-colors text-ink-tertiary hover:text-ink">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <h3 className="text-heading-sm font-bold text-ink">
             {t('weekOf')} {weekDays[0].toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short', day: 'numeric' })}
           </h3>
-          <button onClick={() => changeDate(7)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+          <button onClick={() => changeDate(7)} className="p-2 hover:bg-surface-2 rounded-md transition-colors text-ink-tertiary hover:text-ink">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
       <div className="overflow-x-auto">
-        <div className="grid grid-cols-7 divide-x divide-zinc-100 dark:divide-zinc-800 min-h-[400px]">
+        <div className="grid grid-cols-7 divide-x divide-hairline min-h-[450px]">
           {weekDays.map((day, idx) => {
           const year = day.getFullYear();
           const month = String(day.getMonth() + 1).padStart(2, '0');
@@ -267,25 +223,30 @@ export default function DailySchedule() {
           const isToday = dayStr === todayStr;
           
           return (
-            <div key={idx} className={`p-2 space-y-2 ${isToday ? 'bg-zinc-50 dark:bg-zinc-800/50' : ''}`}>
-              <div className="text-center pb-2 border-b border-zinc-100 dark:border-zinc-800">
-                <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+            <div key={idx} className={`p-2 space-y-3 ${isToday ? 'bg-surface-2/30' : ''}`}>
+              <div className="text-center pb-3 border-b border-hairline/50">
+                <div className="text-eyebrow text-ink-tertiary uppercase mb-1">
                   {day.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { weekday: 'short' })}
                 </div>
-                <div className={`text-sm font-black ${isToday ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                <div className={`text-heading-xs font-black ${isToday ? 'text-accent' : 'text-ink-subtle'}`}>
                   {day.getDate()}
                 </div>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {dayTasks.map(task => (
                   <div 
                     key={task.id} 
-                    className={`text-[10px] p-1.5 rounded-lg border ${
-                      task.completed ? 'bg-vivid-tangerine/10 border-vivid-tangerine/20 text-vivid-tangerine' : 'bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 text-zinc-700'
-                    } truncate`}
+                    className={`text-[10px] p-2 rounded-md border transition-all ${
+                      task.completed 
+                        ? 'bg-accent/10 border-accent/20 text-accent opacity-60' 
+                        : 'bg-surface-1 border-hairline text-ink-muted shadow-sm hover:border-hairline-strong'
+                    } truncate relative overflow-hidden`}
                     title={task.title}
                   >
-                    {task.startTime} {task.title}
+                    <div className="font-bold flex items-center gap-1.5">
+                      <span className="font-mono opacity-60 shrink-0">{task.startTime}</span>
+                      <span className="truncate">{task.title}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -298,28 +259,28 @@ export default function DailySchedule() {
   );
 
   const renderMonthlyView = () => (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 overflow-hidden">
-      <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+    <div className="bg-surface-1 rounded-lg shadow-card border border-hairline overflow-hidden">
+      <div className="p-6 border-b border-hairline flex items-center justify-between bg-surface-1/50">
+        <div className="flex items-center gap-6">
+          <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-surface-2 rounded-md transition-colors text-ink-tertiary hover:text-ink">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <h3 className="text-heading-sm font-bold text-ink">
             {selectedDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'long', year: 'numeric' })}
           </h3>
-          <button onClick={() => changeMonth(1)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+          <button onClick={() => changeMonth(1)} className="p-2 hover:bg-surface-2 rounded-md transition-colors text-ink-tertiary hover:text-ink">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
       <div className="overflow-x-auto">
         <div>
-          <div className="grid grid-cols-7 text-center border-b border-zinc-100 dark:border-zinc-800">
+          <div className="grid grid-cols-7 text-center border-b border-hairline">
             {(language === 'id' ? ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']).map(d => (
-              <div key={d} className="py-2 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">{d}</div>
+              <div key={d} className="py-3 text-eyebrow text-ink-tertiary uppercase">{d}</div>
             ))}
           </div>
-          <div className="grid grid-cols-7 divide-x divide-y divide-zinc-100">
+          <div className="grid grid-cols-7 divide-x divide-y divide-hairline">
             {monthDays.map((dayObj, idx) => {
           const year = dayObj.date.getFullYear();
           const month = String(dayObj.date.getMonth() + 1).padStart(2, '0');
@@ -343,14 +304,14 @@ export default function DailySchedule() {
                 setSelectedDate(dayObj.date);
                 setView('daily');
               }}
-              className={`min-h-[100px] p-1.5 cursor-pointer transition-colors relative group ${
-                !dayObj.isCurrentMonth ? 'bg-zinc-50/50 opacity-40' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-              } ${isSelected ? 'bg-deep-space-blue/5 dark:bg-blue-400/5 ring-1 ring-inset ring-deep-space-blue dark:ring-blue-400' : isToday ? 'bg-zinc-50/80' : ''}`}
+              className={`min-h-[110px] p-2 cursor-pointer transition-all relative group ${
+                !dayObj.isCurrentMonth ? 'bg-surface-2/20 opacity-30 grayscale' : 'hover:bg-surface-2'
+              } ${isSelected ? 'bg-accent/5 ring-1 ring-inset ring-accent' : isToday ? 'bg-accent/5' : ''}`}
             >
-              <div className={`text-[10px] font-bold mb-1.5 w-6 h-6 flex items-center justify-center rounded-full ${
-                isSelected ? 'bg-deep-space-blue text-white shadow-sm' : 
-                isToday ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100' : 
-                'text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:text-zinc-100'
+              <div className={`text-[10px] font-bold mb-2.5 w-7 h-7 flex items-center justify-center rounded-md border transition-all ${
+                isSelected ? 'bg-accent border-accent text-white shadow-glow-accent' : 
+                isToday ? 'bg-surface-3 border-accent text-accent' : 
+                'text-ink-tertiary border-transparent group-hover:border-hairline-strong'
               }`}>
                 {dayObj.date.getDate()}
               </div>
@@ -358,10 +319,10 @@ export default function DailySchedule() {
                 {dayTasks.slice(0, 3).map(task => (
                   <div 
                     key={task.id} 
-                    className={`w-full px-1.5 py-0.5 rounded text-[9px] truncate font-medium border ${
+                    className={`w-full px-1.5 py-1 rounded text-[9px] truncate font-bold border transition-colors shadow-sm ${
                       task.completed 
-                        ? 'bg-vivid-tangerine/10 border-vivid-tangerine/20 text-vivid-tangerine' 
-                        : 'bg-deep-space-blue/5 dark:bg-blue-400/5 border-deep-space-blue/10 dark:border-blue-400/10 text-deep-space-blue dark:text-blue-400'
+                        ? 'bg-accent/10 border-accent/20 text-accent opacity-60' 
+                        : 'bg-surface-1 border-hairline text-ink-subtle'
                     }`}
                     title={task.title}
                   >
@@ -369,8 +330,8 @@ export default function DailySchedule() {
                   </div>
                 ))}
                 {dayTasks.length > 3 && (
-                  <div className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400 text-center bg-zinc-100 dark:bg-zinc-800 rounded py-0.5">
-                    +{dayTasks.length - 3} more
+                  <div className="text-[9px] font-black text-ink-tertiary text-center bg-surface-2 rounded-md py-1 border border-hairline">
+                    +{dayTasks.length - 3}
                   </div>
                 )}
               </div>
@@ -384,40 +345,48 @@ export default function DailySchedule() {
   );
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
+    <div className="relative overflow-hidden p-1">
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.1]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, #CBD5E1 1px, transparent 0)`,
+          backgroundSize: '32px 32px'
+        }}
+      />
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6 relative z-10"
+      >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{t('schedule')}</h2>
-        <div className="flex items-center bg-white dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm w-fit">
+        <h2 className="text-heading-md font-bold text-ink">{t('schedule')}</h2>
+        <div className="flex items-center bg-surface-2 p-1 rounded-pill border border-hairline shadow-sm w-fit">
           <button
             onClick={() => exportTasks(tasks, user?.displayName || 'User', t)}
-            className="p-2 text-zinc-400 dark:text-zinc-500 hover:text-deep-space-blue dark:hover:text-blue-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded-lg transition-all mr-1"
+            className="p-2 text-ink-tertiary hover:text-accent hover:bg-surface-3 rounded-pill transition-all mr-1"
             title={t('exportCSV')}
           >
             <List className="w-4 h-4 rotate-90" />
           </button>
-          <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-700 mx-1" />
+          <div className="w-px h-4 bg-hairline mx-1" />
           <button
             onClick={() => setView('daily')}
-            className={`p-2 rounded-lg transition-all ${view === 'daily' ? 'bg-deep-space-blue text-white shadow-md' : 'text-zinc-500 dark:text-zinc-400 hover:text-deep-space-blue dark:hover:text-blue-400'}`}
+            className={`p-2 rounded-pill transition-all ${view === 'daily' ? 'bg-accent text-white shadow-glow-accent' : 'text-ink-tertiary hover:text-ink'}`}
             title={t('dailyView')}
           >
             <List className="w-4 h-4" />
           </button>
           <button
             onClick={() => setView('weekly')}
-            className={`p-2 rounded-lg transition-all ${view === 'weekly' ? 'bg-deep-space-blue text-white shadow-md' : 'text-zinc-500 dark:text-zinc-400 hover:text-deep-space-blue dark:hover:text-blue-400'}`}
+            className={`p-2 rounded-pill transition-all ${view === 'weekly' ? 'bg-accent text-white shadow-glow-accent' : 'text-ink-tertiary hover:text-ink'}`}
             title={t('weeklyView')}
           >
             <CalendarIcon className="w-4 h-4" />
           </button>
           <button
             onClick={() => setView('monthly')}
-            className={`p-2 rounded-lg transition-all ${view === 'monthly' ? 'bg-deep-space-blue text-white shadow-md' : 'text-zinc-500 dark:text-zinc-400 hover:text-deep-space-blue dark:hover:text-blue-400'}`}
+            className={`p-2 rounded-pill transition-all ${view === 'monthly' ? 'bg-accent text-white shadow-glow-accent' : 'text-ink-tertiary hover:text-ink'}`}
             title={t('monthlyView')}
           >
             <CalendarIcon className="w-4 h-4" />
@@ -427,52 +396,67 @@ export default function DailySchedule() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 lg:sticky lg:top-24 h-fit">
-          <form onSubmit={addTask} className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 space-y-4">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">{t('addSchedule')}</h3>
+          <form onSubmit={addTask} className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline space-y-6 group">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-center text-accent shadow-sm transition-transform group-hover:rotate-12">
+                <CalendarIcon className="w-5 h-5" />
+              </div>
+              <h3 className="text-heading-sm font-black text-ink uppercase tracking-tight">{t('addSchedule')}</h3>
+            </div>
+            
             <div>
-              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('activity')}</label>
+              <label className="block text-eyebrow font-black text-ink-tertiary uppercase mb-2 tracking-widest">{t('activity')}</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all"
+                className="w-full h-14 px-6 bg-surface-2 border border-hairline rounded-md focus:border-accent outline-none text-ink text-body-sm font-black transition-all placeholder:font-medium placeholder:text-ink-tertiary/20 shadow-inner"
                 placeholder="e.g. Morning Run, Meeting"
               />
             </div>
+            
             <div>
-              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('date')}</label>
+              <label className="block text-eyebrow font-black text-ink-tertiary uppercase mb-2 tracking-widest">{t('date')}</label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all"
+                className="w-full h-14 px-6 bg-surface-2 border border-hairline rounded-md focus:border-accent outline-none text-ink text-body-sm font-black transition-all shadow-inner"
               />
             </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('startTime')}</label>
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all"
-                />
+                <label className="block text-eyebrow font-black text-ink-tertiary uppercase mb-2 tracking-widest">{t('startTime')}</label>
+                <div className="relative">
+                  <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-tertiary" />
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full h-14 pl-12 pr-4 bg-surface-2 border border-hairline rounded-md focus:border-accent outline-none text-ink text-body-sm font-mono font-black transition-all shadow-inner"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">{t('endTime')}</label>
-                <input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-deep-space-blue dark:ring-blue-400 transition-all"
-                />
+                <label className="block text-eyebrow font-black text-ink-tertiary uppercase mb-2 tracking-widest">{t('endTime')}</label>
+                <div className="relative">
+                  <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-tertiary" />
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full h-14 pl-12 pr-4 bg-surface-2 border border-hairline rounded-md focus:border-accent outline-none text-ink text-body-sm font-mono font-black transition-all shadow-inner"
+                  />
+                </div>
               </div>
             </div>
+            
             <button
               type="submit"
-              className="w-full bg-deep-space-blue text-white py-3 rounded-xl font-semibold hover:bg-deep-space-blue/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-deep-space-blue/20"
+              className="w-full h-14 bg-accent text-white rounded-pill font-black text-button uppercase tracking-widest shadow-glow-accent hover:bg-accent-hover active:scale-[0.98] transition-all flex items-center justify-center gap-3"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-6 h-6" />
               {t('addToSchedule')}
             </button>
           </form>
@@ -506,5 +490,6 @@ export default function DailySchedule() {
         onCancel={() => setTaskToDelete(null)}
       />
     </motion.div>
+    </div>
   );
 }

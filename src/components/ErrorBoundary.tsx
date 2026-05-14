@@ -37,24 +37,24 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-[400px] flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-zinc-900 rounded-3xl border border-black/5 dark:border-white/5 shadow-sm">
-          <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6">
+        <div className="min-h-[400px] flex flex-col items-center justify-center p-8 text-center bg-surface-1 rounded-lg border border-hairline shadow-card">
+          <div className="w-16 h-16 bg-danger/10 rounded-xl flex items-center justify-center text-danger mb-6 shadow-sm border border-danger/20">
             <AlertCircle className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">Something went wrong</h2>
-          <p className="text-zinc-500 dark:text-zinc-400 mb-8 max-w-md">
+          <h2 className="text-display-sm font-black text-ink tracking-tight uppercase mb-2">Something went wrong</h2>
+          <p className="text-body-sm text-ink-subtle mb-8 max-w-md font-medium">
             The application encountered an unexpected error. Don't worry, your data is safe.
           </p>
-          <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 mb-8 w-full max-w-lg overflow-auto text-left">
-            <code className="text-xs text-rose-600 font-mono">
+          <div className="bg-surface-2 p-6 rounded-md border border-hairline mb-8 w-full max-w-lg overflow-auto text-left shadow-inner">
+            <code className="text-xs text-danger font-mono font-bold leading-relaxed">
               {errorMessage}
             </code>
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-6 py-3 bg-deep-space-blue text-white rounded-xl font-bold hover:bg-deep-space-blue/90 transition-all shadow-lg shadow-deep-space-blue/20"
+            className="flex items-center gap-3 px-8 h-14 bg-accent text-white rounded-pill font-black text-button uppercase tracking-widest hover:bg-accent-hover transition-all shadow-glow-accent active:scale-95"
           >
-            <RefreshCcw className="w-4 h-4" />
+            <RefreshCcw className="w-5 h-5" />
             Reload Application
           </button>
         </div>
