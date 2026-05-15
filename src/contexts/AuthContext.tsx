@@ -22,6 +22,10 @@ interface AuthContextType {
   signUpWithEmail: (email: string, pass: string) => Promise<void>;
   signInWithFace: () => Promise<void>;
   signOut: () => Promise<void>;
+  connectGoogleCalendar: () => Promise<void>;
+  disconnectGoogleCalendar: () => void;
+  googleAccessToken: string | null;
+  isCalendarConnected: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -33,6 +37,10 @@ const AuthContext = createContext<AuthContextType>({
   signUpWithEmail: async () => {},
   signInWithFace: async () => {},
   signOut: async () => {},
+  connectGoogleCalendar: async () => {},
+  disconnectGoogleCalendar: () => {},
+  googleAccessToken: null,
+  isCalendarConnected: false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -40,6 +48,8 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(localStorage.getItem('google_calendar_token'));
+  const [isCalendarConnected, setIsCalendarConnected] = useState<boolean>(!!localStorage.getItem('google_calendar_token'));
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -66,11 +76,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      // If the user logs in with Google normally, we don't automatically get the calendar scope
+      // unless we ask for it here. But we want to separate "Connect Calendar" from "Sign in with Google".
     } catch (error) {
       console.error('Error signing in with Google:', error);
       throw error;
     }
+  };
+
+  const connectGoogleCalendar = async () => {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/calendar.readonly');
+    
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+      
+      if (token) {
+        setGoogleAccessToken(token);
+        setIsCalendarConnected(true);
+        localStorage.setItem('google_calendar_token', token);
+      }
+    } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        console.warn('Google Calendar connection cancelled by user.');
+        return;
+      }
+      console.error('Error connecting Google Calendar:', error);
+      throw error;
+    }
+  };
+
+  const disconnectGoogleCalendar = () => {
+    setGoogleAccessToken(null);
+    setIsCalendarConnected(false);
+    localStorage.removeItem('google_calendar_token');
   };
 
   const signInWithGithub = async () => {
@@ -141,7 +183,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signInWithEmail,
       signUpWithEmail,
       signInWithFace,
-      signOut 
+      signOut,
+      connectGoogleCalendar,
+      disconnectGoogleCalendar,
+      googleAccessToken,
+      isCalendarConnected
     }}>
       {children}
     </AuthContext.Provider>

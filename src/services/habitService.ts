@@ -12,13 +12,23 @@ import {
 import { db } from '../firebase';
 import { Habit, HabitLog } from '../types/habits';
 
+const clean = (obj: any) => {
+  const newObj = { ...obj };
+  Object.keys(newObj).forEach((key) => {
+    if (newObj[key] === undefined) {
+      delete newObj[key];
+    }
+  });
+  return newObj;
+};
+
 export const habitService = {
   async saveHabit(userId: string, habit: Habit) {
     const habitRef = doc(db, `users/${userId}/habits/${habit.id}`);
-    await setDoc(habitRef, {
+    await setDoc(habitRef, clean({
       ...habit,
       userId // Ensure userId is attached for rules
-    });
+    }));
   },
 
   async deleteHabit(userId: string, habitId: string) {
@@ -36,11 +46,11 @@ export const habitService = {
     const now = Timestamp.now();
 
     if (logSnap.exists()) {
-      await updateDoc(logRef, {
+      await updateDoc(logRef, clean({
         completedCount: increment(count),
         completedAt: arrayUnion(now),
         note: note || logSnap.data().note
-      });
+      }));
     } else {
       const newLog: HabitLog = {
         id: logId,
@@ -51,7 +61,7 @@ export const habitService = {
         note,
         skipped: false
       };
-      await setDoc(logRef, { ...newLog, userId });
+      await setDoc(logRef, clean({ ...newLog, userId }));
     }
 
     // Update habit stats
@@ -77,12 +87,12 @@ export const habitService = {
         note,
         skipped: true
       };
-      await setDoc(logRef, { ...newLog, userId });
+      await setDoc(logRef, clean({ ...newLog, userId }));
     } else {
-      await updateDoc(logRef, {
+      await updateDoc(logRef, clean({
         skipped: true,
         note: note || logSnap.data().note
-      });
+      }));
     }
   }
 };

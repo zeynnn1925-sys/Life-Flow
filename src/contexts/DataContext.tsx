@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { Transaction, RecurringTransaction, Category, Task, Target, Achievement, NotificationSetting, DailyQuote, AIProductivityPlan, Budget, SavingsGoal } from '../types';
 import { Habit, HabitLog } from '../types/habits';
 import { habitService } from '../services/habitService';
+import { cleanFirestoreData } from '../lib/utils';
 
 enum OperationType {
   CREATE = 'create',
@@ -167,7 +168,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         { id: 'e11', name: 'Debt', icon: 'CreditCard', type: 'expense', color: '#fcbf49', group: 'Savings & Debt' },
       ];
       for (const cat of DEFAULT_CATEGORIES) {
-        await setDoc(doc(db, `users/${user.uid}/categories/${cat.id}`), { ...cat, userId: user.uid });
+        await setDoc(doc(db, `users/${user.uid}/categories/${cat.id}`), cleanFirestoreData({ ...cat, userId: user.uid }));
       }
     } catch (error) {
       handleError(error, OperationType.DELETE, `users/${user.uid}/categories`);
@@ -239,14 +240,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       requiredTypes.forEach(async (type) => {
         if (!settings.find(s => s.type === type)) {
           const id = `notif_${type}`;
-          await setDoc(doc(db, `users/${userId}/notification_settings/${id}`), {
+          await setDoc(doc(db, `users/${userId}/notification_settings/${id}`), cleanFirestoreData({
             id,
             type,
             enabled: true,
             time: type === 'streak_warning' ? '20:00' : '09:00',
             frequency: 'daily',
             userId
-          });
+          }));
         }
       });
     }, (error) => {
@@ -317,7 +318,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveTransaction = async (t: Transaction) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/transactions/${t.id}`), { ...t, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/transactions/${t.id}`), cleanFirestoreData({ ...t, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/transactions/${t.id}`);
     }
@@ -335,7 +336,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveRecurringTransaction = async (t: RecurringTransaction) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/recurring_transactions/${t.id}`), { ...t, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/recurring_transactions/${t.id}`), cleanFirestoreData({ ...t, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/recurring_transactions/${t.id}`);
     }
@@ -353,7 +354,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveCategory = async (c: Category) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/categories/${c.id}`), { ...c, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/categories/${c.id}`), cleanFirestoreData({ ...c, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/categories/${c.id}`);
     }
@@ -371,7 +372,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveTask = async (t: Task) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/tasks/${t.id}`), { ...t, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/tasks/${t.id}`), cleanFirestoreData({ ...t, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/tasks/${t.id}`);
     }
@@ -389,7 +390,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveTarget = async (t: Target) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/targets/${t.id}`), { ...t, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/targets/${t.id}`), cleanFirestoreData({ ...t, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/targets/${t.id}`);
     }
@@ -407,7 +408,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveUnlockedAchievement = async (id: string, unlockedAt: string) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/unlocked_achievements/${id}`), { id, unlockedAt, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/unlocked_achievements/${id}`), cleanFirestoreData({ id, unlockedAt, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/unlocked_achievements/${id}`);
     }
@@ -416,7 +417,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveNotificationSetting = async (s: NotificationSetting) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/notification_settings/${s.id}`), { ...s, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/notification_settings/${s.id}`), cleanFirestoreData({ ...s, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/notification_settings/${s.id}`);
     }
@@ -425,16 +426,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveDailyQuote = async (q: DailyQuote) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/daily_quote/current`), { ...q, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/daily_quote/current`), cleanFirestoreData({ ...q, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/daily_quote/current`);
     }
   };
 
   const saveAIPlan = async (p: AIProductivityPlan) => {
-    if (!user) return;
+    if (!user) return ;
     try {
-      await setDoc(doc(db, `users/${user.uid}/ai_plan/current`), { ...p, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/ai_plan/current`), cleanFirestoreData({ ...p, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/ai_plan/current`);
     }
@@ -443,7 +444,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveBudget = async (b: Budget) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/budgets/${b.id}`), { ...b, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/budgets/${b.id}`), cleanFirestoreData({ ...b, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/budgets/${b.id}`);
     }
@@ -461,7 +462,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveSavingsGoal = async (g: SavingsGoal) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, `users/${user.uid}/savings_goals/${g.id}`), { ...g, userId: user.uid });
+      await setDoc(doc(db, `users/${user.uid}/savings_goals/${g.id}`), cleanFirestoreData({ ...g, userId: user.uid }));
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/savings_goals/${g.id}`);
     }

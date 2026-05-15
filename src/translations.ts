@@ -257,6 +257,13 @@ export const translations = {
     progress: "Progress",
     tasks: "Tasks",
     performance: "Performance",
+    googleCalendar: "Google Calendar",
+    connectGoogleCalendar: "Connect Google Calendar",
+    disconnectGoogleCalendar: "Disconnect Google Calendar",
+    googleCalendarConnected: "Google Calendar Connected",
+    googleCalendarDisconnected: "Google Calendar Disconnected",
+    fetchingEvents: "Fetching events...",
+    syncWithGoogle: "Sync with Google",
   },
   id: {
     appName: "LIFE FLOW",
@@ -516,6 +523,13 @@ export const translations = {
     progress: "Kemajuan",
     tasks: "Tugas",
     performance: "Performa",
+    googleCalendar: "Google Calendar",
+    connectGoogleCalendar: "Hubungkan Google Calendar",
+    disconnectGoogleCalendar: "Putuskan Google Calendar",
+    googleCalendarConnected: "Google Calendar Terhubung",
+    googleCalendarDisconnected: "Google Calendar Terputus",
+    fetchingEvents: "Mengambil data...",
+    syncWithGoogle: "Sinkronkan dengan Google",
   }
 };
 

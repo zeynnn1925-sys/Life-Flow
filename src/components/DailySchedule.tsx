@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, Clock, CheckCircle2, Circle, ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from 'lucide-react';
+import { Plus, Trash2, Clock, CheckCircle2, Circle, ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Globe, ExternalLink } from 'lucide-react';
 import { Task } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -8,13 +8,14 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { exportTasks } from '../services/exportService';
 import { ConfirmationModal } from './ConfirmationModal';
+import { fetchCalendarEvents, CalendarEvent } from '../services/googleCalendarService';
 
 type ScheduleView = 'daily' | 'weekly' | 'monthly';
 
 export default function DailySchedule() {
   const { language, t } = useLanguage();
   const { tasks, saveTask, deleteTask: deleteTaskFromDb } = useData();
-  const { user } = useAuth();
+  const { user, googleAccessToken, isCalendarConnected, connectGoogleCalendar, disconnectGoogleCalendar } = useAuth();
 
   const [view, setView] = useState<ScheduleView>('daily');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -24,6 +25,38 @@ export default function DailySchedule() {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+
+  const [googleEvents, setGoogleEvents] = useState<CalendarEvent[]>([]);
+  const [isFetchingGoogle, setIsFetchingGoogle] = useState(false);
+
+  useEffect(() => {
+    const fetchGoogleEvents = async () => {
+      if (!googleAccessToken || !isCalendarConnected) {
+        setGoogleEvents([]);
+        return;
+      }
+
+      setIsFetchingGoogle(true);
+      try {
+        // Fetch events for a larger range (e.g., current month) to cover all views or just for the current view
+        // For simplicity, let's fetch for the current month of selectedDate
+        const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+        const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+        
+        const events = await fetchCalendarEvents(googleAccessToken, startOfMonth, endOfMonth);
+        setGoogleEvents(events);
+      } catch (error) {
+        console.error('Error in fetching google events component:', error);
+        if ((error as Error).message === 'UNAUTHORIZED') {
+          disconnectGoogleCalendar();
+        }
+      } finally {
+        setIsFetchingGoogle(false);
+      }
+    };
+
+    fetchGoogleEvents();
+  }, [googleAccessToken, isCalendarConnected, selectedDate.getMonth(), selectedDate.getFullYear()]);
 
   const addTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +108,18 @@ export default function DailySchedule() {
     const dateStr = `${year}-${month}-${day}`;
     return tasks.filter(t => t.date === dateStr);
   }, [tasks, selectedDate]);
+
+  const filteredGoogleEvents = useMemo(() => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const day = selectedDate.getDate();
+    
+    return googleEvents.filter(event => {
+      const start = event.start.dateTime ? new Date(event.start.dateTime) : (event.start.date ? new Date(event.start.date) : null);
+      if (!start) return false;
+      return start.getFullYear() === year && start.getMonth() === month && start.getDate() === day;
+    });
+  }, [googleEvents, selectedDate]);
 
   const weekDays = useMemo(() => {
     const days = [];
@@ -136,12 +181,54 @@ export default function DailySchedule() {
       </div>
       <div className="divide-y divide-hairline">
         <AnimatePresence initial={false} mode="wait">
-          {filteredTasks.length === 0 ? (
+          {filteredTasks.length === 0 && filteredGoogleEvents.length === 0 ? (
             <div className="p-16 text-center text-ink-tertiary text-body-sm italic">
               {t('noTasks')}
             </div>
           ) : (
             <div key="tasks">
+              {/* Google Calendar Events */}
+              {filteredGoogleEvents.map((event) => {
+                const startTime = event.start.dateTime 
+                  ? new Date(event.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                  : '--:--';
+                const endTime = event.end.dateTime 
+                  ? new Date(event.end.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                  : '';
+
+                return (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 flex items-center justify-between group transition-colors relative border-l-2 border-[#4285F4] bg-[#4285F4]/5"
+                  >
+                    <div className="flex items-center gap-4 relative z-10">
+                      <div className="w-6 h-6 rounded-md border border-[#4285F4]/30 flex items-center justify-center bg-white text-[#4285F4]">
+                        <Globe className="w-3 h-3" />
+                      </div>
+                      <div>
+                        <div className="text-body-sm font-bold text-[#4285F4] flex items-center gap-2">
+                          {event.summary}
+                          <span className="text-[9px] bg-[#4285F4]/10 px-1.5 py-0.5 rounded uppercase">{t('googleCalendar')}</span>
+                        </div>
+                        <div className="text-[10px] text-ink-tertiary flex items-center gap-1.5 mt-0.5">
+                          <Clock className="w-3 h-3" />
+                          <span className="font-mono">{startTime}</span>
+                          {endTime && (
+                            <>
+                              <span className="text-hairline-strong">—</span>
+                              <span className="font-mono">{endTime}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+
+              {/* Local Tasks */}
               {filteredTasks.map((task) => (
                 <motion.div
                   key={task.id}
@@ -217,6 +304,11 @@ export default function DailySchedule() {
           const d = String(day.getDate()).padStart(2, '0');
           const dayStr = `${year}-${month}-${d}`;
           const dayTasks = tasks.filter(t => t.date === dayStr);
+          const dayGoogleEvents = googleEvents.filter(event => {
+            const start = event.start.dateTime ? new Date(event.start.dateTime) : (event.start.date ? new Date(event.start.date) : null);
+            if (!start) return false;
+            return start.getFullYear() === year && start.getMonth() === day.getMonth() && start.getDate() === day.getDate();
+          });
           
           const today = new Date();
           const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -233,6 +325,26 @@ export default function DailySchedule() {
                 </div>
               </div>
               <div className="space-y-1.5">
+                {/* Google Events in Weekly */}
+                {dayGoogleEvents.map(event => {
+                  const startTime = event.start.dateTime 
+                    ? new Date(event.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                    : '--:--';
+                  return (
+                    <div 
+                      key={event.id} 
+                      className="text-[10px] p-2 rounded-md border bg-[#4285F4]/10 border-[#4285F4]/20 text-[#4285F4] truncate relative overflow-hidden shadow-sm"
+                      title={event.summary}
+                    >
+                      <div className="font-bold flex items-center gap-1.5">
+                        <span className="font-mono opacity-60 shrink-0">{startTime}</span>
+                        <span className="truncate">{event.summary}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Local Tasks in Weekly */}
                 {dayTasks.map(task => (
                   <div 
                     key={task.id} 
@@ -287,6 +399,11 @@ export default function DailySchedule() {
           const d = String(dayObj.date.getDate()).padStart(2, '0');
           const dayStr = `${year}-${month}-${d}`;
           const dayTasks = tasks.filter(t => t.date === dayStr);
+          const dayGoogleEvents = googleEvents.filter(event => {
+            const start = event.start.dateTime ? new Date(event.start.dateTime) : (event.start.date ? new Date(event.start.date) : null);
+            if (!start) return false;
+            return start.getFullYear() === year && start.getMonth() === dayObj.date.getMonth() && start.getDate() === dayObj.date.getDate();
+          });
           
           const today = new Date();
           const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -316,7 +433,19 @@ export default function DailySchedule() {
                 {dayObj.date.getDate()}
               </div>
               <div className="space-y-1">
-                {dayTasks.slice(0, 3).map(task => (
+                {/* Google Events in Monthly */}
+                {dayGoogleEvents.slice(0, 2).map(event => (
+                  <div 
+                    key={event.id} 
+                    className="w-full px-1.5 py-1 rounded text-[9px] truncate font-bold border border-[#4285F4]/20 bg-[#4285F4]/10 text-[#4285F4] transition-colors shadow-sm"
+                    title={event.summary}
+                  >
+                    {event.summary}
+                  </div>
+                ))}
+                
+                {/* Local Tasks in Monthly */}
+                {dayTasks.slice(0, 3 - Math.min(dayGoogleEvents.length, 2)).map(task => (
                   <div 
                     key={task.id} 
                     className={`w-full px-1.5 py-1 rounded text-[9px] truncate font-bold border transition-colors shadow-sm ${
@@ -391,6 +520,32 @@ export default function DailySchedule() {
           >
             <CalendarIcon className="w-4 h-4" />
           </button>
+          
+          <div className="w-px h-4 bg-hairline mx-1" />
+          
+          {isCalendarConnected ? (
+            <button
+              onClick={() => disconnectGoogleCalendar()}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-pill border border-[#4285F4]/20 bg-[#4285F4]/10 text-[#4285F4] text-[10px] font-black uppercase tracking-tight hover:bg-[#4285F4]/20 transition-all ${isFetchingGoogle ? 'animate-pulse' : ''}`}
+            >
+              <Globe className="w-3 h-3" />
+              {isFetchingGoogle ? t('fetchingEvents') : t('googleCalendar')}
+            </button>
+          ) : (
+            <button
+              onClick={async () => {
+                try {
+                  await connectGoogleCalendar();
+                } catch (err) {
+                  // Error is already logged in AuthContext
+                }
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-pill border border-hairline bg-surface-1 text-ink-tertiary text-[10px] font-black uppercase tracking-tight hover:border-[#4285F4]/50 hover:text-[#4285F4] transition-all"
+            >
+              <Globe className="w-3 h-3" />
+              {t('connectGoogleCalendar')}
+            </button>
+          )}
         </div>
       </div>
 

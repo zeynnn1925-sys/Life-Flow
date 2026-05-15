@@ -57,7 +57,7 @@ export function AddHabitModal({ isOpen, onClose, onSave, initialHabit }: AddHabi
       const habit: Habit = {
         id: initialHabit?.id || `habit_${Date.now()}`,
         title: formData.title || '',
-        description: formData.description,
+        description: formData.description || '',
         icon: formData.icon || 'Activity',
         color: formData.color || '#3b82f6',
         category: formData.category as HabitCategory || 'health',
