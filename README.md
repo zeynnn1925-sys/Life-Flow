@@ -1,20 +1,36 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# LifeFlow — Personal Wealth & Productivity Hub
 
-# Run and deploy your AI Studio app
+LifeFlow adalah aplikasi all-in-one untuk mengelola keuangan pribadi dan produktivitas Anda. Bangun kebiasaan baik, lacak pengeluaran, dan rencanakan masa depan Anda dengan cerdas.
 
-This contains everything you need to run your app locally.
+## Fitur Utama
 
-View your app in AI Studio: https://ai.studio/apps/9c59d784-c11c-4d3b-9b2b-cf521ee9f39a
+- **Finance Manager**: Lacak pemasukan, pengeluaran, dan buat anggaran bulanan.
+- **Productivity Suite**: Jadwal harian, pelacak kebiasaan (Habit Tracker), dan AI Planner.
+- **Smart Analytics**: Visualisasi data keuangan Anda agar lebih mudah dipahami.
+- **AI Integration**: Personal coach untuk membantu mengoptimalkan hidup Anda.
 
-## Run Locally
+## Cara Deploy ke Vercel
 
-**Prerequisites:**  Node.js
+Jika Anda mengalami masalah layar kosong (blank screen) saat deploy ke Vercel, pastikan langkah-langkah berikut terpenuhi:
 
+1. **Environment Variables**: 
+   Salin semua isi dari `.env.example` ke bagian **Environment Variables** di dashboard Vercel. Pastikan `VITE_FIREBASE_API_KEY`, dan variabel lainnya sudah terisi.
+   
+2. **Build Settings**:
+   - Framework Preset: `Vite`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+3. **Firebase Configuration**:
+   Pastikan file `firebase-applet-config.json` sudah memiliki data yang valid.
+
+## Teknologi yang Digunakan
+
+- React + Vite + TypeScript
+- Tailwind CSS (Styling)
+- Firebase (Database & Auth)
+- Framer Motion (Animations)
+- Gemini API (AI Capabilities)
+
+---
+Dibuat dengan ❤️ oleh Zeynn.

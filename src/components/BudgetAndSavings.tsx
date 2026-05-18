@@ -202,20 +202,52 @@ export function BudgetAndSavings() {
 
                   <div className="space-y-4">
                     <div className="flex justify-between items-end">
-                      <span className={`text-heading-sm font-black font-mono transition-colors ${isOver ? 'text-danger' : 'text-ink'}`}>
-                        Rp {spent.toLocaleString()}
-                      </span>
-                      <span className="text-eyebrow text-ink-tertiary font-bold font-mono">
-                        / Rp {budget.amount.toLocaleString()}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className={`text-heading-sm font-black font-mono transition-colors ${isOver ? 'text-danger' : 'text-ink'}`}>
+                          Rp {spent.toLocaleString()}
+                        </span>
+                        <span className="text-[10px] text-ink-tertiary font-bold uppercase tracking-wider">Spent</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-body-sm font-bold font-mono text-ink-tertiary">
+                          Rp {budget.amount.toLocaleString()}
+                        </span>
+                        <span className="text-[10px] text-ink-tertiary font-bold uppercase tracking-wider">Limit</span>
+                      </div>
                     </div>
-                    <div className="h-2.5 bg-surface-2 rounded-pill overflow-hidden border border-hairline">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percentage}%` }}
-                        className={`h-full rounded-pill transition-all ${isOver ? 'bg-danger shadow-glow-primary/20' : percentage > 80 ? 'bg-warning' : 'bg-accent shadow-glow-accent'}`}
-                      />
+                    
+                    <div className="relative">
+                      <div className="h-3 bg-surface-2 rounded-pill overflow-hidden border border-hairline p-[2px]">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percentage}%` }}
+                          className={`h-full rounded-pill transition-all relative ${
+                            isOver 
+                              ? 'bg-danger shadow-[0_0_12px_rgba(226,59,74,0.4)]' 
+                              : percentage > 80 
+                                ? 'bg-warning shadow-[0_0_12px_rgba(242,153,74,0.4)]' 
+                                : 'bg-accent shadow-glow-accent'
+                          }`}
+                        />
+                      </div>
+                      <div className="absolute top-1/2 left-0 w-full flex justify-between px-2 -translate-y-1/2 pointer-events-none">
+                        {[25, 50, 75].map(mark => (
+                          <div key={mark} className="w-px h-1 bg-white/20" />
+                        ))}
+                      </div>
                     </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className={`text-[11px] font-black uppercase tracking-widest ${isOver ? 'text-danger' : 'text-accent'}`}>
+                        {Math.round(percentage)}% used
+                      </span>
+                      {!isOver && (
+                        <span className="text-[11px] text-ink-tertiary font-bold lowercase">
+                          Rp {(budget.amount - spent).toLocaleString()} remaining
+                        </span>
+                      )}
+                    </div>
+
                     {isOver && (
                       <div className="flex items-center gap-2 p-3 bg-danger/10 rounded-md border border-danger/20">
                         <AlertCircle className="w-4 h-4 text-danger" />
@@ -323,20 +355,44 @@ export function BudgetAndSavings() {
                   </div>
 
                   <div className="space-y-4 mb-8">
-                    <div className="flex justify-between items-end text-eyebrow">
-                      <span className="text-ink font-black font-mono">
-                        Rp {goal.currentAmount.toLocaleString()}
-                      </span>
-                      <span className="text-ink-tertiary font-bold font-mono">
-                        / Rp {goal.targetAmount.toLocaleString()}
-                      </span>
+                    <div className="flex justify-between items-end">
+                      <div className="flex flex-col">
+                        <span className="text-heading-sm font-black font-mono text-ink">
+                          Rp {goal.currentAmount.toLocaleString()}
+                        </span>
+                        <span className="text-[10px] text-ink-tertiary font-bold uppercase tracking-wider">Saved</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-body-sm font-bold font-mono text-ink-tertiary">
+                          Rp {goal.targetAmount.toLocaleString()}
+                        </span>
+                        <span className="text-[10px] text-ink-tertiary font-bold uppercase tracking-wider">Target</span>
+                      </div>
                     </div>
-                    <div className="h-2.5 bg-surface-2 rounded-pill overflow-hidden border border-hairline">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percentage}%` }}
-                        className={`h-full rounded-pill transition-all ${isComplete ? 'bg-accent shadow-glow-accent' : 'bg-accent/40 shadow-sm'}`}
-                      />
+
+                    <div className="relative">
+                      <div className="h-3 bg-surface-2 rounded-pill overflow-hidden border border-hairline p-[2px]">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percentage}%` }}
+                          className={`h-full rounded-pill transition-all ${
+                            isComplete 
+                              ? 'bg-accent shadow-glow-accent' 
+                              : 'bg-accent/40 shadow-sm'
+                          }`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-[11px] font-black">
+                      <span className="text-accent uppercase tracking-widest">
+                        {Math.round(percentage)}% complete
+                      </span>
+                      {!isComplete && (
+                        <span className="text-ink-tertiary lowercase">
+                          Rp {(goal.targetAmount - goal.currentAmount).toLocaleString()} left to save
+                        </span>
+                      )}
                     </div>
                   </div>
 

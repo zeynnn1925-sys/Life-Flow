@@ -1,7 +1,10 @@
 {
-  "name": "Remix: LIFE FLOW: Personal Finance \u0026 Productivity",
+  "name": "LifeFlow: Personal Finance & Productivity",
   "description": "A comprehensive tool to manage your finances, daily schedule, and personal goals in one place.",
   "requestFramePermissions": [
     "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ]
 }
