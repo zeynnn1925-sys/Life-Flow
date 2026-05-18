@@ -24,8 +24,12 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   connectGoogleCalendar: () => Promise<void>;
   disconnectGoogleCalendar: () => void;
+  connectOutlookCalendar: () => Promise<void>;
+  disconnectOutlookCalendar: () => void;
   googleAccessToken: string | null;
+  outlookAccessToken: string | null;
   isCalendarConnected: boolean;
+  isOutlookConnected: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -39,8 +43,12 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
   connectGoogleCalendar: async () => {},
   disconnectGoogleCalendar: () => {},
+  connectOutlookCalendar: async () => {},
+  disconnectOutlookCalendar: () => {},
   googleAccessToken: null,
+  outlookAccessToken: null,
   isCalendarConnected: false,
+  isOutlookConnected: false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -49,7 +57,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(localStorage.getItem('google_calendar_token'));
+  const [outlookAccessToken, setOutlookAccessToken] = useState<string | null>(localStorage.getItem('outlook_calendar_token'));
   const [isCalendarConnected, setIsCalendarConnected] = useState<boolean>(!!localStorage.getItem('google_calendar_token'));
+  const [isOutlookConnected, setIsOutlookConnected] = useState<boolean>(!!localStorage.getItem('outlook_calendar_token'));
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -73,21 +83,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return unsubscribe;
   }, []);
 
+  const handleAuthError = (error: any, providerName: string) => {
+    if (error.code === 'auth/operation-not-allowed') {
+      const msg = `${providerName} is not enabled in Firebase Console. Go to Authentication > Sign-in method to enable it.`;
+      console.error(msg);
+      alert(msg);
+    } else if (error.code === 'auth/popup-closed-by-user') {
+      console.warn(`${providerName} login cancelled by user.`);
+    } else {
+      console.error(`Error with ${providerName}:`, error);
+      throw error;
+    }
+  };
+
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      // If the user logs in with Google normally, we don't automatically get the calendar scope
-      // unless we ask for it here. But we want to separate "Connect Calendar" from "Sign in with Google".
+      await signInWithPopup(auth, provider);
     } catch (error) {
-      console.error('Error signing in with Google:', error);
-      throw error;
+      handleAuthError(error, 'Google');
     }
   };
 
   const connectGoogleCalendar = async () => {
     const provider = new GoogleAuthProvider();
-    provider.addScope('https://www.googleapis.com/auth/calendar.readonly');
+    provider.addScope('https://www.googleapis.com/auth/calendar');
     
     try {
       const result = await signInWithPopup(auth, provider);
@@ -100,12 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('google_calendar_token', token);
       }
     } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        console.warn('Google Calendar connection cancelled by user.');
-        return;
-      }
-      console.error('Error connecting Google Calendar:', error);
-      throw error;
+      handleAuthError(error, 'Google Calendar');
     }
   };
 
@@ -115,13 +130,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('google_calendar_token');
   };
 
+  const connectOutlookCalendar = async () => {
+    const { OAuthProvider } = await import('firebase/auth');
+    const provider = new OAuthProvider('microsoft.com');
+    provider.addScope('Calendars.ReadWrite');
+    provider.addScope('offline_access');
+    provider.addScope('openid');
+    provider.addScope('profile');
+    
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const credential = OAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+      
+      if (token) {
+        setOutlookAccessToken(token);
+        setIsOutlookConnected(true);
+        localStorage.setItem('outlook_calendar_token', token);
+      }
+    } catch (error: any) {
+      handleAuthError(error, 'Outlook Calendar (Microsoft)');
+    }
+  };
+
+  const disconnectOutlookCalendar = () => {
+    setOutlookAccessToken(null);
+    setIsOutlookConnected(false);
+    localStorage.removeItem('outlook_calendar_token');
+  };
+
   const signInWithGithub = async () => {
     const provider = new GithubAuthProvider();
     try {
       await signInWithPopup(auth, provider);
     } catch (error) {
-      console.error('Error signing in with GitHub:', error);
-      throw error;
+      handleAuthError(error, 'GitHub');
     }
   };
 
@@ -129,8 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await signInWithEmailAndPassword(auth, email, pass);
     } catch (error) {
-      console.error('Error signing in with Email:', error);
-      throw error;
+      handleAuthError(error, 'Email Sign-in');
     }
   };
 
@@ -138,8 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await createUserWithEmailAndPassword(auth, email, pass);
     } catch (error) {
-      console.error('Error signing up with Email:', error);
-      throw error;
+      handleAuthError(error, 'Email Sign-up');
     }
   };
 
@@ -186,8 +227,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signOut,
       connectGoogleCalendar,
       disconnectGoogleCalendar,
+      connectOutlookCalendar,
+      disconnectOutlookCalendar,
       googleAccessToken,
-      isCalendarConnected
+      outlookAccessToken,
+      isCalendarConnected,
+      isOutlookConnected
     }}>
       {children}
     </AuthContext.Provider>

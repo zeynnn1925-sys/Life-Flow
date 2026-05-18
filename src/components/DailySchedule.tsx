@@ -8,14 +8,25 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { exportTasks } from '../services/exportService';
 import { ConfirmationModal } from './ConfirmationModal';
-import { fetchCalendarEvents, CalendarEvent } from '../services/googleCalendarService';
+import { fetchCalendarEvents, CalendarEvent, createGoogleCalendarEvent, deleteGoogleCalendarEvent } from '../services/googleCalendarService';
+import { fetchOutlookEvents, OutlookEvent, createOutlookEvent, deleteOutlookEvent } from '../services/outlookCalendarService';
 
 type ScheduleView = 'daily' | 'weekly' | 'monthly';
 
 export default function DailySchedule() {
   const { language, t } = useLanguage();
   const { tasks, saveTask, deleteTask: deleteTaskFromDb } = useData();
-  const { user, googleAccessToken, isCalendarConnected, connectGoogleCalendar, disconnectGoogleCalendar } = useAuth();
+  const { 
+    user, 
+    googleAccessToken, 
+    isCalendarConnected, 
+    connectGoogleCalendar, 
+    disconnectGoogleCalendar,
+    outlookAccessToken,
+    isOutlookConnected,
+    connectOutlookCalendar,
+    disconnectOutlookCalendar
+  } = useAuth();
 
   const [view, setView] = useState<ScheduleView>('daily');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -24,13 +35,16 @@ export default function DailySchedule() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [syncWithExternal, setSyncWithExternal] = useState(true);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   const [googleEvents, setGoogleEvents] = useState<CalendarEvent[]>([]);
+  const [outlookEvents, setOutlookEvents] = useState<OutlookEvent[]>([]);
   const [isFetchingGoogle, setIsFetchingGoogle] = useState(false);
+  const [isFetchingOutlook, setIsFetchingOutlook] = useState(false);
 
   useEffect(() => {
-    const fetchGoogleEvents = async () => {
+    const fetchGoogleEventsData = async () => {
       if (!googleAccessToken || !isCalendarConnected) {
         setGoogleEvents([]);
         return;
@@ -38,15 +52,13 @@ export default function DailySchedule() {
 
       setIsFetchingGoogle(true);
       try {
-        // Fetch events for a larger range (e.g., current month) to cover all views or just for the current view
-        // For simplicity, let's fetch for the current month of selectedDate
         const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
         const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
         
         const events = await fetchCalendarEvents(googleAccessToken, startOfMonth, endOfMonth);
         setGoogleEvents(events);
       } catch (error) {
-        console.error('Error in fetching google events component:', error);
+        console.error('Error fetching google events:', error);
         if ((error as Error).message === 'UNAUTHORIZED') {
           disconnectGoogleCalendar();
         }
@@ -55,10 +67,37 @@ export default function DailySchedule() {
       }
     };
 
-    fetchGoogleEvents();
+    fetchGoogleEventsData();
   }, [googleAccessToken, isCalendarConnected, selectedDate.getMonth(), selectedDate.getFullYear()]);
 
-  const addTask = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchOutlookEventsData = async () => {
+      if (!outlookAccessToken || !isOutlookConnected) {
+        setOutlookEvents([]);
+        return;
+      }
+
+      setIsFetchingOutlook(true);
+      try {
+        const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+        const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+        
+        const events = await fetchOutlookEvents(outlookAccessToken, startOfMonth, endOfMonth);
+        setOutlookEvents(events);
+      } catch (error) {
+        console.error('Error fetching outlook events:', error);
+        if ((error as Error).message === 'UNAUTHORIZED') {
+          disconnectOutlookCalendar();
+        }
+      } finally {
+        setIsFetchingOutlook(false);
+      }
+    };
+
+    fetchOutlookEventsData();
+  }, [outlookAccessToken, isOutlookConnected, selectedDate.getMonth(), selectedDate.getFullYear()]);
+
+  const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !startTime || !date) return;
 
@@ -70,6 +109,40 @@ export default function DailySchedule() {
       endTime,
       completed: false,
     };
+
+    // Sync to External
+    if (syncWithExternal) {
+      const startDateTime = new Date(`${date}T${startTime}:00`).toISOString();
+      const endDateTime = endTime 
+        ? new Date(`${date}T${endTime}:00`).toISOString()
+        : new Date(new Date(`${date}T${startTime}:00`).getTime() + 60 * 60 * 1000).toISOString();
+
+      if (isCalendarConnected && googleAccessToken) {
+        try {
+          const gEvent = await createGoogleCalendarEvent(googleAccessToken, {
+            summary: title,
+            start: { dateTime: startDateTime },
+            end: { dateTime: endDateTime }
+          });
+          newTask.googleEventId = gEvent.id;
+        } catch (err) {
+          console.error("Failed to sync to Google Calendar:", err);
+        }
+      }
+
+      if (isOutlookConnected && outlookAccessToken) {
+        try {
+          const oEvent = await createOutlookEvent(outlookAccessToken, {
+            subject: title,
+            start: { dateTime: startDateTime, timeZone: 'UTC' },
+            end: { dateTime: endDateTime, timeZone: 'UTC' }
+          });
+          newTask.outlookEventId = oEvent.id;
+        } catch (err) {
+          console.error("Failed to sync to Outlook Calendar:", err);
+        }
+      }
+    }
 
     saveTask(newTask);
     setTitle('');
@@ -84,7 +157,27 @@ export default function DailySchedule() {
     }
   };
 
-  const deleteTask = (id: string) => {
+  const deleteTask = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    
+    if (task) {
+      if (task.googleEventId && googleAccessToken && isCalendarConnected) {
+        try {
+          await deleteGoogleCalendarEvent(googleAccessToken, task.googleEventId);
+        } catch (err) {
+          console.error("Failed to delete Google Calendar event:", err);
+        }
+      }
+      
+      if (task.outlookEventId && outlookAccessToken && isOutlookConnected) {
+        try {
+          await deleteOutlookEvent(outlookAccessToken, task.outlookEventId);
+        } catch (err) {
+          console.error("Failed to delete Outlook event:", err);
+        }
+      }
+    }
+
     deleteTaskFromDb(id);
     setTaskToDelete(null);
   };
@@ -120,6 +213,17 @@ export default function DailySchedule() {
       return start.getFullYear() === year && start.getMonth() === month && start.getDate() === day;
     });
   }, [googleEvents, selectedDate]);
+
+  const filteredOutlookEvents = useMemo(() => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const day = selectedDate.getDate();
+    
+    return outlookEvents.filter(event => {
+      const start = new Date(event.start.dateTime);
+      return start.getFullYear() === year && start.getMonth() === month && start.getDate() === day;
+    });
+  }, [outlookEvents, selectedDate]);
 
   const weekDays = useMemo(() => {
     const days = [];
@@ -181,7 +285,7 @@ export default function DailySchedule() {
       </div>
       <div className="divide-y divide-hairline">
         <AnimatePresence initial={false} mode="wait">
-          {filteredTasks.length === 0 && filteredGoogleEvents.length === 0 ? (
+          {filteredTasks.length === 0 && filteredGoogleEvents.length === 0 && filteredOutlookEvents.length === 0 ? (
             <div className="p-16 text-center text-ink-tertiary text-body-sm italic">
               {t('noTasks')}
             </div>
@@ -189,10 +293,10 @@ export default function DailySchedule() {
             <div key="tasks">
               {/* Google Calendar Events */}
               {filteredGoogleEvents.map((event) => {
-                const startTime = event.start.dateTime 
+                const startTimeStr = event.start.dateTime 
                   ? new Date(event.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
                   : '--:--';
-                const endTime = event.end.dateTime 
+                const endTimeStr = event.end.dateTime 
                   ? new Date(event.end.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
                   : '';
 
@@ -214,13 +318,46 @@ export default function DailySchedule() {
                         </div>
                         <div className="text-[10px] text-ink-tertiary flex items-center gap-1.5 mt-0.5">
                           <Clock className="w-3 h-3" />
-                          <span className="font-mono">{startTime}</span>
-                          {endTime && (
+                          <span className="font-mono">{startTimeStr}</span>
+                          {endTimeStr && (
                             <>
                               <span className="text-hairline-strong">—</span>
-                              <span className="font-mono">{endTime}</span>
+                              <span className="font-mono">{endTimeStr}</span>
                             </>
                           )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+
+              {/* Outlook Calendar Events */}
+              {filteredOutlookEvents.map((event) => {
+                const startTimeStr = new Date(event.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                const endTimeStr = new Date(event.end.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                return (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 flex items-center justify-between group transition-colors relative border-l-2 border-[#0078D4] bg-[#0078D4]/5"
+                  >
+                    <div className="flex items-center gap-4 relative z-10">
+                      <div className="w-6 h-6 rounded-md border border-[#0078D4]/30 flex items-center justify-center bg-white text-[#0078D4]">
+                        <Globe className="w-3 h-3" />
+                      </div>
+                      <div>
+                        <div className="text-body-sm font-bold text-[#0078D4] flex items-center gap-2">
+                          {event.subject}
+                          <span className="text-[9px] bg-[#0078D4]/10 px-1.5 py-0.5 rounded uppercase">{t('outlookCalendar')}</span>
+                        </div>
+                        <div className="text-[10px] text-ink-tertiary flex items-center gap-1.5 mt-0.5">
+                          <Clock className="w-3 h-3" />
+                          <span className="font-mono">{startTimeStr}</span>
+                          <span className="text-hairline-strong">—</span>
+                          <span className="font-mono">{endTimeStr}</span>
                         </div>
                       </div>
                     </div>
@@ -328,6 +465,10 @@ export default function DailySchedule() {
             if (!start) return false;
             return start.getFullYear() === year && start.getMonth() === day.getMonth() && start.getDate() === day.getDate();
           });
+          const dayOutlookEvents = outlookEvents.filter(event => {
+            const start = new Date(event.start.dateTime);
+            return start.getFullYear() === year && start.getMonth() === day.getMonth() && start.getDate() === day.getDate();
+          });
           
           const today = new Date();
           const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -344,24 +485,41 @@ export default function DailySchedule() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                {/* Google Events in Weekly */}
-                {dayGoogleEvents.map(event => {
-                  const startTime = event.start.dateTime 
-                    ? new Date(event.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
-                    : '--:--';
-                  return (
-                    <div 
-                      key={event.id} 
-                      className="text-[10px] p-2 rounded-md border bg-[#4285F4]/10 border-[#4285F4]/20 text-[#4285F4] truncate relative overflow-hidden shadow-sm"
-                      title={event.summary}
-                    >
-                      <div className="font-bold flex items-center gap-1.5">
-                        <span className="font-mono opacity-60 shrink-0">{startTime}</span>
-                        <span className="truncate">{event.summary}</span>
+                  {/* Google Events in Weekly */}
+                  {dayGoogleEvents.map(event => {
+                    const startTimeStr = event.start.dateTime 
+                      ? new Date(event.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                      : '--:--';
+                    return (
+                      <div 
+                        key={event.id} 
+                        className="text-[10px] p-2 rounded-md border bg-[#4285F4]/10 border-[#4285F4]/20 text-[#4285F4] truncate relative overflow-hidden shadow-sm"
+                        title={event.summary}
+                      >
+                        <div className="font-bold flex items-center gap-1.5">
+                          <span className="font-mono opacity-60 shrink-0">{startTimeStr}</span>
+                          <span className="truncate">{event.summary}</span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+
+                  {/* Outlook Events in Weekly */}
+                  {dayOutlookEvents.map(event => {
+                    const startTimeStr = new Date(event.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                    return (
+                      <div 
+                        key={event.id} 
+                        className="text-[10px] p-2 rounded-md border bg-[#0078D4]/10 border-[#0078D4]/20 text-[#0078D4] truncate relative overflow-hidden shadow-sm"
+                        title={event.subject}
+                      >
+                        <div className="font-bold flex items-center gap-1.5">
+                          <span className="font-mono opacity-60 shrink-0">{startTimeStr}</span>
+                          <span className="truncate">{event.subject}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
 
                 {/* Local Tasks in Weekly */}
                 {dayTasks.map(task => (
@@ -423,6 +581,10 @@ export default function DailySchedule() {
             if (!start) return false;
             return start.getFullYear() === year && start.getMonth() === dayObj.date.getMonth() && start.getDate() === dayObj.date.getDate();
           });
+          const dayOutlookEvents = outlookEvents.filter(event => {
+            const start = new Date(event.start.dateTime);
+            return start.getFullYear() === year && start.getMonth() === dayObj.date.getMonth() && start.getDate() === dayObj.date.getDate();
+          });
           
           const today = new Date();
           const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -453,7 +615,7 @@ export default function DailySchedule() {
               </div>
               <div className="space-y-1">
                 {/* Google Events in Monthly */}
-                {dayGoogleEvents.slice(0, 2).map(event => (
+                {dayGoogleEvents.slice(0, 1).map(event => (
                   <div 
                     key={event.id} 
                     className="w-full px-1.5 py-1 rounded text-[9px] truncate font-bold border border-[#4285F4]/20 bg-[#4285F4]/10 text-[#4285F4] transition-colors shadow-sm"
@@ -462,9 +624,20 @@ export default function DailySchedule() {
                     {event.summary}
                   </div>
                 ))}
+
+                {/* Outlook Events in Monthly */}
+                {dayOutlookEvents.slice(0, 1).map(event => (
+                  <div 
+                    key={event.id} 
+                    className="w-full px-1.5 py-1 rounded text-[9px] truncate font-bold border border-[#0078D4]/20 bg-[#0078D4]/10 text-[#0078D4] transition-colors shadow-sm"
+                    title={event.subject}
+                  >
+                    {event.subject}
+                  </div>
+                ))}
                 
                 {/* Local Tasks in Monthly */}
-                {dayTasks.slice(0, 3 - Math.min(dayGoogleEvents.length, 2)).map(task => (
+                {dayTasks.slice(0, 3 - Math.min(dayGoogleEvents.length, 1) - Math.min(dayOutlookEvents.length, 1)).map(task => (
                   <div 
                     key={task.id} 
                     className={`w-full px-1.5 py-1 rounded text-[9px] truncate font-bold border transition-colors shadow-sm ${
@@ -477,9 +650,9 @@ export default function DailySchedule() {
                     {task.title}
                   </div>
                 ))}
-                {dayTasks.length > 3 && (
+                {dayTasks.length > (3 - Math.min(dayGoogleEvents.length, 1) - Math.min(dayOutlookEvents.length, 1)) && (
                   <div className="text-[9px] font-black text-ink-tertiary text-center bg-surface-2 rounded-md py-1 border border-hairline">
-                    +{dayTasks.length - 3}
+                    +{dayTasks.length - (3 - Math.min(dayGoogleEvents.length, 1) - Math.min(dayOutlookEvents.length, 1))}
                   </div>
                 )}
               </div>
@@ -565,6 +738,30 @@ export default function DailySchedule() {
               {t('connectGoogleCalendar')}
             </button>
           )}
+
+          {isOutlookConnected ? (
+            <button
+              onClick={() => disconnectOutlookCalendar()}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-pill border border-[#0078D4]/20 bg-[#0078D4]/10 text-[#0078D4] text-[10px] font-black uppercase tracking-tight hover:bg-[#0078D4]/20 transition-all ${isFetchingOutlook ? 'animate-pulse' : ''}`}
+            >
+              <Globe className="w-3 h-3" />
+              {isFetchingOutlook ? t('fetchingEvents') : t('outlookCalendar')}
+            </button>
+          ) : (
+            <button
+              onClick={async () => {
+                try {
+                  await connectOutlookCalendar();
+                } catch (err) {
+                  // Error is already logged in AuthContext
+                }
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-pill border border-hairline bg-surface-1 text-ink-tertiary text-[10px] font-black uppercase tracking-tight hover:border-[#0078D4]/50 hover:text-[#0078D4] transition-all"
+            >
+              <Globe className="w-3 h-3" />
+              {t('connectOutlookCalendar')}
+            </button>
+          )}
         </div>
       </div>
 
@@ -625,6 +822,21 @@ export default function DailySchedule() {
                 </div>
               </div>
             </div>
+
+            {(isCalendarConnected || isOutlookConnected) && (
+              <div className="flex items-center gap-3 p-4 bg-surface-2 rounded-md border border-hairline group/sync">
+                <input
+                  type="checkbox"
+                  id="sync-external"
+                  checked={syncWithExternal}
+                  onChange={(e) => setSyncWithExternal(e.target.checked)}
+                  className="w-5 h-5 rounded border-hairline text-accent focus:ring-accent accent-accent cursor-pointer"
+                />
+                <label htmlFor="sync-external" className="text-[10px] font-black uppercase tracking-widest text-ink-tertiary cursor-pointer group-hover/sync:text-ink transition-colors">
+                  {t('syncWithExternal')}
+                </label>
+              </div>
+            )}
             
             <button
               type="submit"

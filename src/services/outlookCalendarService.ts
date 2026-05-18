@@ -1,36 +1,38 @@
-export interface CalendarEvent {
+export interface OutlookEvent {
   id: string;
-  summary: string;
-  description?: string;
+  subject: string;
+  body?: {
+    content: string;
+    contentType: string;
+  };
   start: {
-    dateTime?: string;
-    date?: string;
+    dateTime: string;
+    timeZone: string;
   };
   end: {
-    dateTime?: string;
-    date?: string;
+    dateTime: string;
+    timeZone: string;
   };
-  location?: string;
+  location?: {
+    displayName: string;
+  };
 }
 
-export async function fetchCalendarEvents(
+export async function fetchOutlookEvents(
   accessToken: string,
   timeMin: Date,
   timeMax: Date
-): Promise<CalendarEvent[]> {
+): Promise<OutlookEvent[]> {
   try {
-    const params = new URLSearchParams({
-      timeMin: timeMin.toISOString(),
-      timeMax: timeMax.toISOString(),
-      singleEvents: 'true',
-      orderBy: 'startTime',
-    });
+    const startStr = timeMin.toISOString();
+    const endStr = timeMax.toISOString();
 
     const response = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
+      `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${startStr}&endDateTime=${endStr}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          'Prefer': 'outlook.timezone="UTC"'
         },
       }
     );
@@ -40,24 +42,24 @@ export async function fetchCalendarEvents(
         throw new Error('UNAUTHORIZED');
       }
       const errorData = await response.json();
-      throw new Error(errorData.error?.message || 'Failed to fetch calendar events');
+      throw new Error(errorData.error?.message || 'Failed to fetch Outlook events');
     }
 
     const data = await response.json();
-    return data.items || [];
+    return data.value || [];
   } catch (error) {
-    console.error('Error fetching Google Calendar events:', error);
+    console.error('Error fetching Outlook events:', error);
     throw error;
   }
 }
 
-export async function createGoogleCalendarEvent(
+export async function createOutlookEvent(
   accessToken: string,
-  event: Partial<CalendarEvent>
-): Promise<CalendarEvent> {
+  event: Partial<OutlookEvent>
+): Promise<OutlookEvent> {
   try {
     const response = await fetch(
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+      'https://graph.microsoft.com/v1.0/me/events',
       {
         method: 'POST',
         headers: {
@@ -65,8 +67,8 @@ export async function createGoogleCalendarEvent(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          summary: event.summary,
-          description: event.description,
+          subject: event.subject,
+          body: event.body,
           start: event.start,
           end: event.end,
           location: event.location,
@@ -79,23 +81,23 @@ export async function createGoogleCalendarEvent(
         throw new Error('UNAUTHORIZED');
       }
       const errorData = await response.json();
-      throw new Error(errorData.error?.message || 'Failed to create calendar event');
+      throw new Error(errorData.error?.message || 'Failed to create Outlook event');
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error creating Google Calendar event:', error);
+    console.error('Error creating Outlook event:', error);
     throw error;
   }
 }
 
-export async function deleteGoogleCalendarEvent(
+export async function deleteOutlookEvent(
   accessToken: string,
   eventId: string
 ): Promise<void> {
   try {
     const response = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`,
+      `https://graph.microsoft.com/v1.0/me/events/${eventId}`,
       {
         method: 'DELETE',
         headers: {
@@ -109,10 +111,10 @@ export async function deleteGoogleCalendarEvent(
         throw new Error('UNAUTHORIZED');
       }
       const errorData = await response.json();
-      throw new Error(errorData.error?.message || 'Failed to delete calendar event');
+      throw new Error(errorData.error?.message || 'Failed to delete Outlook event');
     }
   } catch (error) {
-    console.error('Error deleting Google Calendar event:', error);
+    console.error('Error deleting Outlook event:', error);
     throw error;
   }
 }

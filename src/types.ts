@@ -38,6 +38,8 @@ export interface Task {
   endTime: string;
   completed: boolean;
   reminderTime?: string;
+  googleEventId?: string;
+  outlookEventId?: string;
 }
 
 export interface Target {

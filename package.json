@@ -32,6 +32,7 @@
     "motion": "^12.23.24",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-is": "^19.2.6",
     "react-markdown": "^10.1.0",
     "recharts": "^3.8.0",
     "remark-gfm": "^4.0.1",
@@ -39,7 +40,7 @@
     "vite": "^6.2.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.0.0",
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/express": "^4.17.21",
