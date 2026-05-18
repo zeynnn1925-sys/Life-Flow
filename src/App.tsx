@@ -22,7 +22,7 @@ import {
   Moon,
   Sun
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import FinanceTracker from './components/FinanceTracker';
 import DailySchedule from './components/DailySchedule';
@@ -41,6 +41,7 @@ import HabitTrackerPage from './pages/productivity/HabitTrackerPage';
 import FinanceHubPage from './pages/finance/FinanceHubPage';
 import ProductivityHubPage from './pages/productivity/ProductivityHubPage';
 import SystemHubPage from './pages/system/SystemHubPage';
+import AccountPage from './pages/system/AccountPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import AppShell from './components/layout/AppShell';
 import { View, Transaction, Task, Target } from './types';
@@ -105,6 +106,16 @@ export default function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Redirect Hubs on Desktop
+  useEffect(() => {
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+    if (isDesktop) {
+      if (activeView === 'finance-hub') setActiveView('finance');
+      else if (activeView === 'productivity-hub') setActiveView('schedule');
+      else if (activeView === 'system-hub') setActiveView('settings');
+    }
+  }, [activeView]);
 
   useEffect(() => {
     if (!user) {
@@ -235,38 +246,6 @@ export default function App() {
   if (!user) {
     return <Login />;
   }
-
-  const navGroups = [
-    {
-      title: t('finance'),
-      items: [
-        { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
-        { id: 'finance-hub', label: 'Finance Hub', icon: PieChart },
-        { id: 'finance', label: t('finance'), icon: Wallet },
-        { id: 'budgets', label: t('budgets') || 'Budgets & Savings', icon: TrendingUp },
-        { id: 'visualization', label: t('financialVisualization'), icon: BarChart3 },
-        { id: 'reports', label: t('analytics'), icon: PieChart },
-      ]
-    },
-    {
-      title: t('productivity'),
-      items: [
-        { id: 'productivity-hub', label: 'Productivity Hub', icon: Zap },
-        { id: 'schedule', label: t('schedule'), icon: Calendar },
-        { id: 'habits', label: t('habits') || 'Habit Tracker', icon: Zap },
-        { id: 'ai_planner', label: t('aiPlanner'), icon: Sparkles },
-        { id: 'targets', label: t('targets'), icon: TargetIcon },
-      ]
-    },
-    {
-      title: t('system'),
-      items: [
-        { id: 'system-hub', label: 'System Hub', icon: Settings },
-        { id: 'achievements', label: t('achievements'), icon: Trophy },
-        { id: 'settings', label: t('settings'), icon: Settings },
-      ]
-    }
-  ];
 
   const renderView = () => {
     return (
@@ -411,17 +390,13 @@ export default function App() {
         </div>
       );
       case 'settings': return (
-        <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
-          <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
-            style={{ 
-              backgroundImage: 'url("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop")',
-            }}
-          />
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[2px]" />
-          <div className="relative z-10">
-            <NotificationSettings />
-          </div>
+        <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl bg-surface-1">
+          <NotificationSettings />
+        </div>
+      );
+      case 'account': return (
+        <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl bg-surface-1">
+          <AccountPage />
         </div>
       );
       default: return (

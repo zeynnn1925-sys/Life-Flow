@@ -44,8 +44,14 @@ export function HabitCard({ habit, logToday, status, onEdit }: HabitCardProps) {
           </HabitStreakRing>
           
           <div>
-            <h3 className="text-heading-sm font-black text-ink leading-none tracking-tight uppercase">
+            <h3 className={`text-heading-sm font-black transition-all relative inline-block tracking-tight uppercase ${status === 'completed' ? 'text-ink-tertiary' : 'text-ink'}`}>
               {habit.title}
+              <motion.div 
+                className="absolute left-0 top-1/2 h-[2px] bg-accent/40 -translate-y-1/2"
+                initial={false}
+                animate={{ width: status === 'completed' ? '100%' : '0%' }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              />
             </h3>
             <div className="flex items-center gap-3 mt-2">
               <span className="text-eyebrow font-black text-ink-tertiary uppercase tracking-widest">
@@ -103,13 +109,21 @@ export function HabitCard({ habit, logToday, status, onEdit }: HabitCardProps) {
       </div>
       
       {status === 'completed' && (
-        <div className="absolute -top-2 -right-2">
+        <div className="absolute -top-3 -right-3">
           <motion.div
-            initial={{ scale: 0, rotate: -45 }}
-            animate={{ scale: 1, rotate: 0 }}
-            className="flex items-center justify-center bg-accent text-white p-2 rounded-full shadow-glow-accent border-2 border-white"
+            initial={{ scale: 0, rotate: -45, y: 10 }}
+            animate={{ 
+              scale: [0, 1.2, 1], 
+              rotate: [45, -10, 0],
+              y: 0 
+            }}
+            transition={{ 
+              duration: 0.5, 
+              ease: "backOut" 
+            }}
+            className="flex items-center justify-center bg-accent text-white p-2.5 rounded-full shadow-glow-accent border-4 border-surface-1"
           >
-            <LucideIcons.Check size={14} strokeWidth={4} />
+            <LucideIcons.Check size={18} strokeWidth={4} />
           </motion.div>
         </div>
       )}

@@ -120,14 +120,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [habitLogs, setHabitLogs] = useState<HabitLog[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
-  if (error) {
-    throw error;
-  }
-
   const handleError = (err: unknown, operationType: OperationType, path: string | null) => {
     try {
       handleFirestoreError(err, operationType, path);
     } catch (e) {
+      console.error("Firestore error captured by DataProvider:", e);
       if (e instanceof Error) {
         setError(e);
       } else {

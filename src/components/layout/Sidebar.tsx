@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   Wallet, 
@@ -12,7 +12,8 @@ import {
   Settings,
   Zap,
   Sparkles,
-  Globe
+  Globe,
+  LogOut
 } from 'lucide-react';
 import { Logo } from '../Logo';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -28,14 +29,13 @@ interface SidebarProps {
 
 export default function Sidebar({ activeView, setActiveView, isCollapsed, onToggleCollapse }: SidebarProps) {
   const { t, language, setLanguage } = useLanguage();
-  const { user } = useAuth(); // Assuming I need user info for bottom section
+  const { user, signOut } = useAuth(); // Assuming I need user info for bottom section
 
   const navGroups = [
     {
       title: t('finance'),
       items: [
         { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
-        { id: 'finance-hub', label: 'Finance Hub', icon: PieChart },
         { id: 'finance', label: t('finance'), icon: Wallet },
         { id: 'budgets', label: t('budgets') || 'Budgets & Savings', icon: TrendingUp },
         { id: 'visualization', label: t('financialVisualization'), icon: BarChart3 },
@@ -45,7 +45,6 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
     {
       title: t('productivity'),
       items: [
-        { id: 'productivity-hub', label: 'Productivity Hub', icon: Zap },
         { id: 'schedule', label: t('schedule'), icon: Calendar },
         { id: 'habits', label: t('habits') || 'Habit Tracker', icon: Zap },
         { id: 'ai_planner', label: t('aiPlanner'), icon: Sparkles },
@@ -55,8 +54,8 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
     {
       title: t('system'),
       items: [
-        { id: 'system-hub', label: 'System Hub', icon: Settings },
         { id: 'achievements', label: t('achievements'), icon: Trophy },
+        { id: 'account', label: t('userAccount') || 'Account', icon: Globe },
         { id: 'settings', label: t('settings'), icon: Settings },
       ]
     }
@@ -105,7 +104,7 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
       </div>
 
       {/* Bottom Section */}
-      <div className="p-3 border-t border-white/5 shrink-0">
+      <div className="p-3 border-t border-white/5 shrink-0 space-y-3">
         <div className="flex items-center gap-3">
           {user?.photoURL ? (
             <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full object-cover" referrerPolicy="no-referrer" />
@@ -119,9 +118,24 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
               <span className="text-xs font-medium text-[#f7f8f8] truncate">
                 {user?.displayName || 'User'}
               </span>
+              <span className="text-[10px] text-[#62666d] truncate">{user?.email}</span>
             </div>
           )}
         </div>
+        
+        {!isCollapsed && (
+          <button 
+            onClick={() => {
+              if (window.confirm(t('logoutConfirm') || "Yakin ingin keluar?")) {
+                signOut();
+              }
+            }}
+            className="w-full flex items-center gap-2 px-2 py-2 text-[#e23b4a] hover:bg-[#e23b4a]/10 rounded-md transition-colors text-xs font-medium"
+          >
+            <LogOut size={14} />
+            <span>{t('signOut') || 'Keluar'}</span>
+          </button>
+        )}
       </div>
     </div>
   );

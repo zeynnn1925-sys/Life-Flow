@@ -15,6 +15,18 @@ export function HabitCheckInButton({ status, onCheckIn, onSkip, color }: HabitCh
   return (
     <div className="relative">
       <AnimatePresence>
+        {status === 'completed' && (
+          <motion.div
+            key="complete-pop"
+            initial={{ scale: 1, opacity: 0.8 }}
+            animate={{ scale: 1.8, opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="absolute inset-0 bg-accent rounded-xl z-0"
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {showOptions && status === 'pending' && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.8, y: 10 }}

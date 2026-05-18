@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { Transaction, Category } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';

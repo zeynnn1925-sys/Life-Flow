@@ -18,7 +18,6 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ activeView, setActiveView }: MobileNavProps) {
-  const [showAccount, setShowAccount] = useState(false);
   const { user, signOut } = useAuth();
 
   const handleSignOut = () => {
@@ -40,7 +39,7 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
     if (tabId === 'finance') return ['finance-hub', 'finance', 'budgets', 'visualization', 'reports'].includes(activeView);
     if (tabId === 'productivity') return ['productivity-hub', 'schedule', 'habits', 'ai_planner', 'targets'].includes(activeView);
     if (tabId === 'system') return ['system-hub', 'achievements', 'settings'].includes(activeView);
-    if (tabId === 'account') return showAccount;
+    if (tabId === 'account') return activeView === 'account';
     return false;
   };
 
@@ -54,82 +53,12 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
     } else if (tabId === 'system') {
       setActiveView('system-hub');
     } else if (tabId === 'account') {
-      setShowAccount(true);
+      setActiveView('account');
     }
   };
 
   return (
     <div className="lg:hidden">
-      {/* Backdrop */}
-      <AnimatePresence>
-        {showAccount && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowAccount(false)}
-            className="fixed inset-0 z-[48] bg-black/50 backdrop-blur-[4px]"
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Account Sheet */}
-      <AnimatePresence>
-        {showAccount && (
-          <motion.div 
-            initial={{ translateY: '100%' }}
-            animate={{ translateY: 0 }}
-            exit={{ translateY: '100%' }}
-            transition={{ 
-              duration: 0.25,
-              ease: "easeOut"
-            }}
-            className="fixed bottom-[calc(60px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-[49] bg-[#111318] border-t border-white/10 rounded-t-[16px] shadow-2xl overflow-hidden"
-          >
-            <div className="p-5 relative">
-              <div className="w-10 h-1 bg-[#34343a] rounded-full mx-auto mb-4" />
-              <button 
-                onClick={() => setShowAccount(false)}
-                className="absolute top-4 right-4 p-2 text-[#62666d] hover:text-white"
-              >
-                <X size={20} />
-              </button>
-              
-              <div className="flex items-center gap-4 mb-4">
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt="" className="w-12 h-12 rounded-full object-cover" referrerPolicy="no-referrer" />
-                ) : (
-                  <div className="w-12 h-12 bg-[#5e6ad2] rounded-full flex items-center justify-center text-white font-bold text-xl">
-                    {user?.displayName?.charAt(0) || 'U'}
-                  </div>
-                )}
-                <div className="flex flex-col">
-                  <h3 className="text-base font-semibold text-[#f7f8f8]">{user?.displayName || 'User'}</h3>
-                  <p className="text-xs text-[#8a8f98]">{user?.email}</p>
-                </div>
-              </div>
-              
-              <div className="border-t border-white/10 my-4" />
-              
-              <p className="text-xs text-[#62666d] mb-4">
-                Bergabung sejak {user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}
-              </p>
-              
-              <div className="border-t border-white/10 my-4" />
-
-              <button 
-                onClick={handleSignOut}
-                className="w-full flex items-center justify-center gap-2 p-3 bg-[#e23b4a]/12 border border-[#e23b4a]/25 rounded-[10px] text-[#e23b4a] text-sm font-medium hover:bg-[#e23b4a]/20 transition-all"
-              >
-                <LogOut size={16} />
-                <span>Keluar dari LifeFlow</span>
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-
       {/* Bottom Nav Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 h-[60px] bg-[#0a0a0c]/96 backdrop-blur-[20px] border-t border-white/8 pb-[env(safe-area-inset-bottom,0px)] flex">
         {tabs.map((tab) => {

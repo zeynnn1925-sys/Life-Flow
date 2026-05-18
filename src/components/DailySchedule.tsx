@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Trash2, Clock, CheckCircle2, Circle, ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Globe, ExternalLink } from 'lucide-react';
 import { Task } from '../types';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
@@ -233,26 +233,45 @@ export default function DailySchedule() {
                 <motion.div
                   key={task.id}
                   layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ 
+                    opacity: 1, 
+                    x: 0,
+                    backgroundColor: task.completed ? '#141516' : '#0f1011'
+                  }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.2 }}
                   className={`p-4 flex items-center justify-between group transition-colors relative border-l-2 ${
-                    task.completed ? 'bg-surface-2/50 border-ink-tertiary' : 'hover:bg-surface-2 border-transparent hover:border-accent'
+                    task.completed ? 'border-ink-tertiary' : 'hover:bg-surface-2 border-transparent hover:border-accent'
                   }`}
                 >
                   <div className="flex items-center gap-4 relative z-10">
                     <button
                       onClick={() => toggleTask(task.id)}
                       className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all ${
-                        task.completed ? 'bg-accent border-accent text-white' : 'border-hairline-strong bg-surface-1 text-transparent hover:border-accent'
+                        task.completed ? 'bg-accent border-accent text-white shadow-glow-accent scale-110' : 'border-hairline-strong bg-surface-1 text-transparent hover:border-accent hover:scale-105'
                       }`}
                     >
-                      <CheckCircle2 className={`w-4 h-4 ${task.completed ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} transition-all`} />
+                      <motion.div
+                        initial={false}
+                        animate={{ 
+                          scale: task.completed ? 1 : 0,
+                          rotate: task.completed ? 0 : -90
+                        }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                      </motion.div>
                     </button>
                     <div>
                       <div className={`text-body-sm font-bold transition-all relative inline-block ${task.completed ? 'text-ink-tertiary' : 'text-ink'}`}>
                         {task.title}
-                        {task.completed && <div className="absolute left-0 top-1/2 w-full h-0.5 bg-ink-tertiary/30 -translate-y-1/2" />}
+                        <motion.div 
+                          className="absolute left-0 top-1/2 h-[1.5px] bg-ink-tertiary/40 -translate-y-1/2"
+                          initial={false}
+                          animate={{ width: task.completed ? '100%' : '0%' }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                        />
                       </div>
                       <div className="text-[10px] text-ink-tertiary flex items-center gap-1.5 mt-0.5">
                         <Clock className="w-3 h-3" />
@@ -474,7 +493,7 @@ export default function DailySchedule() {
   );
 
   return (
-    <div className="relative overflow-hidden p-1">
+    <div className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.1]"
         style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, #CBD5E1 1px, transparent 0)`,

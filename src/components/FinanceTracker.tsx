@@ -6,7 +6,7 @@ import {
   X, ChevronDown, Check, Settings2, Users, ShieldCheck, CreditCard, Landmark, Camera, Loader2
 } from 'lucide-react';
 import { Transaction, Category, RecurringTransaction } from '../types';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
@@ -352,7 +352,7 @@ export default function FinanceTracker() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-6 relative overflow-hidden p-1"
+      className="space-y-6 relative overflow-hidden"
     >
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <img

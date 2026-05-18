@@ -39,7 +39,7 @@ export default function ProductivityHubPage({ setActiveView }: ProductivityHubPr
   ];
 
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       {/* Header Section */}
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-[#f59e0b]/10 flex items-center justify-center">

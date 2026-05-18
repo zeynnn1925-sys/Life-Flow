@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell
+  PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
 import { Transaction, Category } from '../types';
-import { Filter, TrendingUp, PieChart as PieChartIcon, Download, DollarSign } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Filter, TrendingUp, PieChart as PieChartIcon, Download, DollarSign, Calendar, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
@@ -13,25 +13,81 @@ import { useAuth } from '../contexts/AuthContext';
 import AIFinanceAdvisor from './AIFinanceAdvisor';
 import { exportTransactions } from '../services/exportService';
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-surface-1 p-4 rounded-md shadow-card border border-hairline">
+        <p className="text-eyebrow text-ink-tertiary uppercase mb-3 text-[10px] font-black">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <div key={index} className="flex items-center justify-between gap-8 mb-2 last:mb-0">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
+              <span className="text-body-sm font-bold text-ink underline decoration-accent/20">{entry.name}</span>
+            </div>
+            <span className="text-body-sm font-black text-ink font-mono">Rp {entry.value.toLocaleString()}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function FinanceReports() {
   const { language, t } = useLanguage();
   const { transactions, categories } = useData();
   const { user } = useAuth();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [hiddenData, setHiddenData] = useState<string[]>([]);
   const [hiddenCategories, setHiddenCategories] = useState<string[]>([]);
+  
+  // New Filter state
+  const [showFilters, setShowFilters] = useState(false);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const getCategoryName = (idOrName: string) => {
     const cat = categories.find(c => c.id === idOrName || c.name === idOrName);
     return cat ? cat.name : idOrName;
   };
 
-  const COLORS = ['var(--color-accent)', 'var(--color-danger)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-primary)'];
+  const COLORS = ['var(--color-accent)', 'var(--color-danger)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-primary)', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de65'];
+
+  // Apply Filters to Transactions
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(t => {
+      const dateMatch = (!startDate || t.date >= startDate) && (!endDate || t.date <= endDate);
+      const catMatch = selectedCategories.length === 0 || selectedCategories.includes(t.category);
+      return dateMatch && catMatch;
+    });
+  }, [transactions, startDate, endDate, selectedCategories]);
 
   const chartData = useMemo(() => {
     const data: Record<string, { name: string; income: number; expense: number }> = {};
 
-    transactions.forEach(t => {
+    filteredTransactions.forEach(t => {
       const date = new Date(t.date);
       let key = '';
       
@@ -55,11 +111,11 @@ export default function FinanceReports() {
     });
 
     return Object.values(data).slice(-7);
-  }, [transactions, period]);
+  }, [filteredTransactions, period, language]);
 
   const categoryData = useMemo(() => {
     const data: Record<string, { value: number, color: string }> = {};
-    transactions.filter(t => t.type === 'expense').forEach(t => {
+    filteredTransactions.filter(t => t.type === 'expense').forEach(t => {
       const cat = categories.find(c => c.id === t.category || c.name === t.category);
       const name = cat ? cat.name : t.category;
       const color = cat ? cat.color : '#d62828';
@@ -69,7 +125,41 @@ export default function FinanceReports() {
     return Object.entries(data)
       .map(([name, { value, color }]) => ({ name, value, color }))
       .filter(item => !hiddenCategories.includes(item.name));
-  }, [transactions, hiddenCategories, categories]);
+  }, [filteredTransactions, hiddenCategories, categories]);
+
+  // Net worth trend data
+  const netTrendData = useMemo(() => {
+    let runningBalance = 0;
+    // Sort all transactions by date to calculate running balance correctly
+    const sortedAll = [...transactions].sort((a, b) => a.date.localeCompare(b.date));
+    
+    const trend: { name: string; balance: number; date: string }[] = [];
+    
+    sortedAll.forEach(t => {
+      if (t.type === 'income') runningBalance += t.amount;
+      else runningBalance -= t.amount;
+      
+      const dateStr = t.date;
+      const lastEntry = trend[trend.length - 1];
+      
+      if (lastEntry && lastEntry.date === dateStr) {
+        lastEntry.balance = runningBalance;
+      } else {
+        trend.push({ 
+          name: new Date(dateStr).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short', day: 'numeric' }),
+          balance: runningBalance,
+          date: dateStr
+        });
+      }
+    });
+
+    // Apply current date range filters to the trend view as well, or just show last 30 entries
+    if (startDate || endDate) {
+      return trend.filter(item => (!startDate || item.date >= startDate) && (!endDate || item.date <= endDate));
+    }
+
+    return trend.slice(-15);
+  }, [transactions, startDate, endDate, language]);
 
   const allCategories = useMemo(() => {
     const cats = new Set<string>();
@@ -77,8 +167,8 @@ export default function FinanceReports() {
     return Array.from(cats);
   }, [transactions, categories]);
 
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+  const totalIncome = filteredTransactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
+  const totalExpense = filteredTransactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
 
   const budgetAllocation = useMemo(() => {
     const allocation = {
@@ -87,7 +177,7 @@ export default function FinanceReports() {
       savings: 0,
     };
 
-    transactions.filter(t => t.type === 'expense').forEach(t => {
+    filteredTransactions.filter(t => t.type === 'expense').forEach(t => {
       const cat = categories.find(c => c.id === t.category || c.name === t.category);
       if (cat?.group === 'Needs') allocation.needs += t.amount;
       else if (cat?.group === 'Wants') allocation.wants += t.amount;
@@ -100,7 +190,7 @@ export default function FinanceReports() {
       { name: `${t('wants')} (30%)`, value: allocation.wants, percent: Math.round((allocation.wants / total) * 100), target: 30, color: 'var(--color-warning)' },
       { name: `${t('savings')} (20%)`, value: allocation.savings, percent: Math.round((allocation.savings / total) * 100), target: 20, color: 'var(--color-success)' },
     ];
-  }, [transactions, categories]);
+  }, [filteredTransactions, categories, t]);
 
   const toggleData = (dataKey: string) => {
     setHiddenData(prev => 
@@ -115,72 +205,152 @@ export default function FinanceReports() {
   };
 
   const handleExport = () => {
-    exportTransactions(transactions, user?.displayName || 'User', getCategoryName, t);
+    exportTransactions(filteredTransactions, user?.displayName || 'User', getCategoryName, t);
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-surface-1 p-4 rounded-md shadow-card border border-hairline">
-          <p className="text-eyebrow text-ink-tertiary uppercase mb-3">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-8 mb-2 last:mb-0">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                <span className="text-body-sm font-bold text-ink">{entry.name}</span>
-              </div>
-              <span className="text-body-sm font-black text-ink font-mono">Rp {entry.value.toLocaleString()}</span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
+  const resetFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setSelectedCategories([]);
+    setPeriod('monthly');
   };
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-12"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-12 pb-12"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-heading-md font-bold text-ink">{t('analytics')}</h2>
           <p className="text-body-sm text-ink-tertiary mt-1">{t('analyticsDesc')}</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-6 h-10 border rounded-md text-eyebrow font-bold transition-all shadow-sm uppercase tracking-widest ${
+              showFilters ? 'bg-accent text-white border-accent shadow-glow-accent' : 'bg-surface-1 border-hairline text-ink-tertiary hover:text-ink'
+            }`}
+          >
+            <Filter className="w-4 h-4" />
+            <span>{t('filterByCategory').split(' ')[0]}</span>
+            {showFilters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleExport}
             className="flex items-center gap-2 px-6 h-10 bg-surface-1 border border-hairline rounded-md text-eyebrow font-bold text-ink-tertiary hover:text-ink hover:border-hairline-strong transition-all shadow-sm uppercase tracking-widest"
           >
             <Download className="w-4 h-4" />
             <span>{t('exportCSV')}</span>
-          </button>
-          
-          <div className="flex items-center bg-surface-2 p-1 rounded-pill border border-hairline shadow-sm overflow-x-auto no-scrollbar max-w-full">
-            {(['daily', 'weekly', 'monthly'] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={`px-6 py-1.5 rounded-pill text-eyebrow font-bold transition-all whitespace-nowrap uppercase tracking-widest ${
-                  period === p ? 'bg-accent text-white shadow-glow-accent outline-none' : 'text-ink-tertiary hover:text-ink'
-                }`}
-              >
-                {t(p)}
-              </button>
-            ))}
-          </div>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-surface-2 p-6 rounded-lg border border-hairline shadow-sm space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                  <label className="text-eyebrow text-ink-subtle uppercase tracking-widest block mb-2 font-black">{t('startDate')}</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary" />
+                    <input 
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full h-11 bg-surface-1 border border-hairline rounded-md pl-10 pr-4 text-body-sm text-ink font-bold focus:outline-none focus:border-accent"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-eyebrow text-ink-subtle uppercase tracking-widest block mb-2 font-black">{t('endDate')}</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary" />
+                    <input 
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full h-11 bg-surface-1 border border-hairline rounded-md pl-10 pr-4 text-body-sm text-ink font-bold focus:outline-none focus:border-accent"
+                    />
+                  </div>
+                </div>
+                <div className="lg:col-span-2">
+                  <label className="text-eyebrow text-ink-subtle uppercase tracking-widest block mb-2 font-black">{t('filterByCategory')}</label>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          setSelectedCategories(prev => 
+                            prev.includes(cat.id) ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
+                          );
+                        }}
+                        className={`px-3 py-1.5 rounded-pill text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 ${
+                          selectedCategories.includes(cat.id)
+                            ? 'bg-accent text-white border-accent shadow-sm'
+                            : 'bg-surface-1 border-hairline text-ink-tertiary hover:text-ink'
+                        }`}
+                      >
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: selectedCategories.includes(cat.id) ? 'white' : cat.color }} />
+                        {cat.name}
+                      </button>
+                    ))}
+                    {selectedCategories.length > 0 && (
+                      <button 
+                        onClick={() => setSelectedCategories([])}
+                        className="text-[10px] font-black text-danger uppercase tracking-widest hover:underline px-2"
+                      >
+                        {t('reset')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-4 border-t border-hairline">
+                <div className="flex items-center gap-3 bg-surface-1 p-1 rounded-pill border border-hairline shadow-sm overflow-x-auto no-scrollbar max-w-full">
+                  {(['daily', 'weekly', 'monthly'] as const).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPeriod(p)}
+                      className={`px-6 py-1.5 rounded-pill text-eyebrow font-bold transition-all whitespace-nowrap uppercase tracking-widest ${
+                        period === p ? 'bg-accent text-white shadow-glow-accent outline-none' : 'text-ink-tertiary hover:text-ink'
+                      }`}
+                    >
+                      {t(p)}
+                    </button>
+                  ))}
+                </div>
+                <button 
+                  onClick={resetFilters}
+                  className="px-6 h-10 text-eyebrow font-bold text-danger hover:bg-danger/5 rounded-md transition-all uppercase tracking-widest"
+                >
+                  {t('reset')}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card"
+          variants={itemVariants}
+          whileHover={{ y: -4 }}
+          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
         >
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
@@ -215,10 +385,27 @@ export default function FinanceReports() {
                   onClick={(e) => toggleData(String(e.dataKey))}
                 />
                 {!hiddenData.includes('income') && (
-                  <Bar dataKey="income" name={t('income').toUpperCase()} fill="url(#colorIncome)" radius={[2, 2, 0, 0]} barSize={24} />
+                  <Bar 
+                    dataKey="income" 
+                    name={t('income').toUpperCase()} 
+                    fill="url(#colorIncome)" 
+                    radius={[2, 2, 0, 0]} 
+                    barSize={24} 
+                    animationDuration={1500}
+                    animationEasing="ease-out"
+                  />
                 )}
                 {!hiddenData.includes('expense') && (
-                  <Bar dataKey="expense" name={t('expense').toUpperCase()} fill="url(#colorExpenseBar)" radius={[2, 2, 0, 0]} barSize={24} />
+                  <Bar 
+                    dataKey="expense" 
+                    name={t('expense').toUpperCase()} 
+                    fill="url(#colorExpenseBar)" 
+                    radius={[2, 2, 0, 0]} 
+                    barSize={24} 
+                    animationDuration={1500}
+                    animationEasing="ease-out"
+                    animationBegin={200}
+                  />
                 )}
               </BarChart>
             </ResponsiveContainer>
@@ -226,118 +413,168 @@ export default function FinanceReports() {
         </motion.div>
 
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card"
+          variants={itemVariants}
+          whileHover={{ y: -4 }}
+          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
         >
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
-              <DollarSign className="w-5 h-5 text-ink-tertiary" />
-              {t('budgetHealth')} (50/30/20)
+              <PieChartIcon className="w-5 h-5 text-ink-subtle" />
+              {t('netBalance')} Trend
             </h3>
           </div>
-          <div className="space-y-8">
-            {budgetAllocation.map((item) => (
-              <div key={item.name} className="space-y-3">
-                <div className="flex justify-between items-end">
-                  <div>
-                    <div className="text-body-sm font-black text-ink uppercase tracking-tight">{item.name}</div>
-                    <div className="text-eyebrow text-ink-tertiary uppercase mt-0.5">{t('target')}: {item.target}%</div>
-                  </div>
-                  <div className="text-right">
-                    <div className={`text-heading-sm font-black transition-colors ${item.percent > item.target ? 'text-danger' : 'text-accent'}`}>
-                      {item.percent}%
-                    </div>
-                    <div className="text-eyebrow text-ink-tertiary font-bold font-mono">Rp {item.value.toLocaleString()}</div>
-                  </div>
-                </div>
-                <div className="relative group">
-                  <div className="h-4 bg-surface-2 rounded-pill overflow-hidden border border-hairline p-0.5">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${item.percent}%` }}
-                      className="h-full rounded-pill shadow-sm"
-                      style={{ backgroundColor: item.color }}
-                    />
-                  </div>
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-ink text-surface-1 text-[10px] font-black rounded-md opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-20 shadow-xl scale-95 group-hover:scale-100">
-                    Rp {item.value.toLocaleString()}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-6 border-transparent border-t-ink" />
-                  </div>
-                </div>
-                {item.percent > item.target && (
-                  <p className="text-eyebrow text-danger font-black italic mt-1.5 flex items-center gap-1.5">
-                    <TrendingUp className="w-3 h-3" />
-                    {t('overspendingMsg').replace('{percent}', (item.percent - item.target).toString())}
-                  </p>
-                )}
-              </div>
-            ))}
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={netTrendData}>
+                <defs>
+                  <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-hairline)" opacity={0.3} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-tertiary)', fontSize: 10, fontWeight: 700 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-tertiary)', fontSize: 10, fontWeight: 700 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area 
+                  type="monotone" 
+                  dataKey="balance" 
+                  name="BALANCE" 
+                  stroke="var(--color-accent)" 
+                  fillOpacity={1} 
+                  fill="url(#colorBalance)" 
+                  strokeWidth={3} 
+                  dot={{ r: 4, fill: 'var(--color-accent)', strokeWidth: 2, stroke: 'white' }} 
+                  activeDot={{ r: 6 }} 
+                  animationDuration={2000}
+                  animationEasing="ease-in-out"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </motion.div>
       </div>
 
-      <AIFinanceAdvisor transactions={transactions} categories={categories} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <motion.div 
+            variants={itemVariants}
+            whileHover={{ y: -4 }}
+            className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
+                <PieChartIcon className="w-5 h-5 text-ink-tertiary" />
+                {t('expenseBreakdown')}
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+              <div className="lg:col-span-1 h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                      animationBegin={400}
+                      animationDuration={1200}
+                    >
+                      {categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="lg:col-span-2 flex flex-wrap gap-2.5 content-start">
+                {categoryData.length === 0 ? (
+                  <div className="text-body-sm text-ink-tertiary italic">{t('noTransactions')}</div>
+                ) : (
+                  categoryData.map((item, idx) => (
+                    <motion.button
+                      key={item.name}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => toggleCategory(item.name)}
+                      className="px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all border bg-surface-1 border-hairline text-ink hover:border-accent flex items-center gap-2.5"
+                    >
+                      <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: item.color || COLORS[idx % COLORS.length] }} />
+                      <span className="flex-1">{item.name}</span>
+                      <span className="font-mono text-ink-tertiary ml-2 font-black">Rp {item.value.toLocaleString()}</span>
+                    </motion.button>
+                  ))
+                )}
+              </div>
+            </div>
+          </motion.div>
 
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card"
-      >
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
-            <PieChartIcon className="w-5 h-5 text-ink-tertiary" />
-            {t('expenseBreakdown')}
-          </h3>
+          <motion.div 
+            variants={itemVariants}
+            whileHover={{ y: -4 }}
+            className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
+                <PieChartIcon className="w-5 h-5 text-accent" />
+                {t('mainCategories').toUpperCase()}
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={budgetAllocation}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={0}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      dataKey="value"
+                      animationBegin={600}
+                      animationDuration={1500}
+                    >
+                      {budgetAllocation.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-4">
+                {budgetAllocation.map((item) => (
+                  <motion.div 
+                    key={item.name} 
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.8 + budgetAllocation.indexOf(item) * 0.1 }}
+                    className="flex justify-between items-center bg-surface-2 p-3 rounded-md border border-hairline"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-[11px] font-black uppercase text-ink">{item.name.split(' (')[0]}</span>
+                    </div>
+                    <span className="text-body-sm font-black text-ink font-mono">{item.percent}%</span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
-          <div className="lg:col-span-1 h-[250px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                  animationBegin={0}
-                  animationDuration={800}
-                >
-                  {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="lg:col-span-2 flex flex-wrap gap-2.5 content-start">
-            {allCategories.map((cat, idx) => {
-              const catObj = categories.find(c => c.name === cat);
-              const catColor = catObj ? catObj.color : COLORS[idx % COLORS.length];
-              const isHidden = hiddenCategories.includes(cat);
-              return (
-              <button
-                key={cat}
-                onClick={() => toggleCategory(cat)}
-                className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2.5 shadow-sm active:scale-95 ${
-                  isHidden
-                    ? 'bg-surface-2 border-hairline text-ink-tertiary opacity-40 italic'
-                    : 'bg-surface-1 border-hairline-strong text-ink hover:border-accent hover:shadow-md'
-                }`}
-              >
-                <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: isHidden ? '#ccc' : catColor }} />
-                {cat}
-              </button>
-            )})}
-          </div>
-        </div>
-      </motion.div>
+
+      <AIFinanceAdvisor transactions={filteredTransactions} categories={categories} />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group">
+        <motion.div 
+          variants={itemVariants} 
+          whileHover={{ y: -4 }}
+          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group transition-shadow hover:shadow-glow-accent/10"
+        >
           <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
           <div className="text-eyebrow text-accent font-black uppercase tracking-widest mb-2 flex items-center gap-2">
             <TrendingUp size={14} />
@@ -345,34 +582,41 @@ export default function FinanceReports() {
           </div>
           <div className="text-heading-md font-black text-ink font-mono tracking-tighter">Rp {(totalIncome - totalExpense).toLocaleString()}</div>
           <div className="mt-4 text-eyebrow text-ink-tertiary lowercase font-bold">{t('netBalanceDesc')}</div>
-        </div>
+        </motion.div>
         
-        <div className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group">
+        <motion.div 
+          variants={itemVariants} 
+          whileHover={{ y: -4 }}
+          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group transition-shadow hover:shadow-glow-accent/10"
+        >
           <div className="absolute top-0 right-0 w-24 h-24 bg-danger/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
           <div className="text-eyebrow text-danger font-black uppercase tracking-widest mb-2 flex items-center gap-2">
             <Download size={14} className="rotate-180" />
             {t('burnRate')}
           </div>
           <div className="text-heading-md font-black text-ink font-mono tracking-tighter">Rp {Math.round(totalExpense / (chartData.length || 1)).toLocaleString()}</div>
-          <div className="mt-4 text-eyebrow text-ink-tertiary lowercase font-bold">{t('burnRateDesc').replace('{period}', t(period))}</div>
-        </div>
+          <div className="mt-4 text-eyebrow text-ink-tertiary lowercase font-bold font-black uppercase tracking-widest opacity-40">{t('burnRateDesc').replace('{period}', t(period))}</div>
+        </motion.div>
 
-        <div className="bg-ink p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group">
+        <motion.div 
+          variants={itemVariants} 
+          whileHover={{ y: -4 }}
+          className="bg-ink p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group transition-shadow hover:shadow-glow-accent/10"
+        >
           <div className="absolute top-0 right-0 w-24 h-24 bg-surface-1/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
           <div className="text-eyebrow text-accent font-black uppercase tracking-widest mb-2 flex items-center gap-2">
             <Filter size={14} />
             {t('savingsRate')}
           </div>
-          <div className="text-heading-md font-black text-ink font-mono tracking-tighter">
+          <div className="text-heading-md font-black text-white font-mono tracking-tighter">
             {totalIncome > 0 ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100) : 0}%
           </div>
           <div className="mt-4 text-eyebrow text-ink-tertiary lowercase font-bold font-mono opacity-60">{t('savingsRateDesc')}</div>
-        </div>
+        </motion.div>
       </div>
 
       <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        variants={itemVariants}
         className="bg-surface-1 rounded-lg border border-hairline shadow-card overflow-hidden"
       >
         <div className="p-8 border-b border-hairline flex items-center justify-between bg-surface-1/50">
@@ -380,6 +624,13 @@ export default function FinanceReports() {
             <TrendingUp className="w-5 h-5 text-ink-tertiary" />
             {t('transactionHistory')}
           </h3>
+          {selectedCategories.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black text-ink-tertiary uppercase tracking-widest bg-surface-2 px-2.5 py-1 rounded-md border border-hairline">
+                {filteredTransactions.length} Transactions
+              </span>
+            </div>
+          )}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -393,14 +644,14 @@ export default function FinanceReports() {
               </tr>
             </thead>
             <tbody className="divide-y divide-hairline">
-              {transactions.length === 0 ? (
+              {filteredTransactions.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-8 py-16 text-center text-ink-tertiary italic text-body-sm">
                     {t('noTransactions')}
                   </td>
                 </tr>
               ) : (
-                [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((tx) => (
+                [...filteredTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((tx) => (
                   <tr key={tx.id} className="hover:bg-surface-2 transition-all group">
                     <td className="px-8 py-5 text-[11px] font-bold text-ink-tertiary whitespace-nowrap font-mono">
                       {new Date(tx.date).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })}

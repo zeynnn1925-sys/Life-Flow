@@ -7,7 +7,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { View } from '../../types';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface HeaderProps {
   activeView: View;
@@ -63,7 +63,7 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
           >
             <Bell size={18} />
             {inAppNotifications.length > 0 && (
-              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#e23b4a] rounded-full border border-[#010102]" />
+              <span className="absolute top-2 right-2 w.5 h-1.5 bg-[#e23b4a] rounded-full border border-[#010102]" />
             )}
           </button>
         </div>

@@ -41,7 +41,7 @@ export default function AppShell({
       <aside
         style={{
           flexShrink: 0,
-          width: isSidebarCollapsed ? '72px' : '240px',
+          width: isSidebarCollapsed ? '72px' : '220px',
           height: '100%',
           overflowY: 'auto',
           overflowX: 'hidden',
@@ -109,7 +109,7 @@ export default function AppShell({
             lg:px-8 lg:pt-6 lg:pb-8
           "
         >
-          <div key={activeView}>
+          <div key={activeView} className="max-w-7xl mx-auto w-full">
             {children}
           </div>
         </main>
