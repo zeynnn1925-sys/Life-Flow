@@ -21,6 +21,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, pass: string) => Promise<void>;
   signUpWithEmail: (email: string, pass: string) => Promise<void>;
   signInWithFace: () => Promise<void>;
+  signInAnonymouslyUser: () => Promise<void>;
   signOut: () => Promise<void>;
   connectGoogleCalendar: () => Promise<void>;
   disconnectGoogleCalendar: () => void;
@@ -40,6 +41,7 @@ const AuthContext = createContext<AuthContextType>({
   signInWithEmail: async () => {},
   signUpWithEmail: async () => {},
   signInWithFace: async () => {},
+  signInAnonymouslyUser: async () => {},
   signOut: async () => {},
   connectGoogleCalendar: async () => {},
   disconnectGoogleCalendar: () => {},
@@ -66,12 +68,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(user);
       if (user) {
         try {
+          let defaultDisplayName = 'User';
+          let defaultEmail = 'user@lifeflow.app';
+
+          if (user.isAnonymous) {
+            defaultDisplayName = 'Guest User';
+            defaultEmail = 'guest@lifeflow.app';
+          } else if (user.email === 'face-login@lifeflow.app') {
+            defaultDisplayName = 'Face User';
+            defaultEmail = 'face-login@lifeflow.app';
+          } else {
+            defaultDisplayName = user.displayName || user.email?.split('@')[0] || 'User';
+            defaultEmail = user.email || 'user@lifeflow.app';
+          }
+
           await setDoc(doc(db, 'users', user.uid), {
             uid: user.uid,
-            email: user.email || 'face-login@lifeflow.app',
-            displayName: user.displayName || user.email?.split('@')[0] || 'Face User',
+            email: user.email || defaultEmail,
+            displayName: user.displayName || defaultDisplayName,
             photoURL: user.photoURL,
-            lastLogin: new Date().toISOString()
+            lastLogin: new Date().toISOString(),
+            isAnonymous: user.isAnonymous
           }, { merge: true });
         } catch (error) {
           console.error("Error saving user to Firestore:", error);
@@ -96,16 +113,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = React.useCallback(async () => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
     } catch (error) {
       handleAuthError(error, 'Google');
     }
-  };
+  }, []);
 
-  const connectGoogleCalendar = async () => {
+  const connectGoogleCalendar = React.useCallback(async () => {
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/calendar');
     
@@ -122,15 +139,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       handleAuthError(error, 'Google Calendar');
     }
-  };
+  }, []);
 
-  const disconnectGoogleCalendar = () => {
+  const disconnectGoogleCalendar = React.useCallback(() => {
     setGoogleAccessToken(null);
     setIsCalendarConnected(false);
     localStorage.removeItem('google_calendar_token');
-  };
+  }, []);
 
-  const connectOutlookCalendar = async () => {
+  const connectOutlookCalendar = React.useCallback(async () => {
     const { OAuthProvider } = await import('firebase/auth');
     const provider = new OAuthProvider('microsoft.com');
     provider.addScope('Calendars.ReadWrite');
@@ -151,40 +168,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       handleAuthError(error, 'Outlook Calendar (Microsoft)');
     }
-  };
+  }, []);
 
-  const disconnectOutlookCalendar = () => {
+  const disconnectOutlookCalendar = React.useCallback(() => {
     setOutlookAccessToken(null);
     setIsOutlookConnected(false);
     localStorage.removeItem('outlook_calendar_token');
-  };
+  }, []);
 
-  const signInWithGithub = async () => {
+  const signInWithGithub = React.useCallback(async () => {
     const provider = new GithubAuthProvider();
     try {
       await signInWithPopup(auth, provider);
     } catch (error) {
       handleAuthError(error, 'GitHub');
     }
-  };
+  }, []);
 
-  const signInWithEmail = async (email: string, pass: string) => {
+  const signInWithEmail = React.useCallback(async (email: string, pass: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, pass);
     } catch (error) {
       handleAuthError(error, 'Email Sign-in');
     }
-  };
+  }, []);
 
-  const signUpWithEmail = async (email: string, pass: string) => {
+  const signUpWithEmail = React.useCallback(async (email: string, pass: string) => {
     try {
       await createUserWithEmailAndPassword(auth, email, pass);
     } catch (error) {
       handleAuthError(error, 'Email Sign-up');
     }
-  };
+  }, []);
 
-  const signInWithFace = async () => {
+  const signInWithFace = React.useCallback(async () => {
     try {
       const faceEmail = 'face-login@lifeflow.app';
       const facePass = 'LifeFlowFaceAuth2026!'; // Secure internal password
@@ -204,16 +221,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error signing in with Face:', error);
       throw error;
     }
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signInAnonymouslyUser = React.useCallback(async () => {
+    try {
+      await signInAnonymously(auth);
+    } catch (error) {
+      handleAuthError(error, 'Anonymous Login');
+    }
+  }, []);
+
+  const signOut = React.useCallback(async () => {
     try {
       await firebaseSignOut(auth);
+      // Clear all tokens on logout
+      localStorage.removeItem('google_calendar_token');
+      localStorage.removeItem('outlook_calendar_token');
+      setGoogleAccessToken(null);
+      setOutlookAccessToken(null);
+      setIsCalendarConnected(false);
+      setIsOutlookConnected(false);
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;
     }
-  };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ 
@@ -224,6 +256,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signInWithEmail,
       signUpWithEmail,
       signInWithFace,
+      signInAnonymouslyUser,
       signOut,
       connectGoogleCalendar,
       disconnectGoogleCalendar,

@@ -31,7 +31,7 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
   const { t, language, setLanguage } = useLanguage();
   const { user, signOut } = useAuth(); // Assuming I need user info for bottom section
 
-  const navGroups = [
+  const navGroups = React.useMemo(() => [
     {
       title: t('finance'),
       items: [
@@ -59,7 +59,27 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
         { id: 'settings', label: t('settings'), icon: Settings },
       ]
     }
-  ];
+  ], [t]);
+
+  const profileSection = React.useMemo(() => (
+    <div className="flex items-center gap-3">
+      {user?.photoURL ? (
+        <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full object-cover" referrerPolicy="no-referrer" />
+      ) : (
+        <div className="w-7 h-7 bg-[#5e6ad2] rounded-full flex items-center justify-center text-white font-bold text-[10px]">
+          {user?.displayName?.charAt(0) || 'U'}
+        </div>
+      )}
+      {!isCollapsed && (
+        <div className="flex flex-col min-w-0">
+          <span className="text-xs font-medium text-[#f7f8f8] truncate">
+            {user?.displayName || 'User'}
+          </span>
+          <span className="text-[10px] text-[#62666d] truncate">{user?.email}</span>
+        </div>
+      )}
+    </div>
+  ), [user, isCollapsed]);
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-[#010102]">
@@ -105,37 +125,15 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
 
       {/* Bottom Section */}
       <div className="p-3 border-t border-white/5 shrink-0 space-y-3">
-        <div className="flex items-center gap-3">
-          {user?.photoURL ? (
-            <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full object-cover" referrerPolicy="no-referrer" />
-          ) : (
-            <div className="w-7 h-7 bg-[#5e6ad2] rounded-full flex items-center justify-center text-white font-bold text-[10px]">
-              {user?.displayName?.charAt(0) || 'U'}
-            </div>
-          )}
-          {!isCollapsed && (
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs font-medium text-[#f7f8f8] truncate">
-                {user?.displayName || 'User'}
-              </span>
-              <span className="text-[10px] text-[#62666d] truncate">{user?.email}</span>
-            </div>
-          )}
-        </div>
+        {profileSection}
         
-        {!isCollapsed && (
           <button 
-            onClick={() => {
-              if (window.confirm(t('logoutConfirm') || "Yakin ingin keluar?")) {
-                signOut();
-              }
-            }}
+            onClick={() => signOut()}
             className="w-full flex items-center gap-2 px-2 py-2 text-[#e23b4a] hover:bg-[#e23b4a]/10 rounded-md transition-colors text-xs font-medium"
           >
             <LogOut size={14} />
-            <span>{t('signOut') || 'Keluar'}</span>
+            {!isCollapsed && <span>{t('signOut') || 'Keluar'}</span>}
           </button>
-        )}
       </div>
     </div>
   );

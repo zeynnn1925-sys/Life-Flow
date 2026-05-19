@@ -28,28 +28,28 @@ export default function AccountPage() {
   const { t, language, setLanguage } = useLanguage();
 
   const handleSignOut = () => {
-    if (window.confirm(t('logoutConfirm') || "Yakin ingin keluar?")) {
-      signOut();
-    }
+    signOut();
   };
 
-  const creationDate = user?.metadata.creationTime 
-    ? new Date(user.metadata.creationTime).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-      }) 
-    : '-';
+  const creationDate = React.useMemo(() => {
+    if (!user?.metadata.creationTime) return '-';
+    return new Date(user.metadata.creationTime).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  }, [user?.metadata.creationTime, language]);
 
-  const lastLogin = user?.metadata.lastSignInTime 
-    ? new Date(user.metadata.lastSignInTime).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }) 
-    : '-';
+  const lastLogin = React.useMemo(() => {
+    if (!user?.metadata.lastSignInTime) return '-';
+    return new Date(user.metadata.lastSignInTime).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }, [user?.metadata.lastSignInTime, language]);
 
   return (
     <div className="space-y-8 pb-32">

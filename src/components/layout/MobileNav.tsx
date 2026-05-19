@@ -18,13 +18,7 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ activeView, setActiveView }: MobileNavProps) {
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = () => {
-    if (window.confirm("Yakin ingin keluar dari LifeFlow?")) {
-      signOut();
-    }
-  };
+  const { user } = useAuth();
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
