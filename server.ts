@@ -3,6 +3,7 @@ import { createServer as createViteServer } from 'vite';
 import * as admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
+import firebaseConfig from './firebase-applet-config.json' assert { type: 'json' };
 
 // Lazy initialization of Firebase Admin
 let adminApp: admin.app.App | null = null;
@@ -34,20 +35,50 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Auth Middleware
+  const authenticate = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
+
+    const idToken = authHeader.split('Bearer ')[1];
+    const firebaseAdmin = getFirebaseAdmin();
+    
+    if (!firebaseAdmin) {
+      // In development, if Firebase key is missing, we might want to bypass or show clear error
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Firebase Admin not initialized, skipping authentication check');
+        (req as any).user = { uid: 'dev-user', email: 'dev@example.com' };
+        return next();
+      }
+      return res.status(500).json({ error: 'Server authentication service unavailable' });
+    }
+
+    try {
+      const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+      (req as any).user = decodedToken;
+      next();
+    } catch (error) {
+      console.error('Error verifying auth token:', error);
+      res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
+  };
+
   // API Routes
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', adminInitialized: !!getFirebaseAdmin() });
   });
 
-  // Example Admin Route: Get total users count from Firestore
-  app.get('/api/admin/users/count', async (req, res) => {
+  // Protected Admin Route: Get total users count from Firestore
+  app.get('/api/admin/users/count', authenticate, async (req, res) => {
     const firebaseAdmin = getFirebaseAdmin();
     if (!firebaseAdmin) {
-      return res.status(500).json({ error: 'Firebase Admin not configured. Please set FIREBASE_SERVICE_ACCOUNT_KEY.' });
+      return res.status(500).json({ error: 'Firebase Admin not configured.' });
     }
     try {
-      const db = firebaseAdmin.firestore();
-      // This requires a collection named 'users'
+      // Use specific database ID from config
+      const db = firebaseAdmin.firestore(firebaseConfig.firestoreDatabaseId);
       const snapshot = await db.collection('users').count().get();
       res.json({ count: snapshot.data().count });
     } catch (error: any) {

@@ -9,6 +9,7 @@ import { Flame, Info, Settings } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface HabitCardProps {
+  key?: React.Key;
   habit: Habit;
   logToday?: HabitLog;
   status: 'pending' | 'in_progress' | 'completed' | 'skipped';

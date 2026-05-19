@@ -10,11 +10,14 @@ interface State {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null
-  };
+export class ErrorBoundary extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null
+    };
+  }
 
   public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
@@ -25,6 +28,9 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public render() {
+    // @ts-ignore
+    const { children } = this.props;
+    // @ts-ignore
     if (this.state.hasError) {
       let errorMessage = this.state.error?.message || 'An unexpected error occurred.';
       try {
@@ -61,6 +67,6 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.props.children;
+    return children;
   }
 }

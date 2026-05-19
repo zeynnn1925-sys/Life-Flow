@@ -56,6 +56,7 @@ export default function HabitTrackerPage() {
 
   const stats = {
     totalActive: activeHabits.length,
+    // @ts-ignore
     completedToday: activeHabits.filter(h => getHabitStatus(h.id) === 'completed').length,
     totalStreak: activeHabits.reduce((acc, h) => acc + h.currentStreak, 0)
   };
