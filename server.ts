@@ -77,8 +77,7 @@ async function startServer() {
       return res.status(500).json({ error: 'Firebase Admin not configured.' });
     }
     try {
-      // Use specific database ID from config
-      const db = firebaseAdmin.firestore(firebaseConfig.firestoreDatabaseId);
+      const db = firebaseAdmin.firestore();
       const snapshot = await db.collection('users').count().get();
       res.json({ count: snapshot.data().count });
     } catch (error: any) {
