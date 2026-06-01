@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { exportTransactions } from '../services/exportService';
 import { scanReceipt } from '../services/aiService';
 import { ConfirmationModal } from './ConfirmationModal';
+import ChatBotSimulator from './ChatBotSimulator';
 
 const ICON_MAP: Record<string, React.ElementType> = {
   ShoppingBag, Coffee, Home, Car, Smartphone, Heart, Briefcase, 
@@ -183,17 +184,32 @@ export default function FinanceTracker() {
 
       for (const rt of recurringTransactions) {
         let lastProcessed = new Date(rt.lastProcessedDate);
+        if (isNaN(lastProcessed.getTime())) {
+          lastProcessed = new Date(rt.startDate || now.toISOString());
+        }
         let nextDueDate = new Date(lastProcessed);
+        const freq = (rt.frequency || '').toLowerCase().trim();
 
-        if (rt.frequency === 'daily') nextDueDate.setDate(nextDueDate.getDate() + 1);
-        else if (rt.frequency === 'weekly') nextDueDate.setDate(nextDueDate.getDate() + 7);
-        else if (rt.frequency === 'monthly') nextDueDate.setMonth(nextDueDate.getMonth() + 1);
-        else if (rt.frequency === 'yearly') nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+        if (freq === 'daily') nextDueDate.setDate(nextDueDate.getDate() + 1);
+        else if (freq === 'weekly') nextDueDate.setDate(nextDueDate.getDate() + 7);
+        else if (freq === 'monthly') nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+        else if (freq === 'yearly') nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+        else {
+          // If frequency is unknown, advance by 1 month as fallback to avoid getting stuck
+          nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+        }
 
         let currentRt = { ...rt };
         let localHasChanges = false;
 
-        while (nextDueDate <= now) {
+        // Limit iterations to prevent massive execution if nextDueDate is very old
+        let iterations = 0;
+        const maxIterations = 100;
+
+        while (nextDueDate <= now && iterations < maxIterations) {
+          iterations++;
+          const prevTime = nextDueDate.getTime();
+          
           localHasChanges = true;
           hasChanges = true;
           await saveTransaction({
@@ -210,10 +226,19 @@ export default function FinanceTracker() {
           lastProcessed = new Date(currentRt.lastProcessedDate);
           nextDueDate = new Date(lastProcessed);
 
-          if (rt.frequency === 'daily') nextDueDate.setDate(nextDueDate.getDate() + 1);
-          else if (rt.frequency === 'weekly') nextDueDate.setDate(nextDueDate.getDate() + 7);
-          else if (rt.frequency === 'monthly') nextDueDate.setMonth(nextDueDate.getMonth() + 1);
-          else if (rt.frequency === 'yearly') nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+          if (freq === 'daily') nextDueDate.setDate(nextDueDate.getDate() + 1);
+          else if (freq === 'weekly') nextDueDate.setDate(nextDueDate.getDate() + 7);
+          else if (freq === 'monthly') nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+          else if (freq === 'yearly') nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+          else {
+            nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+          }
+
+          // Safety: Check if date actually advanced. If not, break to prevent infinite freeze.
+          if (isNaN(nextDueDate.getTime()) || nextDueDate.getTime() <= prevTime) {
+            console.warn('Recurring transaction nextDueDate did not advance. Breaking loop to prevent freeze.');
+            break;
+          }
         }
 
         if (localHasChanges) {
@@ -585,6 +610,17 @@ export default function FinanceTracker() {
               {t('addTransaction')}
             </button>
           </form>
+
+          {/* Quick Chat Bot Simulator */}
+          <div className="space-y-2 mt-6">
+            <div className="flex items-center gap-1.5 px-1">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-ink-subtle">
+                {language === 'id' ? 'Pencatatan Cepat via AI Chat Bot' : 'Fast Log via AI Chat Bot Bot'}
+              </h4>
+            </div>
+            <ChatBotSimulator />
+          </div>
         </div>
 
         <div className="lg:col-span-2">

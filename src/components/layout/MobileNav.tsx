@@ -31,7 +31,7 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
   const isTabActive = (tabId: string) => {
     if (tabId === 'dashboard') return activeView === 'dashboard';
     if (tabId === 'finance') return ['finance-hub', 'finance', 'budgets', 'visualization', 'reports'].includes(activeView);
-    if (tabId === 'productivity') return ['productivity-hub', 'schedule', 'habits', 'ai_planner', 'targets'].includes(activeView);
+    if (tabId === 'productivity') return ['productivity-hub', 'schedule', 'habits', 'ai_planner', 'targets', 'smart_space'].includes(activeView);
     if (tabId === 'system') return ['system-hub', 'achievements', 'settings'].includes(activeView);
     if (tabId === 'account') return activeView === 'account';
     return false;

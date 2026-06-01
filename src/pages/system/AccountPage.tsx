@@ -164,7 +164,17 @@ export default function AccountPage() {
                 
                 <div className="flex flex-wrap gap-2">
                   <button 
-                    onClick={isCalendarConnected ? disconnectGoogleCalendar : connectGoogleCalendar}
+                    onClick={async () => {
+                      if (isCalendarConnected) {
+                        disconnectGoogleCalendar();
+                      } else {
+                        try {
+                          await connectGoogleCalendar();
+                        } catch (err) {
+                          console.warn('Google Calendar connection failed or was cancelled:', err);
+                        }
+                      }
+                    }}
                     className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-tight px-3 py-2 rounded-lg transition-all ${
                       isCalendarConnected 
                         ? 'bg-[#4285F4]/10 text-[#4285F4] border border-[#4285F4]/20' 
@@ -176,7 +186,17 @@ export default function AccountPage() {
                   </button>
 
                   <button 
-                    onClick={isOutlookConnected ? disconnectOutlookCalendar : connectOutlookCalendar}
+                    onClick={async () => {
+                      if (isOutlookConnected) {
+                        disconnectOutlookCalendar();
+                      } else {
+                        try {
+                          await connectOutlookCalendar();
+                        } catch (err) {
+                          console.warn('Outlook Calendar connection failed or was cancelled:', err);
+                        }
+                      }
+                    }}
                     className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-tight px-3 py-2 rounded-lg transition-all ${
                       isOutlookConnected 
                         ? 'bg-[#0078D4]/10 text-[#0078D4] border border-[#0078D4]/20' 

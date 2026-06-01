@@ -4,7 +4,7 @@ import {
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
 import { Transaction, Category } from '../types';
-import { Filter, TrendingUp, PieChart as PieChartIcon, Download, DollarSign, Calendar, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { Filter, TrendingUp, PieChart as PieChartIcon, Download, DollarSign, Calendar, ChevronDown, ChevronUp, Search, FileSpreadsheet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useLanguage } from '../contexts/LanguageContext';
@@ -12,6 +12,7 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import AIFinanceAdvisor from './AIFinanceAdvisor';
 import { exportTransactions } from '../services/exportService';
+import { exportFinanceToGoogleSheets } from '../services/googleSheetsService';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -36,7 +37,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function FinanceReports() {
   const { language, t } = useLanguage();
   const { transactions, categories } = useData();
-  const { user } = useAuth();
+  const { 
+    user, 
+    googleSheetsAccessToken, 
+    isSheetsConnected, 
+    connectGoogleSheets, 
+    disconnectGoogleSheets 
+  } = useAuth();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -61,12 +68,110 @@ export default function FinanceReports() {
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [hiddenData, setHiddenData] = useState<string[]>([]);
   const [hiddenCategories, setHiddenCategories] = useState<string[]>([]);
+  const [breakdownType, setBreakdownType] = useState<'expense' | 'income'>('expense');
   
   // New Filter state
   const [showFilters, setShowFilters] = useState(false);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  // Google Sheets integration state
+  const [isExportingToSheets, setIsExportingToSheets] = useState(false);
+  const [exportedSheetsUrl, setExportedSheetsUrl] = useState<string | null>(null);
+  const [sheetsExportError, setSheetsExportError] = useState<string | null>(null);
+
+  const handleSheetsExport = async () => {
+    setSheetsExportError(null);
+    setExportedSheetsUrl(null);
+    
+    let token = googleSheetsAccessToken;
+    if (!isSheetsConnected || !token) {
+      try {
+        const provider = new (await import('firebase/auth')).GoogleAuthProvider();
+        provider.addScope('https://www.googleapis.com/auth/spreadsheets');
+        const result = await (await import('firebase/auth')).signInWithPopup(
+          (await import('../firebase')).auth, 
+          provider
+        );
+        const credential = (await import('firebase/auth')).GoogleAuthProvider.credentialFromResult(result);
+        token = credential?.accessToken || null;
+        if (token) {
+          localStorage.setItem('google_sheets_token', token);
+          window.location.reload(); // Refresh to set state properly and proceed safely
+          return;
+        } else {
+          throw new Error('Could not retrieve access token');
+        }
+      } catch (err: any) {
+        setSheetsExportError(err.message || 'Authentication failed');
+        return;
+      }
+    }
+
+    setIsExportingToSheets(true);
+    try {
+      const confirmed = window.confirm(
+        language === 'id'
+          ? `Ekspor ${filteredTransactions.length} transaksi saat ini ke Google Sheets?`
+          : `Export ${filteredTransactions.length} current transactions to a new Google Spreadsheet?`
+      );
+      if (!confirmed) {
+        setIsExportingToSheets(false);
+        return;
+      }
+
+      const res = await exportFinanceToGoogleSheets(
+        token!,
+        filteredTransactions,
+        categories,
+        user?.email || 'User',
+        language
+      );
+      setExportedSheetsUrl(res.spreadsheetUrl);
+    } catch (err: any) {
+      setSheetsExportError(err.message || 'Export failed');
+    } finally {
+      setIsExportingToSheets(false);
+    }
+  };
+
+  const getTodayDate = () => {
+    return new Date().toLocaleDateString('sv').substring(0, 10);
+  };
+
+  const getWeekStartDate = () => {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    const firstDay = new Date(now.setDate(diff));
+    return firstDay.toLocaleDateString('sv').substring(0, 10);
+  };
+
+  const getMonthStartDate = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  };
+
+  const getYearStartDate = () => {
+    return `${new Date().getFullYear()}-01-01`;
+  };
+
+  const handleQuickFilter = (preset: 'all' | 'week' | 'month' | 'year') => {
+    if (preset === 'all') {
+      setStartDate('');
+      setEndDate('');
+    } else if (preset === 'week') {
+      setStartDate(getWeekStartDate());
+      setEndDate(getTodayDate());
+    } else if (preset === 'month') {
+      setStartDate(getMonthStartDate());
+      setEndDate(getTodayDate());
+    } else if (preset === 'year') {
+      setStartDate(getYearStartDate());
+      setEndDate(getTodayDate());
+    }
+  };
 
   const getCategoryName = (idOrName: string) => {
     const cat = categories.find(c => c.id === idOrName || c.name === idOrName);
@@ -115,17 +220,17 @@ export default function FinanceReports() {
 
   const categoryData = useMemo(() => {
     const data: Record<string, { value: number, color: string }> = {};
-    filteredTransactions.filter(t => t.type === 'expense').forEach(t => {
+    filteredTransactions.filter(t => t.type === breakdownType).forEach(t => {
       const cat = categories.find(c => c.id === t.category || c.name === t.category);
       const name = cat ? cat.name : t.category;
-      const color = cat ? cat.color : '#d62828';
+      const color = cat ? cat.color : (breakdownType === 'income' ? 'var(--color-success)' : 'var(--color-danger)');
       if (!data[name]) data[name] = { value: 0, color };
       data[name].value += t.amount;
     });
     return Object.entries(data)
       .map(([name, { value, color }]) => ({ name, value, color }))
       .filter(item => !hiddenCategories.includes(item.name));
-  }, [filteredTransactions, hiddenCategories, categories]);
+  }, [filteredTransactions, hiddenCategories, categories, breakdownType]);
 
   // Net worth trend data
   const netTrendData = useMemo(() => {
@@ -251,8 +356,88 @@ export default function FinanceReports() {
             <Download className="w-4 h-4" />
             <span>{t('exportCSV')}</span>
           </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={isExportingToSheets}
+            onClick={handleSheetsExport}
+            className={`flex items-center gap-2 px-6 h-10 border rounded-md text-eyebrow font-bold transition-all shadow-sm uppercase tracking-widest ${
+              isSheetsConnected
+                ? 'bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-500 border-emerald-500/20 hover:border-emerald-500/35'
+                : 'bg-surface-1 border-hairline text-ink-tertiary hover:text-ink hover:border-hairline-strong'
+            }`}
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>
+              {isExportingToSheets
+                ? (language === 'id' ? 'Mengekspor...' : 'Exporting...')
+                : isSheetsConnected
+                  ? (language === 'id' ? 'Ekspor ke Sheets' : 'Export to Sheets')
+                  : (language === 'id' ? 'Hubungkan Sheets' : 'Connect Sheets')}
+            </span>
+          </motion.button>
         </div>
       </motion.div>
+
+      {/* Google Sheets Status Messages */}
+      <AnimatePresence>
+        {(exportedSheetsUrl || sheetsExportError) && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`p-4 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+              exportedSheetsUrl
+                ? 'bg-emerald-600/10 border-emerald-500/20 text-emerald-400'
+                : 'bg-rose-600/10 border-rose-500/20 text-rose-400'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <FileSpreadsheet className={`w-5 h-5 shrink-0 ${exportedSheetsUrl ? 'text-emerald-500' : 'text-rose-500'}`} />
+              <div className="text-body-sm">
+                {exportedSheetsUrl ? (
+                  <div className="font-semibold text-emerald-300">
+                    {language === 'id' 
+                      ? 'Laporan keuangan berhasil diekspor ke Google Sheets!' 
+                      : 'Financial report successfully exported to Google Sheets!'}
+                  </div>
+                ) : (
+                  <div className="font-semibold text-rose-300">
+                    {language === 'id' ? 'Gagal ekspor ke Google Sheets:' : 'Failed to export to Google Sheets:'} {sheetsExportError}
+                  </div>
+                )}
+              </div>
+            </div>
+            {exportedSheetsUrl && (
+              <div className="flex items-center gap-2">
+                <a
+                  href={exportedSheetsUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-md transition-all whitespace-nowrap"
+                >
+                  {language === 'id' ? 'Buka Google Sheets' : 'Open Google Sheets'}
+                </a>
+                <button
+                  onClick={() => setExportedSheetsUrl(null)}
+                  className="text-xs text-emerald-500/80 hover:text-emerald-500 font-bold px-2 py-1.5"
+                >
+                  {language === 'id' ? 'Tutup' : 'Dismiss'}
+                </button>
+              </div>
+            )}
+            {sheetsExportError && (
+              <button
+                onClick={() => setSheetsExportError(null)}
+                className="text-xs text-rose-500/80 hover:text-rose-500 font-bold px-2 py-1.5"
+              >
+                {language === 'id' ? 'Mengerti' : 'Dismiss'}
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showFilters && (
@@ -263,7 +448,37 @@ export default function FinanceReports() {
             className="overflow-hidden"
           >
             <div className="bg-surface-2 p-6 rounded-lg border border-hairline shadow-sm space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div>
+                <label className="text-eyebrow text-ink-subtle uppercase tracking-widest block mb-2 font-black">
+                  {language === 'id' ? 'Pilihan Cepat Periode' : 'Quick Period Preset'}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: 'all', label: language === 'id' ? 'Semua Waktu' : 'All Time' },
+                    { id: 'week', label: language === 'id' ? 'Minggu Ini' : 'This Week' },
+                    { id: 'month', label: language === 'id' ? 'Bulan Ini' : 'This Month' },
+                    { id: 'year', label: language === 'id' ? 'Tahun Ini' : 'This Year' }
+                  ].map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => handleQuickFilter(preset.id as any)}
+                      className={`px-3.5 py-1.5 rounded-pill text-[10px] font-black uppercase tracking-widest transition-all border ${
+                        (preset.id === 'all' && !startDate && !endDate) ||
+                        (preset.id === 'week' && startDate === getWeekStartDate() && endDate === getTodayDate()) ||
+                        (preset.id === 'month' && startDate === getMonthStartDate() && endDate === getTodayDate()) ||
+                        (preset.id === 'year' && startDate === getYearStartDate() && endDate === getTodayDate())
+                          ? 'bg-accent text-white border-accent shadow-sm'
+                          : 'bg-surface-1 border-hairline text-ink-subtle hover:text-ink hover:border-hairline-strong'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-4 border-t border-hairline/40">
                 <div>
                   <label className="text-eyebrow text-ink-subtle uppercase tracking-widest block mb-2 font-black">{t('startDate')}</label>
                   <div className="relative">
@@ -461,11 +676,35 @@ export default function FinanceReports() {
             whileHover={{ y: -4 }}
             className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
           >
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
               <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
                 <PieChartIcon className="w-5 h-5 text-ink-tertiary" />
-                {t('expenseBreakdown')}
+                {breakdownType === 'expense' ? t('expenseBreakdown') : t('incomeBreakdown')}
               </h3>
+              <div className="flex bg-surface-2 p-1 rounded-md border border-hairline shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setBreakdownType('expense')}
+                  className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-sm transition-all ${
+                    breakdownType === 'expense'
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'text-ink-tertiary hover:text-ink'
+                  }`}
+                >
+                  {t('expense')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBreakdownType('income')}
+                  className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-sm transition-all ${
+                    breakdownType === 'income'
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'text-ink-tertiary hover:text-ink'
+                  }`}
+                >
+                  {t('income')}
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
               <div className="lg:col-span-1 h-[250px] w-full">

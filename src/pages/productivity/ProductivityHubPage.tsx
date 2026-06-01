@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarDays, Flame, Sparkles, Target, Zap, ChevronRight } from 'lucide-react';
+import { CalendarDays, Flame, Sparkles, Target, Zap, ChevronRight, BrainCircuit } from 'lucide-react';
 import { View } from '../../types';
 
 interface ProductivityHubProps {
@@ -35,6 +35,13 @@ export default function ProductivityHubPage({ setActiveView }: ProductivityHubPr
       title: "Daily Targets",
       description: "Pantau progress targetmu",
       view: 'targets' as View
+    },
+    {
+      id: 'smart-space',
+      icon: BrainCircuit,
+      title: "AI Smart Space",
+      description: "Sesi Fokus & Analisis Korelasi",
+      view: 'smart_space' as View
     }
   ];
 

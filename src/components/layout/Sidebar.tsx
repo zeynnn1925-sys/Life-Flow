@@ -13,7 +13,8 @@ import {
   Zap,
   Sparkles,
   Globe,
-  LogOut
+  LogOut,
+  BrainCircuit
 } from 'lucide-react';
 import { Logo } from '../Logo';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -49,6 +50,7 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
         { id: 'habits', label: t('habits') || 'Habit Tracker', icon: Zap },
         { id: 'ai_planner', label: t('aiPlanner'), icon: Sparkles },
         { id: 'targets', label: t('targets'), icon: TargetIcon },
+        { id: 'smart_space', label: language === 'id' ? 'AI Smart Space' : 'AI Smart Space', icon: BrainCircuit },
       ]
     },
     {

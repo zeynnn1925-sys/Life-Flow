@@ -32,6 +32,7 @@ import FinancialVisualization from './components/FinancialVisualization';
 import AchievementSystem from './components/AchievementSystem';
 import NotificationSettings from './components/NotificationSettings';
 import AIPlanner from './components/AIPlanner';
+import SmartSpace from './components/SmartSpace';
 import DigitalClock from './components/DigitalClock';
 import { BudgetAndSavings } from './components/BudgetAndSavings';
 import { Logo } from './components/Logo';
@@ -348,6 +349,14 @@ export default function App() {
           <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
           <div className="relative z-10">
             <AIPlanner />
+          </div>
+        </div>
+      );
+      case 'smart_space': return (
+        <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="relative z-10">
+            <SmartSpace />
           </div>
         </div>
       );

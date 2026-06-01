@@ -27,10 +27,14 @@ interface AuthContextType {
   disconnectGoogleCalendar: () => void;
   connectOutlookCalendar: () => Promise<void>;
   disconnectOutlookCalendar: () => void;
+  connectGoogleSheets: () => Promise<void>;
+  disconnectGoogleSheets: () => void;
   googleAccessToken: string | null;
   outlookAccessToken: string | null;
+  googleSheetsAccessToken: string | null;
   isCalendarConnected: boolean;
   isOutlookConnected: boolean;
+  isSheetsConnected: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -47,10 +51,14 @@ const AuthContext = createContext<AuthContextType>({
   disconnectGoogleCalendar: () => {},
   connectOutlookCalendar: async () => {},
   disconnectOutlookCalendar: () => {},
+  connectGoogleSheets: async () => {},
+  disconnectGoogleSheets: () => {},
   googleAccessToken: null,
   outlookAccessToken: null,
+  googleSheetsAccessToken: null,
   isCalendarConnected: false,
   isOutlookConnected: false,
+  isSheetsConnected: false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -60,8 +68,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(localStorage.getItem('google_calendar_token'));
   const [outlookAccessToken, setOutlookAccessToken] = useState<string | null>(localStorage.getItem('outlook_calendar_token'));
+  const [googleSheetsAccessToken, setGoogleSheetsAccessToken] = useState<string | null>(localStorage.getItem('google_sheets_token'));
   const [isCalendarConnected, setIsCalendarConnected] = useState<boolean>(!!localStorage.getItem('google_calendar_token'));
   const [isOutlookConnected, setIsOutlookConnected] = useState<boolean>(!!localStorage.getItem('outlook_calendar_token'));
+  const [isSheetsConnected, setIsSheetsConnected] = useState<boolean>(!!localStorage.getItem('google_sheets_token'));
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -101,14 +111,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const handleAuthError = (error: any, providerName: string) => {
+    const isLanguageIndonesian = localStorage.getItem('lifeflow_language') === 'id';
+    
     if (error.code === 'auth/operation-not-allowed') {
       const msg = `${providerName} is not enabled in Firebase Console. Go to Authentication > Sign-in method to enable it.`;
-      console.error(msg);
+      console.warn(msg);
       alert(msg);
     } else if (error.code === 'auth/popup-closed-by-user') {
       console.warn(`${providerName} login cancelled by user.`);
+      const friendlyError = new Error(
+        isLanguageIndonesian
+          ? `Popup login ${providerName} ditutup oleh pengguna sebelum selesai.`
+          : `The login popup for ${providerName} was closed before completing.`
+      );
+      (friendlyError as any).code = error.code;
+      throw friendlyError;
+    } else if (error.code === 'auth/popup-blocked') {
+      const warningMsg = `Browser blocked the popup for ${providerName}. Please check your browser's popup blocker settings or try opening the app in a new tab.`;
+      console.warn(warningMsg);
+      const friendlyError = new Error(
+        isLanguageIndonesian
+          ? `Popup login diblokir oleh browser saat menghubungkan ${providerName}. Silakan izinkan popup di browser Anda atau buka aplikasi ini di tab baru.`
+          : `Popup blocked by browser when connecting ${providerName}. Please allow popups or open the app in a new tab.`
+      );
+      (friendlyError as any).code = error.code;
+      throw friendlyError;
+    } else if (error.code === 'auth/cancelled-popup-request') {
+      const warningMsg = `Popup request cancelled for ${providerName}.`;
+      console.warn(warningMsg);
+      const friendlyError = new Error(
+        isLanguageIndonesian
+          ? `Permintaan popup untuk ${providerName} dibatalkan atau masih berjalan.`
+          : `The popup request for ${providerName} was cancelled or is already pending.`
+      );
+      (friendlyError as any).code = error.code;
+      throw friendlyError;
     } else {
-      console.error(`Error with ${providerName}:`, error);
+      console.warn(`Auth connection issue with ${providerName}:`, error.message || error);
       throw error;
     }
   };
@@ -145,6 +184,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setGoogleAccessToken(null);
     setIsCalendarConnected(false);
     localStorage.removeItem('google_calendar_token');
+  }, []);
+
+  const connectGoogleSheets = React.useCallback(async () => {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/spreadsheets');
+    
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+      
+      if (token) {
+        setGoogleSheetsAccessToken(token);
+        setIsSheetsConnected(true);
+        localStorage.setItem('google_sheets_token', token);
+      }
+    } catch (error: any) {
+      handleAuthError(error, 'Google Sheets');
+    }
+  }, []);
+
+  const disconnectGoogleSheets = React.useCallback(() => {
+    setGoogleSheetsAccessToken(null);
+    setIsSheetsConnected(false);
+    localStorage.removeItem('google_sheets_token');
   }, []);
 
   const connectOutlookCalendar = React.useCallback(async () => {
@@ -237,10 +301,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Clear all tokens on logout
       localStorage.removeItem('google_calendar_token');
       localStorage.removeItem('outlook_calendar_token');
+      localStorage.removeItem('google_sheets_token');
       setGoogleAccessToken(null);
       setOutlookAccessToken(null);
+      setGoogleSheetsAccessToken(null);
       setIsCalendarConnected(false);
       setIsOutlookConnected(false);
+      setIsSheetsConnected(false);
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;
@@ -262,10 +329,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       disconnectGoogleCalendar,
       connectOutlookCalendar,
       disconnectOutlookCalendar,
+      connectGoogleSheets,
+      disconnectGoogleSheets,
       googleAccessToken,
       outlookAccessToken,
+      googleSheetsAccessToken,
       isCalendarConnected,
-      isOutlookConnected
+      isOutlookConnected,
+      isSheetsConnected
     }}>
       {children}
     </AuthContext.Provider>
