@@ -132,6 +132,14 @@ service cloud.firestore {
           && incoming().userId == request.auth.uid;
         allow delete: if isOwner(userId);
       }
+
+      match /journals/{id} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(id)
+          && incoming().keys().hasAll(['id', 'title', 'content', 'date', 'mood', 'userId'])
+          && incoming().userId == request.auth.uid;
+        allow delete: if isOwner(userId);
+      }
     }
   }
 }

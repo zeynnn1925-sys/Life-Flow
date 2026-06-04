@@ -55,6 +55,8 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { useData } from './contexts/DataContext';
 import { useTheme } from './contexts/ThemeContext';
 import { useNotifications } from './contexts/NotificationContext';
+import JournalPage from './components/JournalPage';
+import OnboardingTour from './components/OnboardingTour';
 
 interface UINotification {
   id: string;
@@ -80,6 +82,25 @@ export default function App() {
   const { notifications: inAppNotifications, removeNotification, addNotification } = useNotifications();
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+
+  // Auto start onboarding tour for new users on successful login/load
+  useEffect(() => {
+    if (user && !loading) {
+      const completed = localStorage.getItem('lifeflow_onboarding_completed');
+      if (!completed) {
+        setIsOnboardingOpen(true);
+      }
+    }
+  }, [user, loading]);
+
+  // Handle manual tour trigger
+  useEffect(() => {
+    if (activeView === 'tour') {
+      setIsOnboardingOpen(true);
+      setActiveView('dashboard');
+    }
+  }, [activeView]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<UINotification[]>([]);
   const { language, setLanguage, t } = useLanguage();
@@ -408,6 +429,14 @@ export default function App() {
           <AccountPage />
         </div>
       );
+      case 'journal': return (
+        <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
+          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="relative z-10">
+            <JournalPage />
+          </div>
+        </div>
+      );
       default: return (
         <DashboardPage
           user={user}
@@ -425,19 +454,28 @@ export default function App() {
 };
 
   return (
-    <AppShell
-      activeView={activeView}
-      setActiveView={setActiveView}
-      isSidebarCollapsed={!isSidebarOpen}
-      setIsSidebarCollapsed={(val: boolean | ((p: boolean) => boolean)) => {
-        if (typeof val === 'function') {
-          setIsSidebarOpen(prev => !val(!prev));
-        } else {
-          setIsSidebarOpen(!val);
-        }
-      }}
-    >
-      {renderView()}
-    </AppShell>
+    <>
+      <AppShell
+        activeView={activeView}
+        setActiveView={setActiveView}
+        isSidebarCollapsed={!isSidebarOpen}
+        setIsSidebarCollapsed={(val: boolean | ((p: boolean) => boolean)) => {
+          if (typeof val === 'function') {
+            setIsSidebarOpen(prev => !val(!prev));
+          } else {
+            setIsSidebarOpen(!val);
+          }
+        }}
+      >
+        {renderView()}
+      </AppShell>
+      <OnboardingTour
+        user={user}
+        activeView={activeView}
+        setActiveView={setActiveView}
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+      />
+    </>
   );
 }

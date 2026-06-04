@@ -14,7 +14,9 @@ import {
   Sparkles,
   Globe,
   LogOut,
-  BrainCircuit
+  BrainCircuit,
+  BookOpen,
+  HelpCircle
 } from 'lucide-react';
 import { Logo } from '../Logo';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -51,11 +53,13 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
         { id: 'ai_planner', label: t('aiPlanner'), icon: Sparkles },
         { id: 'targets', label: t('targets'), icon: TargetIcon },
         { id: 'smart_space', label: language === 'id' ? 'AI Smart Space' : 'AI Smart Space', icon: BrainCircuit },
+        { id: 'journal', label: language === 'id' ? 'Jurnal Refleksi' : 'Daily Journal', icon: BookOpen },
       ]
     },
     {
       title: t('system'),
       items: [
+        { id: 'tour', label: language === 'id' ? 'Tur Pemandu' : 'Interactive Tour', icon: HelpCircle },
         { id: 'achievements', label: t('achievements'), icon: Trophy },
         { id: 'account', label: t('userAccount') || 'Account', icon: Globe },
         { id: 'settings', label: t('settings'), icon: Settings },

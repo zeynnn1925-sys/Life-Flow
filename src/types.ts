@@ -114,4 +114,4 @@ export interface SavingsGoal {
   color?: string;
 }
 
-export type View = 'dashboard' | 'finance' | 'reports' | 'schedule' | 'targets' | 'achievements' | 'settings' | 'ai_planner' | 'budgets' | 'savings' | 'visualization' | 'habits' | 'finance-hub' | 'productivity-hub' | 'system-hub' | 'account' | 'smart_space';
+export type View = 'dashboard' | 'finance' | 'reports' | 'schedule' | 'targets' | 'achievements' | 'settings' | 'ai_planner' | 'budgets' | 'savings' | 'visualization' | 'habits' | 'finance-hub' | 'productivity-hub' | 'system-hub' | 'account' | 'smart_space' | 'journal' | 'tour';

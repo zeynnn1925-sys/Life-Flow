@@ -159,9 +159,27 @@
         "userId": { "type": "string" }
       },
       "required": ["id", "title", "targetAmount", "currentAmount", "userId"]
+    },
+    "JournalEntry": {
+      "title": "JournalEntry",
+      "description": "A daily digital journal entry.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "mood": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "title", "content", "date", "mood", "userId"]
     }
   },
   "firestore": {
+    "/users/{userId}/journals/{journalId}": {
+      "schema": { "$ref": "JournalEntry" },
+      "description": "Daily digital journal entries for a user."
+    },
     "/users/{userId}/budgets/{budgetId}": {
       "schema": { "$ref": "Budget" },
       "description": "Budgets for a user."
