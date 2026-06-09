@@ -17,13 +17,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 export default function AccountPage() {
   const { 
     user, 
-    signOut, 
-    isCalendarConnected, 
-    connectGoogleCalendar, 
-    disconnectGoogleCalendar,
-    isOutlookConnected,
-    connectOutlookCalendar,
-    disconnectOutlookCalendar
+    signOut
   } = useAuth();
   const { t, language, setLanguage } = useLanguage();
 
@@ -157,56 +151,6 @@ export default function AccountPage() {
                   <option value="id">Bahasa Indonesia</option>
                   <option value="en">English</option>
                 </select>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <span className="text-[#8a8f98]">{t('connectedServices') || 'Layanan Terhubung'}</span>
-                
-                <div className="flex flex-wrap gap-2">
-                  <button 
-                    onClick={async () => {
-                      if (isCalendarConnected) {
-                        disconnectGoogleCalendar();
-                      } else {
-                        try {
-                          await connectGoogleCalendar();
-                        } catch (err) {
-                          console.warn('Google Calendar connection failed or was cancelled:', err);
-                        }
-                      }
-                    }}
-                    className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-tight px-3 py-2 rounded-lg transition-all ${
-                      isCalendarConnected 
-                        ? 'bg-[#4285F4]/10 text-[#4285F4] border border-[#4285F4]/20' 
-                        : 'bg-white/5 text-[#8a8f98] border border-white/10 hover:bg-white/10'
-                    }`}
-                  >
-                    <Globe size={12} />
-                    {isCalendarConnected ? t('googleCalendar') : t('connectGoogleCalendar')}
-                  </button>
-
-                  <button 
-                    onClick={async () => {
-                      if (isOutlookConnected) {
-                        disconnectOutlookCalendar();
-                      } else {
-                        try {
-                          await connectOutlookCalendar();
-                        } catch (err) {
-                          console.warn('Outlook Calendar connection failed or was cancelled:', err);
-                        }
-                      }
-                    }}
-                    className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-tight px-3 py-2 rounded-lg transition-all ${
-                      isOutlookConnected 
-                        ? 'bg-[#0078D4]/10 text-[#0078D4] border border-[#0078D4]/20' 
-                        : 'bg-white/5 text-[#8a8f98] border border-white/10 hover:bg-white/10'
-                    }`}
-                  >
-                    <Globe size={12} />
-                    {isOutlookConnected ? t('outlookCalendar') : t('connectOutlookCalendar')}
-                  </button>
-                </div>
               </div>
             </div>
           </section>

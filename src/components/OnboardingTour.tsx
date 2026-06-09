@@ -27,8 +27,8 @@ const TOUR_STEPS: TourStep[] = [
     view: 'dashboard',
     titleId: "👋 Halo Zeynnn! Selamat Datang!",
     titleEn: "👋 Welcome Zeynnn!",
-    textId: "Aku Flowy, peri pelindung kesadaran mental dan kedamaianmu! Senang sekali bisa bertemu denganmu. Ayo, aku temani jalan-jalan singkat untuk mencicipi semua fitur ajaib di Life Flow! 🌸✨",
-    textEn: "I'm Flowy, your personal mindfulness and peace guardian! So happy to meet you. Permit me to show you around all the magical capabilities of Life Flow! 🌸✨",
+    textId: "Aku Flo, peri pelindung kesadaran mental dan kedamaianmu! Senang sekali bisa bertemu denganmu. Ayo, aku temani jalan-jalan singkat untuk mencicipi semua fitur ajaib di Life Flow! 🌸✨",
+    textEn: "I'm Flo, your personal mindfulness and peace guardian! So happy to meet you. Permit me to show you around all the magical capabilities of Life Flow! 🌸✨",
     expression: "(o^◇^o)✨",
     position: 'center'
   },
@@ -72,8 +72,8 @@ const TOUR_STEPS: TourStep[] = [
     view: 'schedule',
     titleId: "📅 Agenda & Kalender Harian",
     titleEn: "📅 Daily Planner & Calendars",
-    textId: "Atur agenda harianmu agar terstruktur rapi! Kamu bisa menghubungkannya dengan Google Calendar atau Outlook Calendar untuk sinkronisasi pengingat instan! 🕒",
-    textEn: "Plan your day with zero friction! You can integrate easily with Google Calendar or Outlook Calendar for seamless synchronized notifications! 🕒",
+    textId: "Atur agenda harianmu agar terstruktur rapi! Kamu bisa menjadwalkan tugas harian, memantau agenda mendatang, dan menyelesaikan checkpoint aktivitasmu kapan saja secara instan! 🕒",
+    textEn: "Plan your day with zero friction! You can schedule chores, list your upcoming checklists, and tick off your completed items in a single view! 🕒",
     expression: "(•◡•)💭",
     position: 'middle'
   },
@@ -241,7 +241,7 @@ export default function OnboardingTour({ user, activeView, setActiveView, isOpen
                 {processedTitle}
               </h4>
               <p className="text-[11px] text-[#62666d] uppercase font-mono tracking-wider font-semibold">
-                Flowy Companion
+                Flo Companion
               </p>
             </div>
           </div>

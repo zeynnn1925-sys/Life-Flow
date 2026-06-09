@@ -445,6 +445,7 @@ export default function App() {
           dailyQuote={dailyQuote}
           setActiveView={setActiveView}
           t={t}
+          onStartTour={() => setIsOnboardingOpen(true)}
         />
       );
     }

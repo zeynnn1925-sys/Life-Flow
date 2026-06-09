@@ -23,17 +23,9 @@ interface AuthContextType {
   signInWithFace: () => Promise<void>;
   signInAnonymouslyUser: () => Promise<void>;
   signOut: () => Promise<void>;
-  connectGoogleCalendar: () => Promise<void>;
-  disconnectGoogleCalendar: () => void;
-  connectOutlookCalendar: () => Promise<void>;
-  disconnectOutlookCalendar: () => void;
   connectGoogleSheets: () => Promise<void>;
   disconnectGoogleSheets: () => void;
-  googleAccessToken: string | null;
-  outlookAccessToken: string | null;
   googleSheetsAccessToken: string | null;
-  isCalendarConnected: boolean;
-  isOutlookConnected: boolean;
   isSheetsConnected: boolean;
 }
 
@@ -47,17 +39,9 @@ const AuthContext = createContext<AuthContextType>({
   signInWithFace: async () => {},
   signInAnonymouslyUser: async () => {},
   signOut: async () => {},
-  connectGoogleCalendar: async () => {},
-  disconnectGoogleCalendar: () => {},
-  connectOutlookCalendar: async () => {},
-  disconnectOutlookCalendar: () => {},
   connectGoogleSheets: async () => {},
   disconnectGoogleSheets: () => {},
-  googleAccessToken: null,
-  outlookAccessToken: null,
   googleSheetsAccessToken: null,
-  isCalendarConnected: false,
-  isOutlookConnected: false,
   isSheetsConnected: false,
 });
 
@@ -66,11 +50,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(localStorage.getItem('google_calendar_token'));
-  const [outlookAccessToken, setOutlookAccessToken] = useState<string | null>(localStorage.getItem('outlook_calendar_token'));
   const [googleSheetsAccessToken, setGoogleSheetsAccessToken] = useState<string | null>(localStorage.getItem('google_sheets_token'));
-  const [isCalendarConnected, setIsCalendarConnected] = useState<boolean>(!!localStorage.getItem('google_calendar_token'));
-  const [isOutlookConnected, setIsOutlookConnected] = useState<boolean>(!!localStorage.getItem('outlook_calendar_token'));
   const [isSheetsConnected, setIsSheetsConnected] = useState<boolean>(!!localStorage.getItem('google_sheets_token'));
 
   useEffect(() => {
@@ -161,31 +141,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const connectGoogleCalendar = React.useCallback(async () => {
-    const provider = new GoogleAuthProvider();
-    provider.addScope('https://www.googleapis.com/auth/calendar');
-    
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
-      
-      if (token) {
-        setGoogleAccessToken(token);
-        setIsCalendarConnected(true);
-        localStorage.setItem('google_calendar_token', token);
-      }
-    } catch (error: any) {
-      handleAuthError(error, 'Google Calendar');
-    }
-  }, []);
-
-  const disconnectGoogleCalendar = React.useCallback(() => {
-    setGoogleAccessToken(null);
-    setIsCalendarConnected(false);
-    localStorage.removeItem('google_calendar_token');
-  }, []);
-
   const connectGoogleSheets = React.useCallback(async () => {
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/spreadsheets');
@@ -209,35 +164,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setGoogleSheetsAccessToken(null);
     setIsSheetsConnected(false);
     localStorage.removeItem('google_sheets_token');
-  }, []);
-
-  const connectOutlookCalendar = React.useCallback(async () => {
-    const { OAuthProvider } = await import('firebase/auth');
-    const provider = new OAuthProvider('microsoft.com');
-    provider.addScope('Calendars.ReadWrite');
-    provider.addScope('offline_access');
-    provider.addScope('openid');
-    provider.addScope('profile');
-    
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const credential = OAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
-      
-      if (token) {
-        setOutlookAccessToken(token);
-        setIsOutlookConnected(true);
-        localStorage.setItem('outlook_calendar_token', token);
-      }
-    } catch (error: any) {
-      handleAuthError(error, 'Outlook Calendar (Microsoft)');
-    }
-  }, []);
-
-  const disconnectOutlookCalendar = React.useCallback(() => {
-    setOutlookAccessToken(null);
-    setIsOutlookConnected(false);
-    localStorage.removeItem('outlook_calendar_token');
   }, []);
 
   const signInWithGithub = React.useCallback(async () => {
@@ -299,14 +225,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await firebaseSignOut(auth);
       // Clear all tokens on logout
-      localStorage.removeItem('google_calendar_token');
-      localStorage.removeItem('outlook_calendar_token');
       localStorage.removeItem('google_sheets_token');
-      setGoogleAccessToken(null);
-      setOutlookAccessToken(null);
       setGoogleSheetsAccessToken(null);
-      setIsCalendarConnected(false);
-      setIsOutlookConnected(false);
       setIsSheetsConnected(false);
     } catch (error) {
       console.error('Error signing out:', error);
@@ -325,17 +245,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signInWithFace,
       signInAnonymouslyUser,
       signOut,
-      connectGoogleCalendar,
-      disconnectGoogleCalendar,
-      connectOutlookCalendar,
-      disconnectOutlookCalendar,
       connectGoogleSheets,
       disconnectGoogleSheets,
-      googleAccessToken,
-      outlookAccessToken,
       googleSheetsAccessToken,
-      isCalendarConnected,
-      isOutlookConnected,
       isSheetsConnected
     }}>
       {children}
