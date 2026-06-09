@@ -2,34 +2,86 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  /* ── CANVAS (dari Linear: near-black paling dalam) ── */
+:root {
+  /* ── LIGHT THEME VARIABLES ── */
+  --color-canvas: #f8f9fa;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f1f3f5;
+  --color-surface-3: #e9ecef;
+  --color-surface-4: #dee2e6;
+
+  --color-primary: #494fdf;
+  --color-primary-bright: #4f55f1;
+  --color-primary-deep: #3a40c4;
+  --color-on-primary: #ffffff;
+
+  --color-accent: #5e6ad2;
+  --color-accent-hover: #494fdf;
+  --color-accent-focus: #3a40c4;
+
+  --color-ink: #1a1a1a;
+  --color-ink-muted: #343a40;
+  --color-ink-subtle: #495057;
+  --color-ink-tertiary: #868e96;
+
+  --color-hairline: #dee2e6;
+  --color-hairline-strong: #ced4da;
+}
+
+html.dark {
+  /* ── DARK THEME VARIABLES ── */
   --color-canvas: #010102;
   --color-surface-1: #0f1011;
   --color-surface-2: #141516;
   --color-surface-3: #18191a;
   --color-surface-4: #1c1c1c;
 
-  /* ── BRAND PRIMARY (dari Revolut: cobalt-violet) ── */
   --color-primary: #494fdf;
   --color-primary-bright: #4f55f1;
   --color-primary-deep: #3a40c4;
   --color-on-primary: #ffffff;
 
-  /* ── ACCENT (dari Linear: lavender untuk CTA & focus) ── */
   --color-accent: #5e6ad2;
   --color-accent-hover: #828fff;
   --color-accent-focus: #5e69d1;
 
-  /* ── INK / TEXT ── */
   --color-ink: #f7f8f8;
   --color-ink-muted: #d0d6e0;
   --color-ink-subtle: #8a8f98;
   --color-ink-tertiary: #62666d;
 
-  /* ── HAIRLINES / DIVIDERS ── */
   --color-hairline: #23252a;
   --color-hairline-strong: #34343a;
+}
+
+@theme {
+  /* ── CANVAS ── */
+  --color-canvas: var(--color-canvas);
+  --color-surface-1: var(--color-surface-1);
+  --color-surface-2: var(--color-surface-2);
+  --color-surface-3: var(--color-surface-3);
+  --color-surface-4: var(--color-surface-4);
+
+  /* ── BRAND PRIMARY ── */
+  --color-primary: var(--color-primary);
+  --color-primary-bright: var(--color-primary-bright);
+  --color-primary-deep: var(--color-primary-deep);
+  --color-on-primary: var(--color-on-primary);
+
+  /* ── ACCENT ── */
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-focus: var(--color-accent-focus);
+
+  /* ── INK / TEXT ── */
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-subtle: var(--color-ink-subtle);
+  --color-ink-tertiary: var(--color-ink-tertiary);
+
+  /* ── HAIRLINES / DIVIDERS ── */
+  --color-hairline: var(--color-hairline);
+  --color-hairline-strong: var(--color-hairline-strong);
   
   /* ── SEMANTIC ── */
   --color-success: #27a644;
@@ -335,3 +387,35 @@ body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* ── DYNAMIC COLOR MAPS FOR HARDCODED UTILITY CLASSES ── */
+.bg-\[\#0F0F0F\] {
+  background-color: var(--color-surface-1) !important;
+}
+.bg-\[\#111318\] {
+  background-color: var(--color-surface-1) !important;
+}
+.hover\:bg-\[\#1a1b22\]:hover {
+  background-color: var(--color-surface-2) !important;
+}
+.hover\:bg-\[\#141414\]:hover {
+  background-color: var(--color-surface-2) !important;
+}
+.active\:bg-\[\#141414\]:active {
+  background-color: var(--color-surface-2) !important;
+}
+.border-white\/8,
+.border-white\/6,
+.border-\[\#ffffff\]\/6 {
+  border-color: var(--color-hairline) !important;
+}
+.text-zinc-100 {
+  color: var(--color-ink) !important;
+}
+.text-zinc-400 {
+  color: var(--color-ink-muted) !important;
+}
+.text-zinc-500 {
+  color: var(--color-ink-subtle) !important;
+}
+

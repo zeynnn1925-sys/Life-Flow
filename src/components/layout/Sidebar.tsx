@@ -68,32 +68,32 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
   ], [t]);
 
   const profileSection = React.useMemo(() => (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       {user?.photoURL ? (
-        <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full object-cover" referrerPolicy="no-referrer" />
+        <img src={user.photoURL} alt="" className="w-6 h-6 rounded-full object-cover" referrerPolicy="no-referrer" />
       ) : (
-        <div className="w-7 h-7 bg-[#5e6ad2] rounded-full flex items-center justify-center text-white font-bold text-[10px]">
+        <div className="w-6 h-6 bg-[#5e6ad2] rounded-full flex items-center justify-center text-white font-bold text-[10px]">
           {user?.displayName?.charAt(0) || 'U'}
         </div>
       )}
       {!isCollapsed && (
         <div className="flex flex-col min-w-0">
-          <span className="text-xs font-medium text-[#f7f8f8] truncate">
+          <span className="text-[11px] font-medium text-ink truncate leading-tight">
             {user?.displayName || 'User'}
           </span>
-          <span className="text-[10px] text-[#62666d] truncate">{user?.email}</span>
+          <span className="text-[9px] text-ink-subtle truncate leading-none">{user?.email}</span>
         </div>
       )}
     </div>
   ), [user, isCollapsed]);
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-[#010102]">
+    <div className="h-full flex flex-col overflow-hidden bg-canvas">
       {/* Logo Section */}
-      <div className="h-[56px] px-4 flex items-center gap-[10px] border-b border-white/5 shrink-0">
-        <Logo className="h-7 w-auto" />
+      <div className="h-[48px] px-3 flex items-center gap-[10px] border-b border-hairline shrink-0">
+        <Logo className="h-6 w-auto" />
         {!isCollapsed && (
-          <span className="text-sm font-bold text-[#f7f8f8] tracking-tight">LIFE FLOW</span>
+          <span className="text-[13px] font-bold text-ink tracking-tight">LIFE FLOW</span>
         )}
       </div>
 
@@ -102,7 +102,7 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
         {navGroups.map((group) => (
           <div key={group.title} className="space-y-1">
             {!isCollapsed && (
-              <h3 className="px-2 text-[10px] font-semibold text-[#4b5563] uppercase tracking-[0.6px] mt-4 mb-2">
+              <h3 className="px-2 text-[10px] font-semibold text-ink-subtle uppercase tracking-[0.5px] mt-[10px] mb-[3px]">
                 {group.title}
               </h3>
             )}
@@ -113,14 +113,14 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
                   <button
                     key={item.id}
                     onClick={() => setActiveView(item.id as View)}
-                    className={`w-full flex items-center gap-[10px] px-[10px] py-[7px] rounded-md cursor-pointer transition-all duration-150 group ${
+                    className={`w-full h-[30px] flex items-center gap-2 px-2 rounded-[6px] cursor-pointer transition-all duration-150 group ${
                       isActive 
                         ? 'bg-[#5e6ad2]/12 text-[#5e6ad2] font-medium border-l-2 border-[#5e6ad2]' 
-                        : 'text-[#62666d] hover:bg-white/5 hover:text-[#9ca3af]'
+                        : 'text-ink-subtle hover:bg-surface-2 hover:text-ink'
                     }`}
                   >
-                    <item.icon size={15} className="shrink-0" />
-                    {!isCollapsed && <span className="text-[13px] truncate">{item.label}</span>}
+                    <item.icon size={14} className="shrink-0" />
+                    {!isCollapsed && <span className="text-[12px] truncate">{item.label}</span>}
                   </button>
                 );
               })}
@@ -130,12 +130,12 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
       </div>
 
       {/* Bottom Section */}
-      <div className="p-3 border-t border-white/5 shrink-0 space-y-3">
+      <div className="p-[10px] border-t border-hairline shrink-0 space-y-2">
         {profileSection}
         
           <button 
             onClick={() => signOut()}
-            className="w-full flex items-center gap-2 px-2 py-2 text-[#e23b4a] hover:bg-[#e23b4a]/10 rounded-md transition-colors text-xs font-medium"
+            className="w-full flex items-center gap-2 px-2 py-1.5 text-[#e23b4a] hover:bg-[#e23b4a]/10 rounded-md transition-colors text-xs font-medium"
           >
             <LogOut size={14} />
             {!isCollapsed && <span>{t('signOut') || 'Keluar'}</span>}

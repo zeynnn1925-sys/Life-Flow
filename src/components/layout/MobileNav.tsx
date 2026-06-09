@@ -54,7 +54,7 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
   return (
     <div className="lg:hidden">
       {/* Bottom Nav Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 h-[60px] bg-[#0a0a0c]/96 backdrop-blur-[20px] border-t border-white/8 pb-[env(safe-area-inset-bottom,0px)] flex">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 h-[60px] bg-surface-1/96 backdrop-blur-[20px] border-t border-hairline pb-[env(safe-area-inset-bottom,0px)] flex">
         {tabs.map((tab) => {
           const active = isTabActive(tab.id);
           return (

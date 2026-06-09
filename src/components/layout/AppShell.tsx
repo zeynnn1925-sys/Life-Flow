@@ -34,22 +34,23 @@ export default function AppShell({
         display: 'flex',
         flexDirection: 'row',
         overflow: 'hidden',
-        backgroundColor: '#010102',
+        backgroundColor: 'var(--color-canvas)',
+        color: 'var(--color-ink)',
       }}
     >
       {/* ── SIDEBAR — desktop only ── */}
       <aside
         style={{
           flexShrink: 0,
-          width: isSidebarCollapsed ? '72px' : '220px',
+          width: isSidebarCollapsed ? '72px' : '200px',
           height: '100%',
           overflowY: 'auto',
           overflowX: 'hidden',
           transition: 'width 300ms ease',
-          borderRight: '1px solid rgba(255,255,255,0.08)',
+          borderRight: '1px solid var(--color-hairline)',
           display: 'none',           
         }}
-        className="lg:!flex lg:flex-col"
+        className="lg:!flex lg:flex-col animate-fade-in"
       >
         <Sidebar
           activeView={activeView}
@@ -68,6 +69,7 @@ export default function AppShell({
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          backgroundColor: 'var(--color-canvas)',
         }}
       >
         {/* Offline Banner */}
@@ -77,16 +79,16 @@ export default function AppShell({
         <header
           style={{
             flexShrink: 0,
-            height: '56px',
+            height: '44px',
             paddingTop: 'env(safe-area-inset-top, 0px)',
             paddingLeft: '16px',
             paddingRight: '16px',
             display: 'flex',
             alignItems: 'center',
-            backgroundColor: 'rgba(1,1,2,0.95)',
+            backgroundColor: 'var(--color-surface-1)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            borderBottom: '1px solid var(--color-hairline)',
             zIndex: 40,
           }}
         >
@@ -105,8 +107,8 @@ export default function AppShell({
             WebkitOverflowScrolling: 'touch',
           }}
           className="
-            px-4 pt-4 pb-[calc(72px+env(safe-area-inset-bottom,0px))]
-            lg:px-8 lg:pt-6 lg:pb-8
+            px-3 pt-3 pb-[calc(56px+env(safe-area-inset-bottom,0px)+12px)]
+            lg:px-6 lg:pt-5 lg:pb-[20px]
           "
         >
           <div key={activeView} className="max-w-7xl mx-auto w-full">

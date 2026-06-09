@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   TrendingUp, 
@@ -7,11 +7,22 @@ import {
   Sparkles, 
   Wallet, 
   ChevronRight,
-  Play
+  Play,
+  CheckCircle2,
+  Circle,
+  Clock,
+  RefreshCw,
+  BookOpen,
+  CreditCard,
+  PiggyBank,
+  Brain,
+  Flame,
+  ArrowRight,
+  Plus
 } from 'lucide-react';
 import { 
-  AreaChart, 
-  Area, 
+  BarChart, 
+  Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -20,6 +31,9 @@ import {
 } from 'recharts';
 import { View } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useData } from '../../contexts/DataContext';
+import { generateDailyQuote } from '../../services/aiProductivityService';
+import { GoogleGenAI } from '@google/genai';
 
 interface DashboardPageProps {
   user: any;
@@ -46,10 +60,57 @@ export default function DashboardPage({
   onStartTour
 }: DashboardPageProps) {
   const { language } = useLanguage();
-  const [quoteIndex, setQuoteIndex] = useState(0);
+  const { 
+    transactions, 
+    tasks, 
+    habits, 
+    habitLogs, 
+    targets, 
+    saveDailyQuote, 
+    savingsGoals 
+  } = useData();
 
+  // Local date formatting helpers
+  const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local
+  const now = new Date();
+  const currentMonthStr = now.toISOString().slice(0, 7); // YYYY-MM
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthStr = lastMonth.toISOString().slice(0, 7);
+
+  // States
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [loadingQuote, setLoadingQuote] = useState(false);
+  const [insight, setInsight] = useState<string>('');
+  const [loadingInsight, setLoadingInsight] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Greet details
   const displayName = user?.displayName?.split(' ')[0] || (language === 'id' ? 'Sahabat' : 'Friend');
 
+  // Digital time and date rendering
+  const [timeStr, setTimeStr] = useState('');
+  useEffect(() => {
+    const updateTime = () => {
+      setTimeStr(new Date().toLocaleTimeString(language === 'id' ? 'id-ID' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000 * 30);
+    return () => clearInterval(interval);
+  }, [language]);
+
+  const getTodayDateString = () => {
+    return now.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  // Robot Phrases
   const idPhrases = [
     `Hai ${displayName}! Siap menata alur hidupmu hari ini? Let's go! 🚀`,
     "Pusat kendali Life Flow sudah dipersiapkan dengan penuh cinta! 🌸",
@@ -69,419 +130,940 @@ export default function DashboardPage({
   ];
 
   const activePhrases = language === 'id' ? idPhrases : enPhrases;
-
   const cycleFloQuote = () => {
     setQuoteIndex((prev) => (prev + 1) % activePhrases.length);
   };
 
+  // Formatting helper
+  const formatCurrency = (val: number) => {
+    return 'Rp ' + val.toLocaleString('id-ID');
+  };
+
+  // CARD 1 — Balance & Month calculations
+  const currentBalance = transactions.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
+  const thisMonthTransactions = transactions.filter(t => t.date.slice(0, 7) === currentMonthStr);
+  const thisMonthIncome = thisMonthTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+  const thisMonthExpense = thisMonthTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+
+  const thisMonthNet = thisMonthIncome - thisMonthExpense;
+  const balanceTrend = thisMonthNet >= 0 
+    ? `+${formatCurrency(thisMonthNet)} ${language === 'id' ? 'bulan ini' : 'this month'}` 
+    : `-${formatCurrency(Math.abs(thisMonthNet))} ${language === 'id' ? 'bulan ini' : 'this month'}`;
+
+  // CARD 2 — Tasks Hari Ini
+  const todayTasks = tasks.filter(t => t.date === todayStr);
+  const completedTasksToday = todayTasks.filter(t => t.completed).length;
+  const totalTasksToday = todayTasks.length;
+  const taskProgressPercentage = totalTasksToday > 0 
+    ? Math.round((completedTasksToday / totalTasksToday) * 100) 
+    : 0;
+  const taskTrend = language === 'id' 
+    ? `${taskProgressPercentage}% selesai` 
+    : `${taskProgressPercentage}% completed`;
+
+  // CARD 3 — Habit Streak
+  const activeHabits = habits.filter(h => !h.isArchived);
+  const longestStreak = activeHabits.length > 0 ? Math.max(...activeHabits.map(h => h.longestStreak || 0)) : 0;
+  
+  const getHabitStatusToday = (habitId: string) => {
+    const log = habitLogs.find(l => l.habitId === habitId && l.date === todayStr);
+    if (!log) return 'pending';
+    if (log.skipped) return 'skipped';
+    
+    const habit = habits.find(h => h.id === habitId);
+    if (habit && log.completedCount >= habit.targetCount) return 'completed';
+    return 'in_progress';
+  };
+  
+  const completedTodayHabitsCount = activeHabits.filter(h => getHabitStatusToday(h.id) === 'completed').length;
+  const habitTrend = language === 'id'
+    ? `${completedTodayHabitsCount} dari ${activeHabits.length} selesai hari ini`
+    : `${completedTodayHabitsCount} of ${activeHabits.length} done today`;
+
+  // CARD 4 — Target Progress
+  const onTrack = targets.filter(t => t.currentValue >= t.targetValue * 0.5).length;
+  const totalTargets = targets.length;
+  const targetTrend = language === 'id'
+    ? `dari ${totalTargets} total target`
+    : `of ${totalTargets} total targets`;
+
+  // Generate dynamic Weekly Chart Data based on last 7 days of transactions
+  const last7Days = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const dateStr = d.toLocaleDateString('en-CA');
+    const dayLabel = d.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { weekday: 'short' });
+    
+    const dayTransactions = transactions.filter(t => t.date === dateStr);
+    const income = dayTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+    const expense = dayTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+    
+    return {
+      name: dayLabel,
+      income,
+      expense,
+      date: dateStr
+    };
+  });
+
+  // AI Insight Generator (with custom offline fallbacks if Gemini is unconfigured)
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('life_flow_dashboard_ai_insight');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.date === todayStr) {
+          setInsight(parsed.text);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Error reading cached AI insight:", e);
+    }
+    // Auto-generate if empty
+    generateAIInsight();
+  }, [todayStr]);
+
+  const generateAIInsight = async () => {
+    setLoadingInsight(true);
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (apiKey) {
+        const ai = new GoogleGenAI({ apiKey });
+        const prompt = language === 'id' 
+          ? "Berikan 1 kalimat motivasi produktivitas harian yang sangat singkat, elegan, praktis, berkaitan dengan pengelolaan saldo finansial, tugas hiasan, dan kebiasaan."
+          : "Provide 1 short, elegant, and highly practical peak performance productivity advice regarding matching daily routines, habits, and financial peace.";
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt
+        });
+        const text = response.text || "";
+        const cleaned = text.trim().replace(/^["']|["']$/g, '');
+        if (cleaned) {
+          const newInsight = { text: cleaned, date: todayStr };
+          localStorage.setItem('life_flow_dashboard_ai_insight', JSON.stringify(newInsight));
+          setInsight(cleaned);
+          return;
+        }
+      }
+      throw new Error("No API key available");
+    } catch (err) {
+      // Localized authentic fallback insights
+      const idInsights = [
+        "Fokus pada kemajuan hari ini, sekecil apapun itu. Alur kerja yang konsisten mengalahkan lonjakan motivasi yang sesaat.",
+        "Kelola energi Anda dengan bijak, bukan hanya waktu Anda. Mulailah hari dengan prioritas keuangan dan tugas yang paling berdampak.",
+        "Keseimbangan finansial dan produktivitas harian berjalan beriringan. Mulai catat transaksi Anda hari ini untuk kedamaian pikiran.",
+        "Mencapai target harian Anda dimulai dari satu langkah kecil. Selesaikan tugas prioritas pertama Anda sekarang juga.",
+        "Ingatlah untuk mengambil napas dalam-dalam dan beristirahat secara teratur. Aliran hidup yang sehat adalah komitmen maraton.",
+        "Kebiasaan kecil yang dilakukan dengan konsisten setiap hari akan membuahkan perubahan finansial dan karir yang luar biasa."
+      ];
+      const enInsights = [
+        "Focus on today's progress, no matter how small. A consistent workflow beats short bursts of sudden motivation.",
+        "Manage your energy status, not just your clock. Tackle the most impactful financial and habit goals first today.",
+        "Financial clarity and daily peace of mind go hand in hand. Track your spending habits early to secure your peace.",
+        "Ambitious target completion begins with small daily habits. Smash your highest priority task first today.",
+        "Remember to take intentional breathing breaks. A clean, optimized cosmic state is built on sustainable efforts.",
+        "Small daily routines compound into massive breakthroughs over time. Stay focused on your targets and flow!"
+      ];
+      const list = language === 'id' ? idInsights : enInsights;
+      const randomInsight = list[Math.floor(Math.random() * list.length)];
+      const newInsight = { text: randomInsight, date: todayStr };
+      localStorage.setItem('life_flow_dashboard_ai_insight', JSON.stringify(newInsight));
+      setInsight(randomInsight);
+    } finally {
+      setLoadingInsight(false);
+    }
+  };
+
+  // Quote helper
+  const handleRefreshQuote = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    setLoadingQuote(true);
+    try {
+      const newQuote = await generateDailyQuote();
+      await saveDailyQuote(newQuote);
+    } catch (err) {
+      console.error("Failed to refresh daily quote", err);
+    } finally {
+      setLoadingQuote(false);
+    }
+  };
+
   return (
-    <div className="relative p-0 lg:p-0">
-      {/* Dashboard Background */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
+    <div className="relative p-0 flex flex-col gap-6">
+      {/* Background Graphic */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl opacity-10">
         <img
           src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2072&auto=format&fit=crop"
           alt=""
           aria-hidden="true"
           className="h-full w-full object-cover object-top"
-          style={{ opacity: 0.08 }}
+          referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#010102]" />
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative z-10 space-y-12"
-      >
-        <header className="hero-section -mx-4 lg:-mx-8 px-8 lg:px-12 py-10 lg:py-14 rounded-3xl mb-12 bg-surface-1/40 border border-hairline relative overflow-hidden shadow-card">
-          {/* Ambient Glows */}
-          <div className="absolute top-[-50px] right-[-50px] w-72 h-72 rounded-full bg-accent/5 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-[-100px] left-[10%] w-96 h-96 rounded-full bg-violet-600/5 blur-3xl pointer-events-none" />
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative z-10">
-            {/* Left Content Column */}
-            <div className="md:col-span-8 flex flex-col justify-center text-left">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 mb-4"
-              >
-                <div className="w-8 h-px bg-accent" />
-                <span className="text-eyebrow text-accent font-black uppercase tracking-[0.2em]">{t('dashboard')}</span>
-              </motion.div>
-              
-              <motion.h1 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-display-md md:text-display-lg text-ink tracking-tight font-black leading-tight uppercase"
-              >
-                {language === 'id' ? 'SELAMAT DATANG DI LIFE FLOW' : 'WELCOME TO LIFE FLOW'}
-              </motion.h1>
-              
-              <motion.p 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-ink-subtle mt-3 text-body-normal md:text-body-lg font-medium opacity-90 max-w-xl leading-relaxed"
-              >
-                {language === 'id' 
-                  ? `Perkenalkan Flo, Pemandu Pintar Anda yang siap membantu mengelola seluruh alur kerja dengan mudah.`
-                  : `Meet Flo, your Intelligent Companion ready to help you coordinate finances, tasks, and mindfulness with blissful ease.`}
-              </motion.p>
-
-              {/* Interactive Start Tour Button */}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onStartTour}
-                className="mt-6 px-6 py-3 w-fit bg-gradient-to-r from-accent to-violet-600 hover:from-accent/90 hover:to-violet-500 text-white font-black text-button uppercase tracking-wider rounded-xl transition-all shadow-lg hover:shadow-accent/25 flex items-center gap-2 border border-white/10"
-              >
-                <Play className="w-4 h-4 fill-white text-white" />
-                {language === 'id' ? 'MULAI PANDUAN FLO' : "START FLO'S GUIDE"}
-              </motion.button>
+      <div className="relative z-10 flex flex-col gap-5">
+        
+        {/* ============================================================
+            1. WELCOME HEADER (Responsive: adapts beautifully for screen)
+            ============================================================ */}
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#0c0d12]/60 border border-white/5 p-4 rounded-xl backdrop-blur-md">
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] text-orange-500 font-extrabold tracking-[0.2em] uppercase mb-0.5">
+              {t('dashboard') || 'DASHBOARD'}
+            </span>
+            <h1 className="text-[20px] lg:text-[22px] font-bold text-[#f7f8f8] tracking-tight leading-tight">
+              {language === 'id' ? `Selamat Datang Kembali, ${displayName}` : `Welcome back, ${displayName}`}
+            </h1>
+            <p className="text-[11px] text-zinc-500 font-semibold mt-0.5">
+              {getTodayDateString()}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+            <div className="flex flex-col items-end text-right">
+              <span className="text-[12px] font-mono font-bold text-zinc-300 bg-white/5 border border-white/5 py-1 px-2.5 rounded-lg">
+                ⏱ {timeStr || '00:00'}
+              </span>
             </div>
-
-            {/* Right Interactive Flo Companion Avatar Column */}
-            <div className="md:col-span-4 flex flex-col items-center justify-center relative min-h-[180px]">
-              {/* Dynamic Speech bubble */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={quoteIndex}
-                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute top-[-50px] bg-[#0d0e12] border border-white/10 px-4 py-2.5 rounded-2xl max-w-[240px] text-center shadow-lg pointer-events-auto cursor-pointer select-none"
-                  onClick={cycleFloQuote}
-                >
-                  <p className="text-[12.5px] leading-relaxed text-slate-200 font-semibold italic">
-                    {activePhrases[quoteIndex]}
-                  </p>
-                  <div className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#0d0e12] border-r border-b border-white/10 rotate-45" />
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Flo Levitating Body Vector */}
-              <motion.div 
-                animate={{ y: [0, -15, 0] }}
-                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                whileHover={{ scale: 1.08, rotate: [0, 2, -2, 0] }}
-                onClick={cycleFloQuote}
-                className="relative cursor-pointer z-10 w-32 h-32 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(var(--color-accent-rgb),0.35)]"
-                title={language === 'id' ? "Sapa Flo!" : "Greet Flo!"}
-              >
-                {/* Custom Glowing Vector Robot SVG */}
-                <svg viewBox="0 0 100 100" className="w-full h-full">
-                  {/* Outer Orbit Light Ring */}
-                  <motion.circle 
-                    cx="50" 
-                    cy="50" 
-                    r="44" 
-                    fill="none" 
-                    stroke="url(#orbit-glow)" 
-                    strokeWidth="1.5" 
-                    strokeDasharray="10 6"
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
-                  />
-
-                  <defs>
-                    <linearGradient id="robot-metal" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#8b5cf6" />
-                      <stop offset="50%" stopColor="#3b82f6" />
-                      <stop offset="100%" stopColor="#10b981" />
-                    </linearGradient>
-                    <linearGradient id="orbit-glow" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="rgba(139, 92, 246, 0.4)" />
-                      <stop offset="100%" stopColor="rgba(16, 185, 129, 0.4)" />
-                    </linearGradient>
-                    <linearGradient id="glass-visor" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#1e1e24" />
-                      <stop offset="100%" stopColor="#0a0a0d" />
-                    </linearGradient>
-                    <radialGradient id="eyes-glow" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="#67e8f9" />
-                      <stop offset="100%" stopColor="#0891b2" />
-                    </radialGradient>
-                  </defs>
-
-                  {/* Antenna projection */}
-                  <line x1="50" y1="28" x2="50" y2="16" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" />
-                  <motion.circle 
-                    cx="50" 
-                    cy="14" 
-                    r="5" 
-                    fill="#10b981"
-                    animate={{ scale: [1, 1.3, 1], opacity: [0.8, 1, 0.8] }}
-                    transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                  />
-
-                  {/* Robot Head Body */}
-                  <rect x="24" y="28" width="52" height="42" rx="20" fill="url(#robot-metal)" stroke="#ffffff" strokeOpacity="0.15" strokeWidth="2" />
-
-                  {/* Black screen futuristic glass visor */}
-                  <rect x="30" y="36" width="40" height="24" rx="10" fill="url(#glass-visor)" stroke="rgba(255, 255, 255, 0.08)" strokeWidth="1" />
-
-                  {/* Smiling Eyes Vector */}
-                  <motion.g
-                    animate={{ scaleY: [1, 0.05, 1] }}
-                    transition={{ repeat: Infinity, duration: 4, repeatDelay: 3 }}
-                  >
-                    {/* Left Eye (Cute arc shape) */}
-                    <path d="M 37 46 Q 42 42 47 46" fill="none" stroke="url(#eyes-glow)" strokeWidth="3.5" strokeLinecap="round" />
-                    {/* Right Eye (Cute arc shape) */}
-                    <path d="M 53 46 Q 58 42 63 46" fill="none" stroke="url(#eyes-glow)" strokeWidth="3.5" strokeLinecap="round" />
-                  </motion.g>
-
-                  {/* Soft Rosy Cheeks */}
-                  <circle cx="34" cy="53" r="2.5" fill="#f43f5e" opacity="0.6" />
-                  <circle cx="66" cy="53" r="2.5" fill="#f43f5e" opacity="0.6" />
-
-                  {/* Smiling Cute Mouth */}
-                  <path d="M 46 51 Q 50 54 54 51" fill="none" stroke="#67e8f9" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-
-                {/* Sparkling Mini Magic Stars */}
-                <div className="absolute top-2 left-2 text-yellow-300 animate-ping opacity-70">
-                  <Sparkles className="w-4.5 h-4.5" />
-                </div>
-              </motion.div>
-
-              {/* Levitating Shadow Effect Beneath Robot */}
-              <motion.div 
-                animate={{ 
-                  scaleX: [0.6, 0.8, 0.6], 
-                  opacity: [0.3, 0.5, 0.3] 
-                }}
-                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                className="w-14 h-1.5 bg-black/40 rounded-full blur-[2px] mt-2 filter pointer-events-none" 
-              />
-            </div>
+            <button 
+              onClick={() => setActiveView('finance')}
+              className="h-8 py-1 px-3 text-xs rounded-lg bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-orange-500/10 cursor-pointer"
+            >
+              <Plus size={13} className="stroke-[2.5px]" />
+              <span>{language === 'id' ? 'Entri Baru' : 'New Entry'}</span>
+            </button>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="finance-card-primary group cursor-pointer relative overflow-hidden p-4 lg:p-6"
+        {/* ============================================================
+            2. STAT STRIP (Horizontal scroll wrapper on mobile, static on desktop)
+            ============================================================ */}
+        <section className="flex lg:grid lg:grid-cols-4 gap-2.5 lg:gap-3 overflow-x-auto lg:overflow-visible pb-2.5 lg:pb-0 scrollbar-none snap-x antialiased">
+          
+          {/* Card 1 — Balance */}
+          <div 
             onClick={() => setActiveView('finance')}
+            className="min-w-[150px] lg:min-w-0 flex-1 flex-shrink-0 snap-start bg-[#0F0F0F] border border-white/8 rounded-[10px] p-3 cursor-pointer hover:border-orange-500/30 transition-all duration-150 select-none flex flex-col justify-between min-h-[92px]"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-pill -mr-16 -mt-16 blur-2xl group-hover:bg-white/10 transition-all" />
-            <div className="flex items-center justify-between mb-8">
-              <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md shadow-card border border-white/10">
-                <TrendingUp className="w-7 h-7" />
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
+                {language === 'id' ? 'SALDO' : 'BALANCE'}
+              </span>
+              <div className="w-5 h-5 bg-orange-500/10 rounded-md flex items-center justify-center text-orange-500">
+                <Wallet size={12} />
               </div>
-              <span className="text-eyebrow text-white/60 font-black uppercase tracking-widest">{t('finance')}</span>
             </div>
-            <div className="text-display-md text-white font-mono tracking-tighter">Rp {summary.balance.toLocaleString()}</div>
-            <p className="text-white/60 text-eyebrow font-bold uppercase mt-2 tracking-widest">{t('balance')}</p>
-          </motion.div>
+            <div>
+              <div className="text-[14px] lg:text-[15px] font-mono font-bold text-zinc-100 truncate">
+                {formatCurrency(currentBalance)}
+              </div>
+              <p className="text-[9px] text-zinc-500 font-semibold truncate mt-0.5">
+                {balanceTrend}
+              </p>
+            </div>
+          </div>
 
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="bg-surface-1 p-4 lg:p-6 rounded-lg shadow-card border border-hairline hover:border-hairline-strong transition-all group"
+          {/* Card 2 — Tasks Hari Ini */}
+          <div 
             onClick={() => setActiveView('schedule')}
+            className="min-w-[150px] lg:min-w-0 flex-1 flex-shrink-0 snap-start bg-[#0F0F0F] border border-white/8 rounded-[10px] p-3 cursor-pointer hover:border-orange-500/30 transition-all duration-150 select-none flex flex-col justify-between min-h-[92px]"
           >
-            <div className="flex items-center justify-between mb-8">
-              <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center text-accent shadow-sm border border-accent/20 transition-transform group-hover:rotate-6">
-                <Calendar className="w-7 h-7" />
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
+                {language === 'id' ? 'TUGAS HARI INI' : 'TODAY\'S TASidKS'}
+              </span>
+              <div className="w-5 h-5 bg-blue-500/10 rounded-md flex items-center justify-center text-blue-400">
+                <CheckCircle2 size={12} />
               </div>
-              <span className="text-eyebrow text-ink-tertiary font-black uppercase tracking-widest">{t('schedule')}</span>
             </div>
-            <div className="text-heading-lg text-ink font-mono tracking-tighter">{summary.completedTasks} <span className="text-ink-tertiary opacity-40">/</span> {summary.totalTasks}</div>
-            <p className="text-eyebrow text-ink-tertiary font-bold uppercase mt-2 tracking-widest">{t('tasks')}</p>
-          </motion.div>
+            <div>
+              <div className="text-[15px] font-mono font-bold text-zinc-100">
+                {completedTasksToday} <span className="text-zinc-600 font-normal">/</span> {totalTasksToday}
+              </div>
+              <p className="text-[9px] text-zinc-500 font-semibold truncate mt-0.5">
+                {taskTrend}
+              </p>
+            </div>
+          </div>
 
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="bg-surface-1 p-4 lg:p-6 rounded-lg shadow-card border border-hairline hover:border-hairline-strong transition-all group"
+          {/* Card 3 — Habit Streak */}
+          <div 
+            onClick={() => setActiveView('habits')}
+            className="min-w-[150px] lg:min-w-0 flex-1 flex-shrink-0 snap-start bg-[#0F0F0F] border border-white/8 rounded-[10px] p-3 cursor-pointer hover:border-orange-500/30 transition-all duration-150 select-none flex flex-col justify-between min-h-[92px]"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
+                {language === 'id' ? 'STREAK TERBAIK' : 'LONGEST STREAK'}
+              </span>
+              <div className="w-5 h-5 bg-amber-500/10 rounded-md flex items-center justify-center text-amber-500">
+                <Flame size={12} />
+              </div>
+            </div>
+            <div>
+              <div className="text-[15px] font-mono font-bold text-zinc-100">
+                {longestStreak} {language === 'id' ? 'hari' : 'days'}
+              </div>
+              <p className="text-[9px] text-zinc-500 font-semibold truncate mt-0.5">
+                {habitTrend}
+              </p>
+            </div>
+          </div>
+
+          {/* Card 4 — Target Progress */}
+          <div 
             onClick={() => setActiveView('targets')}
+            className="min-w-[150px] lg:min-w-0 flex-1 flex-shrink-0 snap-start bg-[#0F0F0F] border border-white/8 rounded-[10px] p-3 cursor-pointer hover:border-orange-500/30 transition-all duration-150 select-none flex flex-col justify-between min-h-[92px]"
           >
-            <div className="flex items-center justify-between mb-8">
-              <div className="w-14 h-14 bg-warning/10 rounded-xl flex items-center justify-center text-warning shadow-sm border border-warning/20 transition-transform group-hover:-rotate-6">
-                <TargetIcon className="w-7 h-7" />
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
+                {language === 'id' ? 'TARGET AKTIF' : 'ACTIVE TARGETS'}
+              </span>
+              <div className="w-5 h-5 bg-emerald-500/10 rounded-md flex items-center justify-center text-emerald-400">
+                <TargetIcon size={12} />
               </div>
-              <span className="text-eyebrow text-ink-tertiary font-black uppercase tracking-widest">{t('targets')}</span>
             </div>
-            <div className="text-heading-lg text-ink font-mono tracking-tighter">{Math.round(summary.targetProgress)}%</div>
-            <p className="text-eyebrow text-ink-tertiary font-bold uppercase mt-2 tracking-widest">{t('performance')}</p>
-          </motion.div>
-        </div>
+            <div>
+              <div className="text-[15px] font-mono font-bold text-zinc-100">
+                {onTrack} On Track
+              </div>
+              <p className="text-[9px] text-zinc-500 font-semibold truncate mt-0.5">
+                {targetTrend}
+              </p>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          <motion.section 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.42 }}
-            className="bg-surface-1 p-6 rounded-lg shadow-card border border-hairline lg:col-span-3"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-heading-sm font-bold text-ink flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-accent" />
-                {t('weeklyOverview')}
-              </h2>
-            </div>
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={weeklyChartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-danger)" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="var(--color-danger)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-hairline)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-subtle)', fontSize: 11 }} />
-                  <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-subtle)', fontSize: 11 }} />
-                  <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-subtle)', fontSize: 11 }} />
-                  <RechartsTooltip 
-                    contentStyle={{ backgroundColor: 'var(--color-surface-3)', borderRadius: '12px', border: '1px solid var(--color-hairline-strong)', boxShadow: 'var(--shadow-modal)' }}
-                    labelStyle={{ fontWeight: 'bold', color: 'var(--color-ink)', marginBottom: '4px' }}
-                    itemStyle={{ fontSize: '12px' }}
-                  />
-                  <Area yAxisId="left" type="monotone" dataKey="tasks" name={t('tasksCompleted')} stroke="var(--color-accent)" strokeWidth={2} fillOpacity={1} fill="url(#colorTasks)" />
-                  <Area yAxisId="right" type="monotone" dataKey="expense" name={t('expenses')} stroke="var(--color-danger)" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.section>
+        </section>
 
-          <motion.section 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline lg:col-span-2 relative overflow-hidden group"
-          >
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Sparkles className="w-24 h-24 text-primary" />
+
+        {/* ============================================================
+            3. MAIN DESKTOP GRID (3 Columns - Visible on Desktop >= 1024px)
+            ============================================================ */}
+        <div className="hidden lg:grid lg:grid-cols-3 gap-3.5 items-start">
+          
+          {/* Kolom Kiri */}
+          <div className="flex flex-col gap-3.5">
+            
+            {/* A. FINANCE PREVIEW CARD */}
+            <div className="bg-gradient-to-br from-[#0F0F0F] via-[#0F0F0F] to-orange-500/5 border border-white/8 rounded-[12px] p-4 flex flex-col gap-3 transition-colors hover:border-white/12">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-1.5">
+                  💰 {language === 'id' ? 'Keuangan' : 'Finance'}
+                </span>
+                <span 
+                  onClick={() => setActiveView('finance')}
+                  className="text-[10px] font-bold text-orange-500 hover:text-orange-400 cursor-pointer flex items-center gap-0.5 select-none transition-colors"
+                >
+                  {language === 'id' ? 'Lihat' : 'View'} <ChevronRight size={10} />
+                </span>
+              </div>
+
+              <div className="h-px bg-white/5" />
+
+              <div className="py-1">
+                <span className="text-[10px] font-bold text-zinc-500 block leading-none">
+                  {language === 'id' ? 'TOTAL SALDO' : 'TOTAL BALANCE'}
+                </span>
+                <div className="text-[18px] font-mono font-black text-zinc-100 mt-1">
+                  {formatCurrency(currentBalance)}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 bg-white/3 border border-white/5 rounded-lg p-2 text-left">
+                <div>
+                  <span className="text-[8px] font-bold text-zinc-500 uppercase block tracking-wider">
+                    {language === 'id' ? 'Pemasukan' : 'Income'}
+                  </span>
+                  <span className="text-[11px] font-mono font-bold text-emerald-400">
+                    {formatCurrency(thisMonthIncome)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[8px] font-bold text-zinc-500 uppercase block tracking-wider">
+                    {language === 'id' ? 'Pengeluaran' : 'Expense'}
+                  </span>
+                  <span className="text-[11px] font-mono font-bold text-red-400 truncate block">
+                    {formatCurrency(thisMonthExpense)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5 mt-1">
+                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">
+                  {language === 'id' ? 'Aktivitas Terakhir' : 'Recent Activities'}
+                </span>
+                {transactions.length === 0 ? (
+                  <p className="text-[11px] text-zinc-500 italic py-2 text-center">
+                    {language === 'id' ? 'Tidak ada transaksi' : 'No recent transactions'}
+                  </p>
+                ) : (
+                  [...transactions]
+                    .sort((a,b) => b.date.localeCompare(a.date))
+                    .slice(0,3)
+                    .map((item) => (
+                      <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/3 text-[11px] border border-white/3">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.type === 'income' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                          <span className="text-zinc-300 font-medium truncate">{item.description}</span>
+                        </div>
+                        <span className={`font-mono font-bold shrink-0 ${item.type === 'income' ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                          {item.type === 'income' ? '+' : '-'}{item.amount.toLocaleString('id-ID')}
+                        </span>
+                      </div>
+                    ))
+                )}
+              </div>
             </div>
-            <div className="relative z-10">
-              <h2 className="text-eyebrow text-ink-tertiary uppercase mb-4">{t('dailyInspiration')}</h2>
-              <div 
-                className="cursor-pointer"
-                onClick={() => setActiveView('ai_planner')}
+
+            {/* B. HABIT TODAY CARD */}
+            <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-4 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-1.5">
+                  🔥 {language === 'id' ? 'Habit Hari Ini' : 'Habit Today'}
+                </span>
+                <span 
+                  onClick={() => setActiveView('habits')}
+                  className="text-[10px] font-bold text-orange-500 hover:text-orange-400 cursor-pointer flex items-center gap-0.5 select-none transition-colors"
+                >
+                  {language === 'id' ? 'Lihat' : 'View'} <ChevronRight size={10} />
+                </span>
+              </div>
+
+              <div className="h-px bg-white/5" />
+
+              <div className="flex justify-between items-center text-[11px] font-semibold text-zinc-400 mt-1">
+                <span>⚡ {language === 'id' ? 'Progres Harian' : 'Daily Progress'}</span>
+                <span className="text-orange-500">{completedTodayHabitsCount} / {activeHabits.length} habit</span>
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden mb-1">
+                <div 
+                  className="bg-orange-500 h-full transition-all duration-300 rounded-full" 
+                  style={{ width: `${activeHabits.length > 0 ? (completedTodayHabitsCount / activeHabits.length) * 100 : 0}%` }} 
+                />
+              </div>
+
+              {/* Habit Lists */}
+              <div className="flex flex-col gap-1.5">
+                {activeHabits.length === 0 ? (
+                  <p className="text-[11px] text-zinc-500 italic py-2 text-center">
+                    {language === 'id' ? 'Tidak ada habit aktif' : 'No active habits'}
+                  </p>
+                ) : (
+                  activeHabits.slice(0, 3).map((item) => {
+                    const status = getHabitStatusToday(item.id);
+                    const isCompleted = status === 'completed';
+                    return (
+                      <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/3 border border-white/3 text-[11px]">
+                        <span className="text-zinc-300 font-medium truncate flex items-center gap-1.5">
+                          <span>{item.icon || '✨'}</span>
+                          <span className="truncate">{item.title}</span>
+                        </span>
+                        {isCompleted ? (
+                          <span className="text-emerald-400 font-bold flex items-center gap-0.5 text-[10px] bg-emerald-500/10 py-0.5 px-1.5 rounded">
+                            ✅ Selesai
+                          </span>
+                        ) : (
+                          <span className="text-zinc-500 border border-zinc-600/50 text-[10px] font-medium py-0.5 px-1.5 rounded">
+                            ○ Belum
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Kolom Tengah */}
+          <div className="flex flex-col gap-3.5">
+            
+            {/* C. WEEKLY CHART CARD */}
+            <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-4 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-1.5">
+                  📊 {language === 'id' ? 'Ikhtisar Mingguan' : 'Weekly Overview'}
+                </span>
+              </div>
+              <div className="h-px bg-white/5" />
+
+              <div className="h-[140px] w-full mt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={last7Days} margin={{ top: 5, right: 0, left: -24, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#71717A', fontSize: 9 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#71717A', fontSize: 9 }} />
+                    <RechartsTooltip
+                      cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                      contentStyle={{ backgroundColor: '#0d0d0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', fontSize: '10px', color: '#fff' }}
+                      labelStyle={{ fontWeight: 'bold', marginBottom: '2px' }}
+                    />
+                    <Bar dataKey="income" name={language === 'id' ? 'Masuk' : 'Income'} fill="#10b981" radius={[3, 3, 0, 0]} barSize={8} />
+                    <Bar dataKey="expense" name={language === 'id' ? 'Keluar' : 'Expense'} fill="#f43f5e" radius={[3, 3, 0, 0]} barSize={8} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* D. AI INSIGHT CARD */}
+            <div className="bg-orange-500/5 border border-orange-500/20 rounded-[12px] p-4 flex flex-col gap-2.5 relative overflow-hidden">
+              <div className="absolute top-[-30px] right-[-30px] w-16 h-16 bg-orange-500/10 rounded-full blur-xl pointer-events-none" />
+              
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-bold text-orange-400 flex items-center gap-1.5 select-none">
+                  🤖 AI Insight
+                </span>
+                {loadingInsight && (
+                  <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping" />
+                )}
+              </div>
+
+              <div className="h-px bg-orange-500/10" />
+
+              <div className="min-h-[64px] flex items-center justify-center">
+                {insight ? (
+                  <p className="text-[12px] leading-relaxed text-zinc-300 font-medium italic text-left">
+                    "{insight}"
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-zinc-500 italic py-2">
+                    {language === 'id' ? 'Belum ada insight harian.' : 'No daily insights yet.'}
+                  </p>
+                )}
+              </div>
+
+              <button
+                onClick={generateAIInsight}
+                disabled={loadingInsight}
+                className="w-full py-1.5 text-[11px] font-bold bg-[#0F0F0F] text-orange-400 rounded-lg hover:bg-[#141414] border border-orange-500/15 disabled:opacity-50 transition-colors flex items-center justify-center gap-1 cursor-pointer"
               >
-                <p className="text-heading-md leading-relaxed text-ink-muted">
-                  {dailyQuote 
-                    ? `"${dailyQuote.text}"`
-                    : "Click to get your daily dose of inspiration..."}
-                </p>
-                <p className="text-body-sm font-bold text-ink-tertiary mt-4">
-                  {dailyQuote 
-                    ? `— ${dailyQuote.author}`
-                    : ""}
-                </p>
+                <RefreshCw size={10} className={`${loadingInsight ? 'animate-spin' : ''}`} />
+                {language === 'id' ? 'Generate Insight' : 'Generate Insight'}
+              </button>
+            </div>
+
+          </div>
+
+          {/* Kolom Kanan */}
+          <div className="flex flex-col gap-3.5">
+            
+            {/* E. SCHEDULE TODAY CARD */}
+            <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-4 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-1.5">
+                  📅 {language === 'id' ? 'Jadwal Hari Ini' : 'Schedule Today'}
+                </span>
+                <span 
+                  onClick={() => setActiveView('schedule')}
+                  className="text-[10px] font-bold text-orange-500 hover:text-orange-400 cursor-pointer flex items-center gap-0.5 select-none transition-colors"
+                >
+                  {language === 'id' ? 'Lihat' : 'View'} <ChevronRight size={10} />
+                </span>
+              </div>
+              <div className="h-px bg-white/5" />
+
+              <p className="text-[10px] font-bold text-zinc-500 leading-none">
+                {now.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
+
+              <div className="flex flex-col gap-1.5">
+                {todayTasks.length === 0 ? (
+                  <div className="flex flex-col gap-2 items-center py-3">
+                    <p className="text-[11px] text-zinc-500 italic">
+                      {language === 'id' ? 'Tidak ada jadwal hari ini' : 'No schedules today'}
+                    </p>
+                    <button 
+                      onClick={() => setActiveView('schedule')}
+                      className="py-1 px-2 text-[10px] font-bold text-orange-500 border border-orange-500/10 rounded-md bg-orange-500/5 hover:bg-orange-500/10 cursor-pointer transition-colors"
+                    >
+                      + Tambah 
+                    </button>
+                  </div>
+                ) : (
+                  todayTasks.slice(0, 3).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/3 border border-white/3 text-[11px]">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.completed ? 'bg-zinc-600' : 'bg-orange-500'}`} />
+                        <span className={`text-zinc-300 truncate font-semibold ${item.completed ? 'line-through text-zinc-600' : ''}`}>
+                          {item.title}
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-mono font-semibold text-zinc-500 shrink-0">
+                        ⏰ {item.startTime || '09:00'}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
-          </motion.section>
+
+            {/* F. DAILY QUOTE CARD */}
+            <div className="bg-white/3 border border-white/5 rounded-[12px] p-4 flex flex-col gap-3 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-bold text-zinc-400 flex items-center gap-1.5 select-none">
+                  ✨ {language === 'id' ? 'Inspirasi Harian' : 'Daily Inspiration'}
+                </span>
+                <button
+                  onClick={handleRefreshQuote}
+                  disabled={loadingQuote}
+                  className="p-1 hover:bg-white/5 rounded transition-colors text-zinc-500 hover:text-zinc-300 disabled:opacity-50 cursor-pointer"
+                  title="Refresh Quote"
+                >
+                  <RefreshCw size={11} className={`${loadingQuote ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+
+              <div className="h-px bg-white/5" />
+
+              <div className="min-h-[56px] flex flex-col justify-center">
+                {dailyQuote ? (
+                  <>
+                    <p className="text-[12.5px] leading-relaxed text-zinc-300 italic">
+                      "{dailyQuote.text}"
+                    </p>
+                    <span className="text-[10px] text-zinc-500 font-bold mt-1 text-right block pr-1">
+                      — {dailyQuote.author}
+                    </span>
+                  </>
+                ) : (
+                  <p className="text-[11px] text-zinc-500 italic text-center py-2">
+                    {language === 'id' ? 'Mendapatkan quote...' : 'Getting quote...'}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* G. QUICK ACTIONS GRID */}
+            <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-4 flex flex-col gap-3">
+              <span className="text-[13px] font-bold text-zinc-200">
+                ⚡ Quick Actions
+              </span>
+              <div className="h-px bg-white/5" />
+
+              <div className="grid grid-cols-2 gap-2">
+                <button 
+                  onClick={() => setActiveView('finance')}
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                >
+                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">💰 Transaksi</span>
+                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                </button>
+                <button 
+                  onClick={() => setActiveView('schedule')}
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                >
+                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">✅ Tugas</span>
+                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                </button>
+                <button 
+                  onClick={() => setActiveView('habits')}
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                >
+                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">🔥 Habit</span>
+                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                </button>
+                <button 
+                  onClick={() => setActiveView('targets')}
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                >
+                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">🎯 Target</span>
+                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                </button>
+                <button 
+                  onClick={() => setActiveView('ai_planner')}
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                >
+                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">✨ AI Plan</span>
+                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                </button>
+                <button 
+                  onClick={() => setActiveView('journal')}
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                >
+                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">📖 Jurnal</span>
+                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                </button>
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <motion.section 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-surface-1 p-8 rounded-lg shadow-card border border-hairline"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-heading-sm font-bold text-ink">{t('quickActions')}</h2>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+
+        {/* ============================================================
+            4. MOBILE ONLY SINGLE COLUMN (Visible on Mobile < 1024px)
+            ============================================================ */}
+        <div className="flex flex-col lg:hidden gap-3.5">
+          
+          {/* M3. Finance Card (full width) */}
+          <div className="bg-gradient-to-br from-[#0F0F0F] via-[#0F0F0F] to-orange-500/5 border border-white/8 rounded-[12px] p-3 flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-bold text-zinc-200 flex items-center gap-1.5">
+                💰 Finance
+              </span>
+              <span 
                 onClick={() => setActiveView('finance')}
-                className="p-4 rounded-md bg-surface-2 hover:bg-surface-3 border border-hairline transition-all text-left"
+                className="text-[10px] font-bold text-orange-500 flex items-center gap-0.5 select-none"
               >
-                <Wallet className="w-5 h-5 text-ink-subtle mb-3" />
-                <div className="font-semibold text-ink text-body-sm">{t('expense')}</div>
-                <div className="text-[10px] text-ink-tertiary">{t('trackSpending')}</div>
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveView('schedule')}
-                className="p-4 rounded-md bg-surface-2 hover:bg-surface-3 border border-hairline transition-all text-left"
-              >
-                <Calendar className="w-5 h-5 text-ink-subtle mb-3" />
-                <div className="font-semibold text-ink text-body-sm">{t('newTask')}</div>
-                <div className="text-[10px] text-ink-tertiary">{t('planNextHour')}</div>
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveView('ai_planner')}
-                className="p-4 rounded-md bg-surface-2 hover:bg-surface-3 border border-hairline transition-all text-left"
-              >
-                <Sparkles className="w-5 h-5 text-ink-subtle mb-3" />
-                <div className="font-semibold text-ink text-body-sm">{t('aiPlanner')}</div>
-                <div className="text-[10px] text-ink-tertiary">{t('aiPlanDesc')}</div>
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveView('targets')}
-                className="p-4 rounded-md bg-surface-2 hover:bg-surface-3 border border-hairline transition-all text-left"
-              >
-                <TargetIcon className="w-5 h-5 text-ink-subtle mb-3" />
-                <div className="font-semibold text-ink text-body-sm">{t('targets')}</div>
-                <div className="text-[10px] text-ink-tertiary">{t('viewTargets')}</div>
-              </motion.button>
+                {language === 'id' ? 'Lihat' : 'View'} <ChevronRight size={10} />
+              </span>
             </div>
-          </motion.section>
+            
+            <div className="h-px bg-white/5" />
 
-          <motion.section 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-primary p-5 lg:p-8 rounded-xxl shadow-glow-primary text-white relative overflow-hidden"
-          >
-            <div className="relative z-10 h-full flex flex-col justify-between">
-              <div>
-                <h2 className="text-display-md mb-2">{t('stayProductive')}</h2>
-                <p className="text-white/70 text-body-sm mb-8">{t('stayProductiveDesc')}</p>
+            <div className="py-0.5">
+              <span className="text-[9px] font-bold text-zinc-500 block leading-none">TOTAL SALDO</span>
+              <div className="text-[16px] font-mono font-black text-zinc-100 mt-1">
+                {formatCurrency(currentBalance)}
               </div>
-              <motion.button 
-                whileHover={{ x: 4 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveView('targets')}
-                className="bg-white text-primary px-8 py-3 rounded-pill font-bold text-button w-fit shadow-lg flex items-center gap-2"
-              >
-                {t('viewTargets')} <ChevronRight className="w-4 h-4" />
-              </motion.button>
             </div>
-            <motion.div 
-              animate={{ 
-                scale: [1, 1.2, 1],
-                opacity: [0.3, 0.5, 0.3]
-              }}
-              transition={{ 
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="absolute -right-8 -bottom-8 w-48 h-48 bg-white/10 rounded-full blur-3xl" 
-            />
-          </motion.section>
+
+            <div className="grid grid-cols-2 gap-1.5 bg-white/3 border border-white/5 rounded-lg p-2 text-left">
+              <div>
+                <span className="text-[8px] font-bold text-zinc-500 uppercase block tracking-wider">Pemasukan</span>
+                <span className="text-[10px] font-mono font-bold text-emerald-400">{formatCurrency(thisMonthIncome)}</span>
+              </div>
+              <div>
+                <span className="text-[8px] font-bold text-zinc-500 uppercase block tracking-wider">Pengeluaran</span>
+                <span className="text-[10px] font-mono font-bold text-red-400 truncate block">{formatCurrency(thisMonthExpense)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* M4. Habit Today (full width) */}
+          <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-3 flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-bold text-zinc-200 flex items-center gap-1.5">
+                🔥 Habit Hari Ini
+              </span>
+              <span 
+                onClick={() => setActiveView('habits')}
+                className="text-[10px] font-bold text-orange-500 flex items-center gap-0.5 select-none"
+              >
+                {language === 'id' ? 'Lihat' : 'View'} <ChevronRight size={10} />
+              </span>
+            </div>
+
+            <div className="h-px bg-white/5" />
+
+            <div className="flex justify-between items-center text-[10px] font-semibold text-zinc-400">
+              <span>Progres Harian</span>
+              <span className="text-orange-500">{completedTodayHabitsCount} / {activeHabits.length} habit</span>
+            </div>
+
+            <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+              <div 
+                className="bg-orange-500 h-full transition-all duration-300 rounded-full" 
+                style={{ width: `${activeHabits.length > 0 ? (completedTodayHabitsCount / activeHabits.length) * 100 : 0}%` }} 
+              />
+            </div>
+
+            <div className="flex flex-col gap-1 mt-0.5">
+              {activeHabits.slice(0, 3).map((item) => {
+                const isCompleted = getHabitStatusToday(item.id) === 'completed';
+                return (
+                  <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/3 border border-white/3 text-[10px]">
+                    <span className="text-zinc-300 truncate font-medium">
+                      {item.icon || '✨'} {item.title}
+                    </span>
+                    <span>{isCompleted ? '✅' : '○'}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* M5. Schedule Today (full width) */}
+          <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-3 flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-bold text-zinc-200 flex items-center gap-1.5">
+                📅 Jadwal Hari Ini
+              </span>
+              <span 
+                onClick={() => setActiveView('schedule')}
+                className="text-[10px] font-bold text-orange-500 flex items-center gap-0.5 select-none"
+              >
+                {language === 'id' ? 'Lihat' : 'View'} <ChevronRight size={10} />
+              </span>
+            </div>
+
+            <div className="h-px bg-white/5" />
+
+            {todayTasks.length === 0 ? (
+              <p className="text-[10px] text-zinc-500 italic text-center py-2">Tidak ada jadwal hari ini</p>
+            ) : (
+              <div className="flex flex-col gap-1">
+                {todayTasks.slice(0,3).map(item => (
+                  <div key={item.id} className="flex items-center justify-between p-1.5 bg-white/3 border border-white/3 rounded text-[10px]">
+                    <span className={`truncate text-zinc-300 ${item.completed ? 'line-through text-zinc-600' : ''}`}>{item.title}</span>
+                    <span className="text-[9px] text-zinc-500 font-mono shrink-0">⏰ {item.startTime}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* M6. Quick Actions (2x3 grid) */}
+          <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-3 flex flex-col gap-2.5">
+            <span className="text-[12px] font-bold text-zinc-200">⚡ Quick Actions</span>
+            <div className="h-px bg-white/5" />
+            <div className="grid grid-cols-2 gap-1.5">
+              <button onClick={() => setActiveView('finance')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">💰 Transaksi <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('schedule')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">✅ Tugas <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('habits')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">🔥 Habit <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('targets')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">🎯 Target <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('ai_planner')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">✨ AI Plan <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('journal')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">📖 Jurnal <ArrowRight size={10} /></button>
+            </div>
+          </div>
+
+          {/* M7. Daily Quote */}
+          <div className="bg-white/3 border border-white/5 rounded-[12px] p-3 flex flex-col gap-2">
+            <span className="text-[12px] font-bold text-zinc-400">✨ Daily Inspiration</span>
+            <div className="h-px bg-white/5" />
+            {dailyQuote ? (
+              <p className="text-[11px] leading-relaxed text-zinc-300 italic text-left">
+                "{dailyQuote.text}" <span className="text-[9px] text-zinc-500 not-italic block mt-0.5">— {dailyQuote.author}</span>
+              </p>
+            ) : (
+              <p className="text-[10px] text-zinc-500 italic text-center">Loading quote...</p>
+            )}
+          </div>
+
         </div>
-      </motion.div>
+
+        {/* ============================================================
+            5. FITUR HIGHLIGHT SECTION (Desktop only, full width)
+            ============================================================ */}
+        <section className="hidden lg:flex flex-col gap-3.5 mt-2">
+          <div className="text-left">
+            <span className="text-[11px] font-extrabold text-zinc-500 tracking-[0.2em] uppercase">
+              SEMUA FITUR LIFEFLOW
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3.5">
+            
+            {/* Feature 1 — Finance Tracker */}
+            <div 
+              onClick={() => setActiveView('finance')}
+              className="bg-[#0F0F0F] border border-white/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+            >
+              <div className="w-9 h-9 rounded-lg bg-orange-500/12 flex items-center justify-center text-orange-500 font-semibold shrink-0">
+                <CreditCard size={16} />
+              </div>
+              <div className="text-left min-w-0">
+                <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
+                  Finance Tracker
+                </h4>
+                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                  Catat & analisis keuangan harian
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 2 — Budget & Savings */}
+            <div 
+              onClick={() => setActiveView('budgets' as View)}
+              className="bg-[#0F0F0F] border border-white/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+            >
+              <div className="w-9 h-9 rounded-lg bg-emerald-500/12 flex items-center justify-center text-emerald-400 font-semibold shrink-0">
+                <PiggyBank size={16} />
+              </div>
+              <div className="text-left min-w-0">
+                <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
+                  Budget & Savings
+                </h4>
+                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                  Rencanakan pengisian tabungan
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 3 — Habit Tracker */}
+            <div 
+              onClick={() => setActiveView('habits')}
+              className="bg-[#0F0F0F] border border-[#ffffff]/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+            >
+              <div className="w-9 h-9 rounded-lg bg-amber-500/12 flex items-center justify-center text-amber-500 font-semibold shrink-0">
+                <Flame size={16} />
+              </div>
+              <div className="text-left min-w-0">
+                <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
+                  Habit Tracker
+                </h4>
+                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                  Bangun konsistensi harian Anda
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 4 — AI Planner */}
+            <div 
+              onClick={() => setActiveView('ai_planner')}
+              className="bg-[#0F0F0F] border border-white/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+            >
+              <div className="w-9 h-9 rounded-lg bg-purple-500/12 flex items-center justify-center text-purple-400 font-semibold shrink-0">
+                <Sparkles size={16} />
+              </div>
+              <div className="text-left min-w-0">
+                <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
+                  AI Planner
+                </h4>
+                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                  AI compiles automated study plans
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 5 — AI Smart Space */}
+            <div 
+              onClick={() => setActiveView('smart_space')}
+              className="bg-[#0F0F0F] border border-white/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+            >
+              <div className="w-9 h-9 rounded-lg bg-sky-500/12 flex items-center justify-center text-sky-400 font-semibold shrink-0">
+                <Brain size={16} />
+              </div>
+              <div className="text-left min-w-0">
+                <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
+                  AI Smart Space
+                </h4>
+                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                  Focus, mind map & wrap summary
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 6 — Daily Journal */}
+            <div 
+              onClick={() => setActiveView('journal')}
+              className="bg-[#0F0F0F] border border-[#ffffff]/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+            >
+              <div className="w-9 h-9 rounded-lg bg-yellow-500/12 flex items-center justify-center text-yellow-500 font-semibold shrink-0">
+                <BookOpen size={16} />
+              </div>
+              <div className="text-left min-w-0">
+                <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
+                  Daily Journal
+                </h4>
+                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                  Refleksi harian & spiritual ritual
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
     </div>
   );
 }

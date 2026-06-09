@@ -36,23 +36,24 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
           onClick={onMenuToggle}
           className="hidden lg:flex items-center justify-center w-8 h-8 rounded-md hover:bg-white/5 text-[#62666d] hover:text-[#9ca3af] transition-colors"
         >
-          <MenuIcon size={20} />
+          <MenuIcon size={16} />
         </button>
       </div>
 
       {/* Middle Section - Clock */}
-      <div className="hidden sm:flex flex-1 justify-center">
+      <div className="hidden sm:flex flex-1 justify-center text-[12px]">
         <DigitalClock />
       </div>
 
       {/* Right Section */}
       <div className="flex items-center gap-2 lg:gap-4">
-        {/* Theme Toggle (Tablet+) */}
+        {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="hidden md:flex p-2 text-[#62666d] hover:text-[#9ca3af] hover:bg-white/5 rounded-md transition-colors"
+          className="flex p-2 text-ink-subtle hover:text-ink hover:bg-surface-2 rounded-md transition-colors"
+          title={theme === 'light' ? 'Mode Gelap' : 'Mode Terang'}
         >
-          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
         </button>
 
         {/* Notifications */}
@@ -61,7 +62,7 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
             onClick={() => setShowNotifications(!showNotifications)}
             className="p-2 text-[#62666d] hover:text-[#9ca3af] hover:bg-white/5 rounded-md relative transition-colors"
           >
-            <Bell size={18} />
+            <Bell size={16} />
             {inAppNotifications.length > 0 && (
               <span className="absolute top-2 right-2 w.5 h-1.5 bg-[#e23b4a] rounded-full border border-[#010102]" />
             )}
@@ -71,9 +72,9 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
         {/* User Profile */}
         <div className="flex items-center gap-3 pl-2 lg:pl-4 border-l border-white/10 ml-2">
           {user?.photoURL ? (
-            <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full object-cover border border-white/10" referrerPolicy="no-referrer" />
+            <img src={user.photoURL} alt="" className="w-[26px] h-[26px] rounded-full object-cover border border-white/10" referrerPolicy="no-referrer" />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-[#5e6ad2] flex items-center justify-center text-white font-bold text-xs">
+            <div className="w-[26px] h-[26px] rounded-full bg-[#5e6ad2] flex items-center justify-center text-white font-bold text-[10px]">
               {user?.displayName?.charAt(0) || 'U'}
             </div>
           )}
