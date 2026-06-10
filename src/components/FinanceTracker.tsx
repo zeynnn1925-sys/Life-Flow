@@ -380,14 +380,9 @@ export default function FinanceTracker() {
       className="space-y-6 relative overflow-hidden"
     >
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2072&auto=format&fit=crop"
-          alt=""
-          aria-hidden="true"
-          className="h-full w-full object-cover object-center"
-          style={{ opacity: 0.07 }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#010102]/40 via-transparent to-[#010102]/90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#5e6ad2]/3 via-transparent to-emerald-500/3" />
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#5e6ad2]/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/3 blur-[120px]" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div 

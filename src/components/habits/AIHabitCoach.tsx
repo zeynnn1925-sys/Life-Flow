@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Send, Brain, Target, MessageSquare } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
 import { Habit } from '../../types/habits';
 
 interface AIHabitCoachProps {
@@ -16,22 +15,22 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
   const getCoachAdvice = async () => {
     setLoading(true);
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) throw new Error("Gemini API key is missing");
-      
-      const ai = new GoogleGenAI({ apiKey });
-
-      const habitData = habits.map(h => `${h.title} (Streak: ${h.currentStreak}, Completions: ${h.totalCompletions})`).join(', ');
-      
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `You are the LifeFlow AI Habit Coach. Based on these habits: ${habitData}, 
-        give me ONE specific, actionable, and motivating tip to improve consistency today. 
-        Keep it under 150 characters. Be supportive but professional.`
+      const response = await fetch('/api/gemini/habit-coach', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ habits }),
       });
-      
-      setAdvice(result.text || "Tetap semangat! Konsistensi adalah kunci.");
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAdvice(data.text || "Tetap semangat! Konsistensi adalah kunci.");
     } catch (error) {
+      console.error("AI Habit Coach Error:", error);
       setAdvice("Gagal terhubung dengan Coach. Coba lagi nanti ya.");
     } finally {
       setLoading(false);

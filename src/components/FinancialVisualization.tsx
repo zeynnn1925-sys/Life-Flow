@@ -96,7 +96,7 @@ export default function FinancialVisualization() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card group hover:border-hairline-strong transition-all"
+          className="bg-surface-1 p-4 sm:p-8 rounded-lg border border-hairline shadow-card group hover:border-hairline-strong transition-all"
         >
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-heading-sm font-black text-ink uppercase tracking-tight flex items-center gap-3">
@@ -105,7 +105,7 @@ export default function FinancialVisualization() {
             </h3>
             <Calendar className="w-5 h-5 text-ink-tertiary/40" />
           </div>
-          <div className="h-[320px] w-full">
+          <div className="h-[260px] sm:h-[320px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyExpensesData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-hairline)" />
@@ -129,7 +129,7 @@ export default function FinancialVisualization() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card group hover:border-hairline-strong transition-all"
+          className="bg-surface-1 p-4 sm:p-8 rounded-lg border border-hairline shadow-card group hover:border-hairline-strong transition-all"
         >
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-heading-sm font-black text-ink uppercase tracking-tight flex items-center gap-3">
@@ -138,7 +138,7 @@ export default function FinancialVisualization() {
             </h3>
             <TrendingDown className="w-5 h-5 text-ink-tertiary/40" />
           </div>
-          <div className="h-[320px] w-full">
+          <div className="h-[260px] sm:h-[320px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

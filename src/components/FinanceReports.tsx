@@ -565,7 +565,7 @@ export default function FinanceReports() {
         <motion.div 
           variants={itemVariants}
           whileHover={{ y: -4 }}
-          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
+          className="bg-surface-1 p-4 sm:p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
         >
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
@@ -576,7 +576,7 @@ export default function FinanceReports() {
               {t('clickLegend')}
             </div>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[260px] sm:h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <defs>
@@ -630,7 +630,7 @@ export default function FinanceReports() {
         <motion.div 
           variants={itemVariants}
           whileHover={{ y: -4 }}
-          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
+          className="bg-surface-1 p-4 sm:p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
         >
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
@@ -638,7 +638,7 @@ export default function FinanceReports() {
               {t('netBalance')} Trend
             </h3>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[260px] sm:h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={netTrendData}>
                 <defs>
@@ -674,7 +674,7 @@ export default function FinanceReports() {
           <motion.div 
             variants={itemVariants}
             whileHover={{ y: -4 }}
-            className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
+            className="bg-surface-1 p-4 sm:p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
               <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
@@ -754,9 +754,9 @@ export default function FinanceReports() {
           <motion.div 
             variants={itemVariants}
             whileHover={{ y: -4 }}
-            className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
+            className="bg-surface-1 p-4 sm:p-8 rounded-lg border border-hairline shadow-card transition-shadow hover:shadow-glow-accent/10"
           >
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-8 flex-wrap">
               <h3 className="text-heading-xs font-black flex items-center gap-3 text-ink uppercase tracking-tight">
                 <PieChartIcon className="w-5 h-5 text-accent" />
                 {t('mainCategories').toUpperCase()}
@@ -812,7 +812,7 @@ export default function FinanceReports() {
         <motion.div 
           variants={itemVariants} 
           whileHover={{ y: -4 }}
-          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group transition-shadow hover:shadow-glow-accent/10"
+          className="bg-surface-1 p-4 sm:p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group transition-shadow hover:shadow-glow-accent/10"
         >
           <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
           <div className="text-eyebrow text-accent font-black uppercase tracking-widest mb-2 flex items-center gap-2">
@@ -826,7 +826,7 @@ export default function FinanceReports() {
         <motion.div 
           variants={itemVariants} 
           whileHover={{ y: -4 }}
-          className="bg-surface-1 p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group transition-shadow hover:shadow-glow-accent/10"
+          className="bg-surface-1 p-4 sm:p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group transition-shadow hover:shadow-glow-accent/10"
         >
           <div className="absolute top-0 right-0 w-24 h-24 bg-danger/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
           <div className="text-eyebrow text-danger font-black uppercase tracking-widest mb-2 flex items-center gap-2">
@@ -840,7 +840,7 @@ export default function FinanceReports() {
         <motion.div 
           variants={itemVariants} 
           whileHover={{ y: -4 }}
-          className="bg-ink p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group transition-shadow hover:shadow-glow-accent/10"
+          className="bg-ink p-4 sm:p-8 rounded-lg border border-hairline shadow-card relative overflow-hidden group transition-shadow hover:shadow-glow-accent/10"
         >
           <div className="absolute top-0 right-0 w-24 h-24 bg-surface-1/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
           <div className="text-eyebrow text-accent font-black uppercase tracking-widest mb-2 flex items-center gap-2">

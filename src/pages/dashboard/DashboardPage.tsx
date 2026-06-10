@@ -33,7 +33,6 @@ import { View } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useData } from '../../contexts/DataContext';
 import { generateDailyQuote } from '../../services/aiProductivityService';
-import { GoogleGenAI } from '@google/genai';
 
 interface DashboardPageProps {
   user: any;
@@ -227,26 +226,28 @@ export default function DashboardPage({
   const generateAIInsight = async () => {
     setLoadingInsight(true);
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (apiKey) {
-        const ai = new GoogleGenAI({ apiKey });
-        const prompt = language === 'id' 
-          ? "Berikan 1 kalimat motivasi produktivitas harian yang sangat singkat, elegan, praktis, berkaitan dengan pengelolaan saldo finansial, tugas hiasan, dan kebiasaan."
-          : "Provide 1 short, elegant, and highly practical peak performance productivity advice regarding matching daily routines, habits, and financial peace.";
-        const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: prompt
-        });
-        const text = response.text || "";
-        const cleaned = text.trim().replace(/^["']|["']$/g, '');
-        if (cleaned) {
-          const newInsight = { text: cleaned, date: todayStr };
-          localStorage.setItem('life_flow_dashboard_ai_insight', JSON.stringify(newInsight));
-          setInsight(cleaned);
-          return;
-        }
+      const response = await fetch('/api/gemini/generate-insight', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ language }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server status ${response.status}`);
       }
-      throw new Error("No API key available");
+
+      const data = await response.json();
+      const text = data.text || "";
+      const cleaned = text.trim().replace(/^["']|["']$/g, '');
+      if (cleaned) {
+        const newInsight = { text: cleaned, date: todayStr };
+        localStorage.setItem('life_flow_dashboard_ai_insight', JSON.stringify(newInsight));
+        setInsight(cleaned);
+        return;
+      }
+      throw new Error("No API response text available");
     } catch (err) {
       // Localized authentic fallback insights
       const idInsights = [
@@ -295,15 +296,10 @@ export default function DashboardPage({
   return (
     <div className="relative p-0 flex flex-col gap-6">
       {/* Background Graphic */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl opacity-10">
-        <img
-          src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2072&auto=format&fit=crop"
-          alt=""
-          aria-hidden="true"
-          className="h-full w-full object-cover object-top"
-          referrerPolicy="no-referrer"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#010102]" />
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl opacity-40">
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#5e6ad2]/5 via-transparent to-orange-500/5" />
+        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#5e6ad2]/8 blur-[100px] dark:bg-[#5e6ad2]/6" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-orange-500/5 blur-[100px] dark:bg-orange-500/3" />
       </div>
 
       <div className="relative z-10 flex flex-col gap-5">
@@ -311,22 +307,22 @@ export default function DashboardPage({
         {/* ============================================================
             1. WELCOME HEADER (Responsive: adapts beautifully for screen)
             ============================================================ */}
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#0c0d12]/60 border border-white/5 p-4 rounded-xl backdrop-blur-md">
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#0c0d12]/60 dark:bg-surface-1/60 border border-hairline p-4 rounded-xl backdrop-blur-md">
           <div className="flex flex-col text-left">
             <span className="text-[10px] text-orange-500 font-extrabold tracking-[0.2em] uppercase mb-0.5">
               {t('dashboard') || 'DASHBOARD'}
             </span>
-            <h1 className="text-[20px] lg:text-[22px] font-bold text-[#f7f8f8] tracking-tight leading-tight">
+            <h1 className="text-[20px] lg:text-[22px] font-bold text-ink tracking-tight leading-tight">
               {language === 'id' ? `Selamat Datang Kembali, ${displayName}` : `Welcome back, ${displayName}`}
             </h1>
-            <p className="text-[11px] text-zinc-500 font-semibold mt-0.5">
+            <p className="text-[11px] text-ink-subtle font-semibold mt-0.5">
               {getTodayDateString()}
             </p>
           </div>
           
           <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
             <div className="flex flex-col items-end text-right">
-              <span className="text-[12px] font-mono font-bold text-zinc-300 bg-white/5 border border-white/5 py-1 px-2.5 rounded-lg">
+              <span className="text-[12px] font-mono font-bold text-ink bg-surface-2 border border-hairline py-1 px-2.5 rounded-lg">
                 ⏱ {timeStr || '00:00'}
               </span>
             </div>
@@ -341,28 +337,28 @@ export default function DashboardPage({
         </header>
 
         {/* ============================================================
-            2. STAT STRIP (Horizontal scroll wrapper on mobile, static on desktop)
+            2. STAT STRIP (Flex-wrap / Flex-col on mobile, static grid on desktop)
             ============================================================ */}
-        <section className="flex lg:grid lg:grid-cols-4 gap-2.5 lg:gap-3 overflow-x-auto lg:overflow-visible pb-2.5 lg:pb-0 scrollbar-none snap-x antialiased">
+        <section className="flex flex-col sm:flex-row sm:flex-wrap lg:grid lg:grid-cols-4 gap-3.5 antialiased">
           
           {/* Card 1 — Balance */}
           <div 
             onClick={() => setActiveView('finance')}
-            className="min-w-[150px] lg:min-w-0 flex-1 flex-shrink-0 snap-start bg-[#0F0F0F] border border-white/8 rounded-[10px] p-3 cursor-pointer hover:border-orange-500/30 transition-all duration-150 select-none flex flex-col justify-between min-h-[92px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#0F0F0F] border border-white/8 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
                 {language === 'id' ? 'SALDO' : 'BALANCE'}
               </span>
-              <div className="w-5 h-5 bg-orange-500/10 rounded-md flex items-center justify-center text-orange-500">
-                <Wallet size={12} />
+              <div className="w-6 h-6 bg-orange-500/10 rounded-md flex items-center justify-center text-orange-500">
+                <Wallet size={13} />
               </div>
             </div>
             <div>
-              <div className="text-[14px] lg:text-[15px] font-mono font-bold text-zinc-100 truncate">
+              <div className="text-[15px] lg:text-[16px] font-mono font-bold text-zinc-100 truncate">
                 {formatCurrency(currentBalance)}
               </div>
-              <p className="text-[9px] text-zinc-500 font-semibold truncate mt-0.5">
+              <p className="text-[10px] text-zinc-500 font-semibold truncate mt-0.5">
                 {balanceTrend}
               </p>
             </div>
@@ -371,21 +367,21 @@ export default function DashboardPage({
           {/* Card 2 — Tasks Hari Ini */}
           <div 
             onClick={() => setActiveView('schedule')}
-            className="min-w-[150px] lg:min-w-0 flex-1 flex-shrink-0 snap-start bg-[#0F0F0F] border border-white/8 rounded-[10px] p-3 cursor-pointer hover:border-orange-500/30 transition-all duration-150 select-none flex flex-col justify-between min-h-[92px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#0F0F0F] border border-white/8 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
-                {language === 'id' ? 'TUGAS HARI INI' : 'TODAY\'S TASidKS'}
+                {language === 'id' ? 'TUGAS HARI INI' : "TODAY'S TASKS"}
               </span>
-              <div className="w-5 h-5 bg-blue-500/10 rounded-md flex items-center justify-center text-blue-400">
-                <CheckCircle2 size={12} />
+              <div className="w-6 h-6 bg-blue-500/10 rounded-md flex items-center justify-center text-blue-400">
+                <CheckCircle2 size={13} />
               </div>
             </div>
             <div>
-              <div className="text-[15px] font-mono font-bold text-zinc-100">
+              <div className="text-[16px] font-mono font-bold text-zinc-100">
                 {completedTasksToday} <span className="text-zinc-600 font-normal">/</span> {totalTasksToday}
               </div>
-              <p className="text-[9px] text-zinc-500 font-semibold truncate mt-0.5">
+              <p className="text-[10px] text-zinc-500 font-semibold truncate mt-0.5">
                 {taskTrend}
               </p>
             </div>
@@ -394,21 +390,21 @@ export default function DashboardPage({
           {/* Card 3 — Habit Streak */}
           <div 
             onClick={() => setActiveView('habits')}
-            className="min-w-[150px] lg:min-w-0 flex-1 flex-shrink-0 snap-start bg-[#0F0F0F] border border-white/8 rounded-[10px] p-3 cursor-pointer hover:border-orange-500/30 transition-all duration-150 select-none flex flex-col justify-between min-h-[92px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#0F0F0F] border border-white/8 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
                 {language === 'id' ? 'STREAK TERBAIK' : 'LONGEST STREAK'}
               </span>
-              <div className="w-5 h-5 bg-amber-500/10 rounded-md flex items-center justify-center text-amber-500">
-                <Flame size={12} />
+              <div className="w-6 h-6 bg-amber-500/10 rounded-md flex items-center justify-center text-amber-500">
+                <Flame size={13} />
               </div>
             </div>
             <div>
-              <div className="text-[15px] font-mono font-bold text-zinc-100">
+              <div className="text-[16px] font-mono font-bold text-zinc-100">
                 {longestStreak} {language === 'id' ? 'hari' : 'days'}
               </div>
-              <p className="text-[9px] text-zinc-500 font-semibold truncate mt-0.5">
+              <p className="text-[10px] text-zinc-500 font-semibold truncate mt-0.5">
                 {habitTrend}
               </p>
             </div>
@@ -417,21 +413,21 @@ export default function DashboardPage({
           {/* Card 4 — Target Progress */}
           <div 
             onClick={() => setActiveView('targets')}
-            className="min-w-[150px] lg:min-w-0 flex-1 flex-shrink-0 snap-start bg-[#0F0F0F] border border-white/8 rounded-[10px] p-3 cursor-pointer hover:border-orange-500/30 transition-all duration-150 select-none flex flex-col justify-between min-h-[92px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#0F0F0F] border border-white/8 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
                 {language === 'id' ? 'TARGET AKTIF' : 'ACTIVE TARGETS'}
               </span>
-              <div className="w-5 h-5 bg-emerald-500/10 rounded-md flex items-center justify-center text-emerald-400">
-                <TargetIcon size={12} />
+              <div className="w-6 h-6 bg-emerald-500/10 rounded-md flex items-center justify-center text-emerald-400">
+                <TargetIcon size={13} />
               </div>
             </div>
             <div>
-              <div className="text-[15px] font-mono font-bold text-zinc-100">
+              <div className="text-[16px] font-mono font-bold text-zinc-100">
                 {onTrack} On Track
               </div>
-              <p className="text-[9px] text-zinc-500 font-semibold truncate mt-0.5">
+              <p className="text-[10px] text-zinc-500 font-semibold truncate mt-0.5">
                 {targetTrend}
               </p>
             </div>

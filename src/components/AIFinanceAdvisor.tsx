@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { Transaction, Category } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import { GoogleGenAI } from '@google/genai';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { BackgroundBeams } from './ui/background-beams';
@@ -23,13 +22,6 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
     setLoading(true);
     setError(null);
     try {
-      const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env.VITE_GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("API key is missing. Please set VITE_GEMINI_API_KEY in your environment.");
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-
       const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
       
       const allocation = { needs: 0, wants: 0, savings: 0 };
@@ -47,35 +39,28 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
       });
 
       const totalExpense = allocation.needs + allocation.wants + allocation.savings;
-      const targetNeeds = totalIncome * 0.5;
-      const targetWants = totalIncome * 0.3;
-      const targetSavings = totalIncome * 0.2;
 
-      const prompt = `
-        You are an expert financial advisor. The user wants to strictly follow the 50/30/20 budgeting rule (50% Needs, 30% Wants, 20% Savings).
-        Please analyze their current finances and provide specific, actionable advice on how to adjust their spending to hit these targets exactly.
-        
-        Current Financial Data:
-        - Total Income: Rp ${totalIncome.toLocaleString()}
-        - Total Expenses: Rp ${totalExpense.toLocaleString()}
-        
-        Current Allocation:
-        - Needs: Rp ${allocation.needs.toLocaleString()} (Target: Rp ${targetNeeds.toLocaleString()})
-        - Wants: Rp ${allocation.wants.toLocaleString()} (Target: Rp ${targetWants.toLocaleString()})
-        - Savings: Rp ${allocation.savings.toLocaleString()} (Target: Rp ${targetSavings.toLocaleString()})
-        
-        Expenses by Category:
-        ${Object.entries(expensesByCategory).map(([cat, amount]) => `- ${cat}: Rp ${amount.toLocaleString()}`).join('\n')}
-        
-        Please provide your advice in ${language === 'id' ? 'Indonesian' : 'English'}. Keep it concise, practical, and formatted with bullet points or short paragraphs. Focus on exactly what they need to cut or increase to hit the 50/30/20 targets perfectly.
-      `;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
+      const response = await fetch('/api/gemini/finance-advisor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          totalIncome,
+          totalExpense,
+          allocation,
+          expensesByCategory,
+          language,
+        }),
       });
 
-      setAdvice(response.text || "No advice generated.");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Server returned ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAdvice(data.text || "No advice generated.");
     } catch (err: any) {
       console.error("AI Advisor Error:", err);
       setError(err.message || "Failed to generate advice. Please try again.");

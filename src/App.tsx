@@ -292,12 +292,12 @@ export default function App() {
       case 'finance': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15"
             style={{ 
               backgroundImage: 'url("https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2011&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <FinanceTracker />
           </div>
@@ -306,12 +306,12 @@ export default function App() {
       case 'budgets': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15"
             style={{ 
               backgroundImage: 'url("https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=2071&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <BudgetAndSavings />
           </div>
@@ -320,12 +320,12 @@ export default function App() {
       case 'reports': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15"
             style={{ 
               backgroundImage: 'url("https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <FinanceReports />
           </div>
@@ -334,12 +334,12 @@ export default function App() {
       case 'visualization': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15"
             style={{ 
               backgroundImage: 'url("https://images.unsplash.com/photo-1543286386-713bdd548da4?q=80&w=2070&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <FinancialVisualization />
           </div>
@@ -348,12 +348,12 @@ export default function App() {
       case 'schedule': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15"
             style={{ 
               backgroundImage: 'url("https://images.unsplash.com/photo-1506784365847-bbad939e9335?q=80&w=2068&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <DailySchedule />
           </div>
@@ -362,12 +362,12 @@ export default function App() {
       case 'ai_planner': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15"
             style={{ 
               backgroundImage: 'url("https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=2070&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <AIPlanner />
           </div>
@@ -375,7 +375,7 @@ export default function App() {
       );
       case 'smart_space': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <SmartSpace />
           </div>
@@ -384,12 +384,12 @@ export default function App() {
       case 'targets': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15"
             style={{ 
               backgroundImage: 'url("https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?q=80&w=2070&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <DailyTargets />
           </div>
@@ -398,7 +398,7 @@ export default function App() {
       case 'habits': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]"
+            className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]"
           />
           <div className="relative z-10">
             <HabitTrackerPage />
@@ -408,12 +408,12 @@ export default function App() {
       case 'achievements': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15"
             style={{ 
               backgroundImage: 'url("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop")',
             }}
           />
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <AchievementSystem />
           </div>
@@ -431,7 +431,7 @@ export default function App() {
       );
       case 'journal': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
-          <div className="absolute inset-0 z-0 bg-canvas/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 z-0 bg-canvas/65 backdrop-blur-[16px]" />
           <div className="relative z-10">
             <JournalPage />
           </div>
