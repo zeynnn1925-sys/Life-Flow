@@ -107,6 +107,7 @@ export default function DashboardPage({
   const [insight, setInsight] = useState<string>('');
   const [loadingInsight, setLoadingInsight] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
 
   // Greet details
   const displayName = user?.displayName?.split(' ')[0] || (language === 'id' ? 'Sahabat' : 'Friend');
@@ -232,11 +233,22 @@ export default function DashboardPage({
 
   // AI Insight Generator (with custom offline fallbacks if Gemini is unconfigured)
   useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldownRemaining > 0) {
+      timer = setTimeout(() => {
+        setCooldownRemaining(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldownRemaining]);
+
+  useEffect(() => {
     try {
       const cached = localStorage.getItem('life_flow_dashboard_ai_insight');
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed.date === todayStr) {
+        const twoHours = 2 * 60 * 60 * 1000;
+        if (parsed.date === todayStr && parsed.timestamp && (Date.now() - parsed.timestamp < twoHours)) {
           setInsight(parsed.text);
           return;
         }
@@ -244,37 +256,112 @@ export default function DashboardPage({
     } catch (e) {
       console.warn("Error reading cached AI insight:", e);
     }
-    // Auto-generate if empty
+    // Auto-generate if empty/stale
     generateAIInsight();
   }, [todayStr]);
 
-  const generateAIInsight = async () => {
+  const generateAIInsight = async (isManual = false) => {
+    if (isManual && cooldownRemaining > 0) {
+      alert(language === 'id' 
+        ? `Tolong tunggu ${cooldownRemaining} detik sebelum me-refresh kembali.` 
+        : `Please wait ${cooldownRemaining} seconds before refreshing again.`);
+      return;
+    }
+
     setLoadingInsight(true);
+    setInsight(''); // Clear old insight to let user see stream from scratch!
+
+    // Gather context
+    const recentTx = transactions.slice(-5).map(t => ({
+      type: t.type,
+      amount: t.amount,
+      category: t.category,
+      description: t.description,
+      date: t.date
+    }));
+
+    const thisMonthExpenseTransactions = thisMonthTransactions.filter(t => t.type === 'expense');
+    const expensesByCategory: Record<string, number> = {};
+    thisMonthExpenseTransactions.forEach(t => {
+      expensesByCategory[t.category] = (expensesByCategory[t.category] || 0) + t.amount;
+    });
+    const sortedExpenses = Object.entries(expensesByCategory).sort((a, b) => b[1] - a[1]);
+    const topExpenseCategory = sortedExpenses.length > 0 
+      ? { category: sortedExpenses[0][0], amount: sortedExpenses[0][1] }
+      : null;
+
+    const targetsProgress = targets.map(t => ({
+      title: t.title,
+      target: t.targetValue,
+      current: t.currentValue
+    }));
+
+    const contextData = {
+      balance: currentBalance,
+      thisMonthIncome,
+      thisMonthExpense,
+      topExpenseCategory,
+      targets: targetsProgress,
+      recentTransactions: recentTx
+    };
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+
     try {
-      const response = await fetch('/api/gemini/generate-insight', {
+      const response = await fetch('/api/gemini/generate-insight-stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ language }),
+        body: JSON.stringify({ 
+          language,
+          context: contextData
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`Server status ${response.status}`);
       }
 
-      const data = await response.json();
-      const text = data.text || "";
-      const cleaned = text.trim().replace(/^["']|["']$/g, '');
-      if (cleaned) {
-        const newInsight = { text: cleaned, date: todayStr };
-        localStorage.setItem('life_flow_dashboard_ai_insight', JSON.stringify(newInsight));
-        setInsight(cleaned);
-        return;
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("No readable stream in response");
       }
-      throw new Error("No API response text available");
-    } catch (err) {
-      // Localized authentic fallback insights
+
+      const decoder = new TextDecoder();
+      let streamText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        streamText += chunk;
+        const cleaned = streamText.trim().replace(/^["']|["']$/g, '');
+        setInsight(cleaned);
+      }
+
+      const finalCleaned = streamText.trim().replace(/^["']|["']$/g, '');
+      if (finalCleaned) {
+        const cacheItem = {
+          text: finalCleaned,
+          date: todayStr,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('life_flow_dashboard_ai_insight', JSON.stringify(cacheItem));
+        if (isManual) {
+          setCooldownRemaining(120); // 2 minutes cooldown
+        }
+      } else {
+        throw new Error("Received empty stream content");
+      }
+
+    } catch (err: any) {
+      console.error("Failed to stream AI insight:", err);
+      // Fallback
       const idInsights = [
         "Fokus pada kemajuan hari ini, sekecil apapun itu. Alur kerja yang konsisten mengalahkan lonjakan motivasi yang sesaat.",
         "Kelola energi Anda dengan bijak, bukan hanya waktu Anda. Mulailah hari dengan prioritas keuangan dan tugas yang paling berdampak.",
@@ -293,8 +380,13 @@ export default function DashboardPage({
       ];
       const list = language === 'id' ? idInsights : enInsights;
       const randomInsight = list[Math.floor(Math.random() * list.length)];
-      const newInsight = { text: randomInsight, date: todayStr };
-      localStorage.setItem('life_flow_dashboard_ai_insight', JSON.stringify(newInsight));
+      
+      const cacheItem = {
+        text: randomInsight,
+        date: todayStr,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('life_flow_dashboard_ai_insight', JSON.stringify(cacheItem));
       setInsight(randomInsight);
     } finally {
       setLoadingInsight(false);
@@ -660,11 +752,29 @@ export default function DashboardPage({
 
               <div className="h-px bg-orange-500/10" />
 
-              <div className="min-h-[64px] flex items-center justify-center">
+              <div className="min-h-[64px] flex flex-col items-start justify-center w-full gap-2">
                 {insight ? (
-                  <p className="text-[12px] leading-relaxed text-zinc-100 font-medium italic text-left">
-                    "{insight}"
-                  </p>
+                  <>
+                    <p className="text-[12px] leading-relaxed text-zinc-100 font-medium italic text-left">
+                      "{insight}"
+                    </p>
+                    {loadingInsight && (
+                      <span className="text-[10px] text-orange-400/80 animate-pulse flex items-center gap-1 mt-1 font-mono">
+                        <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-ping" />
+                        {language === 'id' ? 'Menulis insight finansial...' : 'Writing financial insight...'}
+                      </span>
+                    )}
+                  </>
+                ) : loadingInsight ? (
+                  <div className="space-y-2 w-full animate-pulse py-2">
+                    <div className="h-3.5 bg-white/5 rounded w-11/12 animate-pulse"></div>
+                    <div className="h-3.5 bg-white/5 rounded w-10/12 animate-pulse"></div>
+                    <div className="h-3.5 bg-white/5 rounded w-8/12 animate-pulse"></div>
+                    <span className="text-[10px] text-orange-400/80 animate-pulse flex items-center gap-1 mt-2 font-mono">
+                      <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-ping" />
+                      {language === 'id' ? 'Menganalisis data keuangan...' : 'Analyzing financial data...'}
+                    </span>
+                  </div>
                 ) : (
                   <p className="text-[11px] text-zinc-400 italic py-2">
                     {language === 'id' ? 'Belum ada insight harian.' : 'No daily insights yet.'}
@@ -673,12 +783,14 @@ export default function DashboardPage({
               </div>
 
               <button
-                onClick={generateAIInsight}
-                disabled={loadingInsight}
+                onClick={() => generateAIInsight(true)}
+                disabled={loadingInsight || cooldownRemaining > 0}
                 className="w-full py-1.5 text-[11px] font-bold bg-[#1f1f1f]/60 hover:bg-[#1f1f1f]/95 text-orange-400 rounded-lg border border-orange-500/25 disabled:opacity-50 transition-colors flex items-center justify-center gap-1 cursor-pointer"
               >
                 <RefreshCw size={10} className={`${loadingInsight ? 'animate-spin' : ''}`} />
-                {language === 'id' ? 'Generate Insight' : 'Generate Insight'}
+                {cooldownRemaining > 0 
+                  ? (language === 'id' ? `Cooldown ${cooldownRemaining}s` : `Cooldown ${cooldownRemaining}s`) 
+                  : (language === 'id' ? 'Segarkan Insight' : 'Refresh Insight')}
               </button>
             </div>
 

@@ -3,6 +3,7 @@ import { createServer as createViteServer } from 'vite';
 import * as admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
+import { GoogleGenAI } from '@google/genai';
 import firebaseConfig from './firebase-applet-config.json' assert { type: 'json' };
 
 // Lazy initialization of Firebase Admin
@@ -78,8 +79,6 @@ async function startServer() {
       if (!apiKey) {
         throw new Error('GEMINI_API_KEY environment variable is required');
       }
-      // Import dynamically to avoid loading latency if not used
-      const { GoogleGenAI } = require('@google/genai');
       geminiClient = new GoogleGenAI({
         apiKey: apiKey,
         httpOptions: {
@@ -103,21 +102,97 @@ async function startServer() {
   };
 
   app.post('/api/gemini/generate-insight', async (req, res) => {
+    const { language } = req.body;
     try {
-      const { language } = req.body;
       const prompt = language === 'id'
         ? "Berikan 1 kalimat motivasi produktivitas harian yang sangat singkat, elegan, praktis, berkaitan dengan pengelolaan saldo finansial, tugas hiasan (dekorasi kegiatan), dan kebiasaan."
         : "Provide 1 short, elegant, and highly practical peak performance productivity advice regarding matching daily routines, habits (consistent efforts), and financial peace.";
       
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: prompt
       });
       res.json({ text: response.text });
     } catch (error: any) {
-      console.error('Gemini generate-insight error:', error);
-      res.status(500).json({ error: error.message || 'Failed to generate insight' });
+      console.error('Gemini generate-insight error (falling back):', error);
+      const fallbackId = [
+        "Fokus pada kemajuan hari ini, sekecil apapun itu. Alur kerja yang konsisten mengalahkan lonjakan motivasi yang sesaat.",
+        "Kelola energi Anda dengan bijak, bukan hanya waktu Anda. Mulailah hari dengan prioritas keuangan dan tugas yang paling berdampak.",
+        "Setiap kebiasaan kecil yang kita bangun hari ini adalah investasi berharga untuk masa depan keuangan dan kesejahteraan kita."
+      ];
+      const fallbackEn = [
+        "Focus on today's progress, no matter how small. A consistent workflow beats a short burst of motivation.",
+        "Manage your energy, not just your time. Start your day with high-impact financial and personal goals.",
+        "Every small habit you build today is a valuable investment in your future financial freedom and wellbeing."
+      ];
+      const list = language === 'id' ? fallbackId : fallbackEn;
+      const randomInsight = list[Math.floor(Math.random() * list.length)];
+      res.json({ text: randomInsight });
+    }
+  });
+
+  app.post('/api/gemini/generate-insight-stream', async (req, res) => {
+    try {
+      const { language, context } = req.body;
+      
+      let systemInstruction = '';
+      let userPrompt = '';
+      
+      if (language === 'id') {
+        systemInstruction = "Anda adalah asisten keuangan pribadi AI yang cerdas, tajam, dan sangat membantu. Analisis data keuangan pengguna dan berikan 1 kalimat insight yang sangat praktis, langsung dapat diterapkan (actionable), dan spesifik terhadap data mereka. Fokus pada apa yang harus mereka lakukan untuk menyeimbangkan anggaran atau mencapai target.";
+        userPrompt = `
+Berikut adalah data finansial saya saat ini:
+- Saldo saat ini: Rp ${(context?.balance ?? 0).toLocaleString('id-ID')}
+- Total Pemasukan Bulan Ini: Rp ${(context?.thisMonthIncome ?? 0).toLocaleString('id-ID')}
+- Total Pengeluaran Bulan Ini: Rp ${(context?.thisMonthExpense ?? 0).toLocaleString('id-ID')}
+- Kategori Pengeluaran Terbesar: ${context?.topExpenseCategory ? `${context.topExpenseCategory.category} (Rp ${context.topExpenseCategory.amount.toLocaleString('id-ID')})` : 'Tidak ada pengeluaran'}
+- Target Finansial aktif: ${context?.targets && context.targets.length > 0 ? context.targets.map((t: any) => `${t.title} (${Math.round(t.current / t.target * 100)}% tercapai)`).join(', ') : 'Tidak ada target aktif'}
+
+Berikan 1 kalimat analisis/insight finansial yang super tajam dan taktis berdasarkan data di atas. Jangan berikan kata sambutan, basa-basi, atau tanda kutip di awal dan di akhir.
+`;
+      } else {
+        systemInstruction = "You are an intelligent, sharp, and highly supportive AI financial personal advisor. Analyze the user's financial data and provide 1 extremely practical, actionable, and specific insight based on their data. Focus on what they should do to optimize budgets or reach targets.";
+        userPrompt = `
+Here is my current financial data:
+- Current Balance: Rp ${(context?.balance ?? 0).toLocaleString('en-US')}
+- Total Income This Month: Rp ${(context?.thisMonthIncome ?? 0).toLocaleString('en-US')}
+- Total Expense This Month: Rp ${(context?.thisMonthExpense ?? 0).toLocaleString('en-US')}
+- Highest Expense Category: ${context?.topExpenseCategory ? `${context.topExpenseCategory.category} (Rp ${context.topExpenseCategory.amount.toLocaleString('en-US')})` : 'None'}
+- Running Targets Progress: ${context?.targets && context.targets.length > 0 ? context.targets.map((t: any) => `${t.title} (${Math.round(t.current / t.target * 100)}% achieved)`).join(', ') : 'No active targets'}
+
+Provide 1 short, actionable, and extremely sharp financial advice based on the data above. Do not use intro text, friendly greetings, or quotes around the response.
+`;
+      }
+
+      const ai = getGeminiClient();
+      const responseStream = await ai.models.generateContentStream({
+        model: "gemini-2.5-flash",
+        contents: userPrompt,
+        config: {
+          systemInstruction: systemInstruction,
+          maxOutputTokens: 150,
+          temperature: 0.7,
+        }
+      });
+
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Transfer-Encoding', 'chunked');
+
+      for await (const chunk of responseStream) {
+        if (chunk.text) {
+          res.write(chunk.text);
+        }
+      }
+      res.end();
+    } catch (error: any) {
+      console.error('Gemini generate-insight-stream error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: error.message || 'Failed to stream insight' });
+      } else {
+        res.write(' [Error streaming response]');
+        res.end();
+      }
     }
   });
 
@@ -131,23 +206,29 @@ async function startServer() {
       
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: prompt
       });
       res.json({ text: response.text });
     } catch (error: any) {
-      console.error('Gemini habit-coach error:', error);
-      res.status(500).json({ error: error.message || 'Failed to connect with Coach' });
+      console.error('Gemini habit-coach error (falling back):', error);
+      const fallbacks = [
+        "Mulai dari yang kecil, misalnya 5 menit sehari. Kunci utama adalah konsistensi, bukan intensitas tinggi.",
+        "Coba teknik 'habit stacking': kaitkan kebiasaan baru ini tepat setelah kebiasaan lama yang rutin Anda lakukan.",
+        "Jangan lewatkan kebiasaan dua kali berturut-turut. Jika hari ini terlewat, pastikan besok kembali berkomitmen.",
+        "Rayakan setiap pencapaian kecil untuk melatih otak mengaitkan kebiasaan ini dengan emosi positif."
+      ];
+      const randomAdvice = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+      res.json({ text: randomAdvice });
     }
   });
 
   app.post('/api/gemini/finance-advisor', async (req, res) => {
+    const { totalIncome, totalExpense, allocation, expensesByCategory, language } = req.body;
+    const targetNeeds = (totalIncome || 0) * 0.5;
+    const targetWants = (totalIncome || 0) * 0.3;
+    const targetSavings = (totalIncome || 0) * 0.2;
     try {
-      const { totalIncome, totalExpense, allocation, expensesByCategory, language } = req.body;
-      const targetNeeds = totalIncome * 0.5;
-      const targetWants = totalIncome * 0.3;
-      const targetSavings = totalIncome * 0.2;
-
       const prompt = `
         You are an expert financial advisor. The user wants to strictly follow the 50/30/20 budgeting rule (50% Needs, 30% Wants, 20% Savings).
         Please analyze their current finances and provide specific, actionable advice on how to adjust their spending to hit these targets exactly.
@@ -169,13 +250,33 @@ async function startServer() {
 
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
       res.json({ text: response.text });
     } catch (error: any) {
-      console.error('Gemini finance-advisor error:', error);
-      res.status(500).json({ error: error.message || 'Failed to generate financial advice' });
+      console.error('Gemini finance-advisor error (falling back):', error);
+      const adviceId = `Saran Anggaran 50/30/20:
+- **Kebutuhan (Needs)**: Alokasi Anda Rp ${(allocation?.needs || 0).toLocaleString()} (Target: Rp ${targetNeeds.toLocaleString()}).
+- **Keinginan (Wants)**: Alokasi Anda Rp ${(allocation?.wants || 0).toLocaleString()} (Target: Rp ${targetWants.toLocaleString()}).
+- **Tabungan (Savings)**: Alokasi Anda Rp ${(allocation?.savings || 0).toLocaleString()} (Target: Rp ${targetSavings.toLocaleString()}).
+
+**Saran Praktis**:
+1. Jika pengeluaran Kebutuhan/Keinginan melebihi batas, cobalah memangkas pengeluaran non-esensial (seperti makan di luar atau langganan bulanan).
+2. Prioritaskan menyisihkan 20% pendapatan langsung di awal bulan ke rekening tabungan/investasi sebelum membelanjakan sisanya.
+3. Selalu pantau pengeluaran harian agar tidak melampaui rencana anggaran bulanan Anda.`;
+
+      const adviceEn = `50/30/20 Budgeting Advice:
+- **Needs**: Your allocation is Rp ${(allocation?.needs || 0).toLocaleString()} (Target: Rp ${targetNeeds.toLocaleString()}).
+- **Wants**: Your allocation is Rp ${(allocation?.wants || 0).toLocaleString()} (Target: Rp ${targetWants.toLocaleString()}).
+- **Savings**: Your allocation is Rp ${(allocation?.savings || 0).toLocaleString()} (Target: Rp ${targetSavings.toLocaleString()}).
+
+**Actionable Advice**:
+1. If your Needs or Wants exceed target limits, try cutting back on discretionary spending (like dining out or entertainment subscriptions).
+2. Automate a transfer of 20% of your income to savings/investment immediately at the start of the month.
+3. Monitor category-wise limits weekly to stay on track.`;
+
+      res.json({ text: language === 'id' ? adviceId : adviceEn });
     }
   });
 
@@ -184,7 +285,7 @@ async function startServer() {
       const { base64Image, mimeType } = req.body;
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: {
           parts: [
             {
@@ -215,18 +316,24 @@ async function startServer() {
 
       res.json({ text: response.text });
     } catch (error: any) {
-      console.error('Gemini scan-receipt error:', error);
-      res.status(500).json({ error: error.message || 'Failed to scan receipt' });
+      console.error('Gemini scan-receipt error (falling back):', error);
+      const fallbackJson = {
+        description: "Struk Belanja / Receipt",
+        amount: 0,
+        date: new Date().toISOString().split('T')[0],
+        notes: "Maaf, pemindaian otomatis sedang sibuk. Silakan masukkan detail secara manual."
+      };
+      res.json({ text: JSON.stringify(fallbackJson) });
     }
   });
 
   app.post('/api/gemini/productivity-plan', async (req, res) => {
+    const { date, language } = req.body;
     try {
-      const { date, language } = req.body;
       const langPrompt = language === 'id' ? 'in Indonesian' : 'in English';
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: `Create a highly productive and realistic daily schedule for ${date} ${langPrompt}. 
         For each activity, specify:
         1. The title of the activity.
@@ -258,8 +365,69 @@ async function startServer() {
       });
       res.json({ text: response.text });
     } catch (error: any) {
-      console.error('Gemini productivity-plan error:', error);
-      res.status(500).json({ error: error.message || 'Failed to generate productivity plan' });
+      console.error('Gemini productivity-plan error (falling back):', error);
+      const defaultPlanId = [
+        {
+          title: "Review & Perencanaan Pagi",
+          startTime: "08:00",
+          endTime: "09:00",
+          challenge: "Tulis 3 prioritas utama hari ini tanpa gangguan ponsel.",
+          fieldToStudy: "Manajemen Waktu",
+          toolsNeeded: ["LifeFlow Planner", "Buku Catatan"],
+          targetPercentage: 100
+        },
+        {
+          title: "Sesi Belajar / Kerja Utama",
+          startTime: "09:30",
+          endTime: "12:00",
+          challenge: "Gunakan teknik Pomodoro: 25 menit fokus penuh, 5 menit istirahat.",
+          fieldToStudy: "Keahlian Profesional",
+          toolsNeeded: ["Laptop", "Koneksi Internet"],
+          targetPercentage: 80
+        },
+        {
+          title: "Evaluasi Finansial & Habit",
+          startTime: "16:00",
+          endTime: "17:00",
+          challenge: "Catat semua pengeluaran hari ini dan centang kebiasaan yang selesai.",
+          fieldToStudy: "Literasi Finansial",
+          toolsNeeded: ["LifeFlow Dashboard"],
+          targetPercentage: 90
+        }
+      ];
+
+      const defaultPlanEn = [
+        {
+          title: "Morning Review & Planning",
+          startTime: "08:00",
+          endTime: "09:00",
+          challenge: "Write down 3 main priorities today without phone distractions.",
+          fieldToStudy: "Time Management",
+          toolsNeeded: ["LifeFlow Planner", "Notebook"],
+          targetPercentage: 100
+        },
+        {
+          title: "Core Work / Study Session",
+          startTime: "09:30",
+          endTime: "12:00",
+          challenge: "Apply Pomodoro technique: 25 minutes absolute focus, 5 minutes break.",
+          fieldToStudy: "Professional Skills",
+          toolsNeeded: ["Laptop", "Internet Access"],
+          targetPercentage: 80
+        },
+        {
+          title: "Financial & Habit Reflection",
+          startTime: "16:00",
+          endTime: "17:00",
+          challenge: "Log all of today's transactions and tick your completed habits.",
+          fieldToStudy: "Financial Literacy",
+          toolsNeeded: ["LifeFlow Dashboard"],
+          targetPercentage: 90
+        }
+      ];
+
+      const chosenPlan = language === 'id' ? defaultPlanId : defaultPlanEn;
+      res.json({ text: JSON.stringify(chosenPlan) });
     }
   });
 
