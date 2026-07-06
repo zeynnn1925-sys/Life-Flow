@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Save, Bell, Clock, Info, Target, Plus, Search, Calendar, ChevronRight } from 'lucide-react';
+import { X, Save, Bell, Clock, Info, Target, Plus, Search, Calendar, ChevronRight, Trash2 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { Habit, HabitCategory, HabitFrequency, HabitTimeOfDay, HabitDifficulty } from '../../types/habits';
 import { Timestamp } from 'firebase/firestore';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { ConfirmationModal } from '../ConfirmationModal';
 
 interface AddHabitModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (habit: Habit) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
   initialHabit?: Habit;
 }
 
@@ -26,10 +28,11 @@ const CATEGORIES: { id: HabitCategory; label: string; icon: string; color: strin
 
 const ICONS = ['Activity', 'Book', 'Coffee', 'Code', 'Dumbbell', 'Heart', 'Moon', 'Music', 'Sun', 'Smile', 'Star', 'Target', 'Zap', 'Waves'];
 
-export function AddHabitModal({ isOpen, onClose, onSave, initialHabit }: AddHabitModalProps) {
-  const { t } = useLanguage();
+export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit }: AddHabitModalProps) {
+  const { language, t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState<Partial<Habit>>(initialHabit || {
     title: '',
     category: 'health',
@@ -244,34 +247,47 @@ export function AddHabitModal({ isOpen, onClose, onSave, initialHabit }: AddHabi
                 )}
               </AnimatePresence>
 
-              <div className="mt-12 flex gap-4">
-                {step === 2 && (
+              <div className="mt-12 flex flex-col gap-3">
+                <div className="flex gap-4">
+                  {step === 2 && (
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="flex-1 h-14 bg-surface-2 text-ink-tertiary font-black text-button uppercase tracking-widest rounded-pill border border-hairline hover:bg-surface-3 transition-colors"
+                    >
+                      Kembali
+                    </button>
+                  )}
+                  
+                  {step === 1 ? (
+                    <button
+                      type="button"
+                      disabled={!formData.title}
+                      onClick={() => setStep(2)}
+                      className="flex-1 h-14 bg-accent text-white font-black text-button uppercase tracking-widest rounded-pill hover:bg-accent-hover transition-all shadow-glow-accent disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      Lanjut
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 h-14 bg-accent text-white font-black text-button uppercase tracking-widest rounded-pill hover:bg-accent-hover transition-all shadow-glow-accent disabled:opacity-50 flex items-center justify-center gap-3 active:scale-[0.98]"
+                    >
+                      {loading ? <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={24} />}
+                      {t('save')}
+                    </button>
+                  )}
+                </div>
+
+                {initialHabit && onDelete && (
                   <button
                     type="button"
-                    onClick={() => setStep(1)}
-                    className="flex-1 h-14 bg-surface-2 text-ink-tertiary font-black text-button uppercase tracking-widest rounded-pill border border-hairline hover:bg-surface-3 transition-colors"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full h-12 bg-danger/10 text-danger hover:bg-danger hover:text-white font-black text-button uppercase tracking-widest rounded-pill transition-all flex items-center justify-center gap-2 border border-danger/20"
                   >
-                    Kembali
-                  </button>
-                )}
-                
-                {step === 1 ? (
-                  <button
-                    type="button"
-                    disabled={!formData.title}
-                    onClick={() => setStep(2)}
-                    className="flex-1 h-14 bg-accent text-white font-black text-button uppercase tracking-widest rounded-pill hover:bg-accent-hover transition-all shadow-glow-accent disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    Lanjut
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 h-14 bg-accent text-white font-black text-button uppercase tracking-widest rounded-pill hover:bg-accent-hover transition-all shadow-glow-accent disabled:opacity-50 flex items-center justify-center gap-3 active:scale-[0.98]"
-                  >
-                    {loading ? <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={24} />}
-                    {t('save')}
+                    <Trash2 size={16} />
+                    {language === 'id' ? 'Hapus Kebiasaan' : 'Delete Habit'}
                   </button>
                 )}
               </div>
@@ -279,6 +295,23 @@ export function AddHabitModal({ isOpen, onClose, onSave, initialHabit }: AddHabi
           </motion.div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        title={language === 'id' ? 'Hapus Kebiasaan' : 'Delete Habit'}
+        message={language === 'id' ? 'Apakah Anda yakin ingin menghapus kebiasaan ini? Semua riwayat dan statistik kebiasaan ini akan hilang.' : 'Are you sure you want to delete this habit? All history and statistics for this habit will be lost.'}
+        confirmText={language === 'id' ? 'Hapus' : 'Delete'}
+        cancelText={language === 'id' ? 'Batal' : 'Cancel'}
+        type="danger"
+        onConfirm={async () => {
+          if (initialHabit && onDelete) {
+            await onDelete(initialHabit.id);
+          }
+          setShowDeleteConfirm(false);
+          onClose();
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </AnimatePresence>
   );
 }

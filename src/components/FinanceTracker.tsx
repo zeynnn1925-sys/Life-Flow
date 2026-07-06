@@ -93,6 +93,7 @@ export default function FinanceTracker() {
   });
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string, type: 'transaction' | 'recurring' | 'category' } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -344,18 +345,15 @@ export default function FinanceTracker() {
   };
 
   const deleteCategory = (id: string) => {
-    deleteCategoryFromDb(id);
-    if (selectedCategoryId === id) {
-      setSelectedCategoryId(categories.find(c => c.id !== id && c.type === type)?.id || '');
-    }
+    setDeleteTarget({ id, type: 'category' });
   };
 
   const deleteTransaction = (id: string) => {
-    deleteTransactionFromDb(id);
+    setDeleteTarget({ id, type: 'transaction' });
   };
 
   const deleteRecurringTransaction = (id: string) => {
-    deleteRecurringTransactionFromDb(id);
+    setDeleteTarget({ id, type: 'recurring' });
   };
 
   const totalIncome = transactions
@@ -999,7 +997,7 @@ export default function FinanceTracker() {
         onConfirm={async () => {
           // Delete all current categories
           for (const cat of categories) {
-            await deleteCategory(cat.id);
+            await deleteCategoryFromDb(cat.id);
           }
           // Add default categories
           for (const cat of DEFAULT_CATEGORIES) {
@@ -1008,6 +1006,42 @@ export default function FinanceTracker() {
           setShowResetConfirm(false);
         }}
         onCancel={() => setShowResetConfirm(false)}
+      />
+
+      <ConfirmationModal
+        isOpen={deleteTarget !== null}
+        title={
+          deleteTarget?.type === 'transaction' 
+            ? (language === 'id' ? 'Hapus Transaksi' : 'Delete Transaction')
+            : deleteTarget?.type === 'recurring'
+              ? (language === 'id' ? 'Hapus Transaksi Berulang' : 'Delete Recurring Transaction')
+              : (language === 'id' ? 'Hapus Kategori' : 'Delete Category')
+        }
+        message={
+          deleteTarget?.type === 'transaction'
+            ? (language === 'id' ? 'Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.' : 'Are you sure you want to delete this transaction? This action cannot be undone.')
+            : deleteTarget?.type === 'recurring'
+              ? (language === 'id' ? 'Apakah Anda yakin ingin menghapus transaksi berulang ini? Tindakan ini tidak dapat dibatalkan.' : 'Are you sure you want to delete this recurring transaction? This action cannot be undone.')
+              : (language === 'id' ? 'Apakah Anda yakin ingin menghapus kategori ini? Kategori pada transaksi terkait mungkin terpengaruh.' : 'Are you sure you want to delete this category? Transactions with this category may lose their label.')
+        }
+        confirmText={language === 'id' ? 'Hapus' : 'Delete'}
+        cancelText={language === 'id' ? 'Batal' : 'Cancel'}
+        type="danger"
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          if (deleteTarget.type === 'transaction') {
+            deleteTransactionFromDb(deleteTarget.id);
+          } else if (deleteTarget.type === 'recurring') {
+            deleteRecurringTransactionFromDb(deleteTarget.id);
+          } else if (deleteTarget.type === 'category') {
+            deleteCategoryFromDb(deleteTarget.id);
+            if (selectedCategoryId === deleteTarget.id) {
+              setSelectedCategoryId(categories.find(c => c.id !== deleteTarget.id && c.type === type)?.id || '');
+            }
+          }
+          setDeleteTarget(null);
+        }}
+        onCancel={() => setDeleteTarget(null)}
       />
     </motion.div>
   );

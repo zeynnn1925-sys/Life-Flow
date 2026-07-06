@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertTriangle, X } from 'lucide-react';
 
@@ -23,7 +24,16 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   cancelText = 'Cancel',
   type = 'info'
 }) => {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -63,7 +73,6 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 <button
                   onClick={() => {
                     onConfirm();
-                    // onCancel(); // Assuming we want the caller to handle closing if needed, but usually it closes.
                   }}
                   className={`flex-1 h-12 rounded-pill font-bold text-white transition-all uppercase tracking-widest text-eyebrow shadow-sm ${
                     type === 'danger' ? 'bg-danger hover:bg-danger/90 shadow-glow-primary/20' : 'bg-accent hover:bg-accent-hover shadow-glow-accent'
@@ -83,6 +92,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   TrendingUp, 
   Calendar, 
@@ -33,6 +33,8 @@ import { View } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useData } from '../../contexts/DataContext';
 import { generateDailyQuote } from '../../services/aiProductivityService';
+// @ts-ignore
+import dashboardHeroBg from '../../Smart Budgeting Strategies_ Save Money and Build Financial Freedom 502030🍹_.jpg';
 
 interface DashboardPageProps {
   user: any;
@@ -48,6 +50,29 @@ interface DashboardPageProps {
   t: (key: string) => string;
   onStartTour?: () => void;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      type: "spring" as const, 
+      stiffness: 100, 
+      damping: 15 
+    } 
+  }
+};
 
 export default function DashboardPage({ 
   user, 
@@ -294,9 +319,16 @@ export default function DashboardPage({
   };
 
   return (
-    <div className="relative p-0 flex flex-col gap-6">
+    <div 
+      className="relative p-4 sm:p-6 flex flex-col gap-6 bg-scroll md:bg-fixed min-h-screen rounded-[24px] border border-white/5 shadow-2xl overflow-hidden"
+      style={{
+        backgroundImage: `linear-gradient(180deg, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.75) 40%, rgba(10,10,10,0.9) 100%), url("${dashboardHeroBg}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       {/* Background Graphic */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl opacity-40">
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl opacity-20">
         <div className="absolute inset-0 bg-gradient-to-tr from-[#5e6ad2]/5 via-transparent to-orange-500/5" />
         <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#5e6ad2]/8 blur-[100px] dark:bg-[#5e6ad2]/6" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-orange-500/5 blur-[100px] dark:bg-orange-500/3" />
@@ -307,22 +339,22 @@ export default function DashboardPage({
         {/* ============================================================
             1. WELCOME HEADER (Responsive: adapts beautifully for screen)
             ============================================================ */}
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#0c0d12]/60 dark:bg-surface-1/60 border border-hairline p-4 rounded-xl backdrop-blur-md">
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#141414]/75 backdrop-blur-md border border-white/5 p-4 rounded-xl">
           <div className="flex flex-col text-left">
             <span className="text-[10px] text-orange-500 font-extrabold tracking-[0.2em] uppercase mb-0.5">
               {t('dashboard') || 'DASHBOARD'}
             </span>
-            <h1 className="text-[20px] lg:text-[22px] font-bold text-ink tracking-tight leading-tight">
+            <h1 className="text-[20px] lg:text-[22px] font-bold text-white tracking-tight leading-tight">
               {language === 'id' ? `Selamat Datang Kembali, ${displayName}` : `Welcome back, ${displayName}`}
             </h1>
-            <p className="text-[11px] text-ink-subtle font-semibold mt-0.5">
+            <p className="text-[11px] text-zinc-300 font-semibold mt-0.5">
               {getTodayDateString()}
             </p>
           </div>
           
           <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
             <div className="flex flex-col items-end text-right">
-              <span className="text-[12px] font-mono font-bold text-ink bg-surface-2 border border-hairline py-1 px-2.5 rounded-lg">
+              <span className="text-[12px] font-mono font-bold text-zinc-100 bg-black/40 backdrop-blur-sm border border-white/10 py-1 px-2.5 rounded-lg">
                 ⏱ {timeStr || '00:00'}
               </span>
             </div>
@@ -339,101 +371,102 @@ export default function DashboardPage({
         {/* ============================================================
             2. STAT STRIP (Flex-wrap / Flex-col on mobile, static grid on desktop)
             ============================================================ */}
-        <section className="flex flex-col sm:flex-row sm:flex-wrap lg:grid lg:grid-cols-4 gap-3.5 antialiased">
+        <motion.section 
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="flex flex-col sm:flex-row sm:flex-wrap lg:grid lg:grid-cols-4 gap-3.5 antialiased"
+        >
           
           {/* Card 1 — Balance */}
-          <div 
+          <motion.div 
+            variants={itemVariants}
             onClick={() => setActiveView('finance')}
-            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#0F0F0F] border border-white/8 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
+              <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
                 {language === 'id' ? 'SALDO' : 'BALANCE'}
               </span>
-              <div className="w-6 h-6 bg-orange-500/10 rounded-md flex items-center justify-center text-orange-500">
-                <Wallet size={13} />
-              </div>
+              <img src="/icons/Finance.png" alt="Balance" className="w-[34px] h-[34px] object-contain shrink-0" />
             </div>
             <div>
               <div className="text-[15px] lg:text-[16px] font-mono font-bold text-zinc-100 truncate">
                 {formatCurrency(currentBalance)}
               </div>
-              <p className="text-[10px] text-zinc-500 font-semibold truncate mt-0.5">
+              <p className="text-[10px] text-zinc-300 font-semibold truncate mt-0.5">
                 {balanceTrend}
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 2 — Tasks Hari Ini */}
-          <div 
+          <motion.div 
+            variants={itemVariants}
             onClick={() => setActiveView('schedule')}
-            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#0F0F0F] border border-white/8 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
+              <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
                 {language === 'id' ? 'TUGAS HARI INI' : "TODAY'S TASKS"}
               </span>
-              <div className="w-6 h-6 bg-blue-500/10 rounded-md flex items-center justify-center text-blue-400">
-                <CheckCircle2 size={13} />
-              </div>
+              <img src="/icons/Schedule.png" alt="Tasks" className="w-[34px] h-[34px] object-contain shrink-0" />
             </div>
             <div>
               <div className="text-[16px] font-mono font-bold text-zinc-100">
-                {completedTasksToday} <span className="text-zinc-600 font-normal">/</span> {totalTasksToday}
+                {completedTasksToday} <span className="text-zinc-500 font-normal">/</span> {totalTasksToday}
               </div>
-              <p className="text-[10px] text-zinc-500 font-semibold truncate mt-0.5">
+              <p className="text-[10px] text-zinc-300 font-semibold truncate mt-0.5">
                 {taskTrend}
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 3 — Habit Streak */}
-          <div 
+          <motion.div 
+            variants={itemVariants}
             onClick={() => setActiveView('habits')}
-            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#0F0F0F] border border-white/8 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
+              <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
                 {language === 'id' ? 'STREAK TERBAIK' : 'LONGEST STREAK'}
               </span>
-              <div className="w-6 h-6 bg-amber-500/10 rounded-md flex items-center justify-center text-amber-500">
-                <Flame size={13} />
-              </div>
+              <img src="/icons/Habit_Tracker.png" alt="Streak" className="w-[34px] h-[34px] object-contain shrink-0" />
             </div>
             <div>
               <div className="text-[16px] font-mono font-bold text-zinc-100">
                 {longestStreak} {language === 'id' ? 'hari' : 'days'}
               </div>
-              <p className="text-[10px] text-zinc-500 font-semibold truncate mt-0.5">
+              <p className="text-[10px] text-zinc-300 font-semibold truncate mt-0.5">
                 {habitTrend}
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 4 — Target Progress */}
-          <div 
+          <motion.div 
+            variants={itemVariants}
             onClick={() => setActiveView('targets')}
-            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#0F0F0F] border border-white/8 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">
+              <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
                 {language === 'id' ? 'TARGET AKTIF' : 'ACTIVE TARGETS'}
               </span>
-              <div className="w-6 h-6 bg-emerald-500/10 rounded-md flex items-center justify-center text-emerald-400">
-                <TargetIcon size={13} />
-              </div>
+              <img src="/icons/Target.png" alt="Targets" className="w-[34px] h-[34px] object-contain shrink-0" />
             </div>
             <div>
               <div className="text-[16px] font-mono font-bold text-zinc-100">
                 {onTrack} On Track
               </div>
-              <p className="text-[10px] text-zinc-500 font-semibold truncate mt-0.5">
+              <p className="text-[10px] text-zinc-300 font-semibold truncate mt-0.5">
                 {targetTrend}
               </p>
             </div>
-          </div>
+          </motion.div>
 
-        </section>
+        </motion.section>
 
 
         {/* ============================================================
@@ -445,10 +478,11 @@ export default function DashboardPage({
           <div className="flex flex-col gap-3.5">
             
             {/* A. FINANCE PREVIEW CARD */}
-            <div className="bg-gradient-to-br from-[#0F0F0F] via-[#0F0F0F] to-orange-500/5 border border-white/8 rounded-[12px] p-4 flex flex-col gap-3 transition-colors hover:border-white/12">
+            <div className="bg-gradient-to-br from-[#141414]/75 via-[#141414]/75 to-orange-500/10 border border-white/5 backdrop-blur-md rounded-[12px] p-4 flex flex-col gap-3 transition-colors hover:border-white/10">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-1.5">
-                  💰 {language === 'id' ? 'Keuangan' : 'Finance'}
+                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-2">
+                  <img src="/icons/Finance.png" alt="Finance" className="w-[26px] h-[26px] object-contain shrink-0" />
+                  {language === 'id' ? 'Keuangan' : 'Finance'}
                 </span>
                 <span 
                   onClick={() => setActiveView('finance')}
@@ -461,7 +495,7 @@ export default function DashboardPage({
               <div className="h-px bg-white/5" />
 
               <div className="py-1">
-                <span className="text-[10px] font-bold text-zinc-500 block leading-none">
+                <span className="text-[10px] font-bold text-zinc-400 block leading-none">
                   {language === 'id' ? 'TOTAL SALDO' : 'TOTAL BALANCE'}
                 </span>
                 <div className="text-[18px] font-mono font-black text-zinc-100 mt-1">
@@ -469,9 +503,9 @@ export default function DashboardPage({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 bg-white/3 border border-white/5 rounded-lg p-2 text-left">
+              <div className="grid grid-cols-2 gap-2 bg-white/5 border border-white/5 rounded-lg p-2 text-left">
                 <div>
-                  <span className="text-[8px] font-bold text-zinc-500 uppercase block tracking-wider">
+                  <span className="text-[8px] font-bold text-zinc-400 uppercase block tracking-wider">
                     {language === 'id' ? 'Pemasukan' : 'Income'}
                   </span>
                   <span className="text-[11px] font-mono font-bold text-emerald-400">
@@ -479,7 +513,7 @@ export default function DashboardPage({
                   </span>
                 </div>
                 <div>
-                  <span className="text-[8px] font-bold text-zinc-500 uppercase block tracking-wider">
+                  <span className="text-[8px] font-bold text-zinc-400 uppercase block tracking-wider">
                     {language === 'id' ? 'Pengeluaran' : 'Expense'}
                   </span>
                   <span className="text-[11px] font-mono font-bold text-red-400 truncate block">
@@ -489,11 +523,11 @@ export default function DashboardPage({
               </div>
 
               <div className="flex flex-col gap-1.5 mt-1">
-                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">
+                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
                   {language === 'id' ? 'Aktivitas Terakhir' : 'Recent Activities'}
                 </span>
                 {transactions.length === 0 ? (
-                  <p className="text-[11px] text-zinc-500 italic py-2 text-center">
+                  <p className="text-[11px] text-zinc-400 italic py-2 text-center">
                     {language === 'id' ? 'Tidak ada transaksi' : 'No recent transactions'}
                   </p>
                 ) : (
@@ -501,12 +535,12 @@ export default function DashboardPage({
                     .sort((a,b) => b.date.localeCompare(a.date))
                     .slice(0,3)
                     .map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/3 text-[11px] border border-white/3">
+                      <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 text-[11px] border border-white/5">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.type === 'income' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                           <span className="text-zinc-300 font-medium truncate">{item.description}</span>
                         </div>
-                        <span className={`font-mono font-bold shrink-0 ${item.type === 'income' ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                        <span className={`font-mono font-bold shrink-0 ${item.type === 'income' ? 'text-emerald-400' : 'text-zinc-300'}`}>
                           {item.type === 'income' ? '+' : '-'}{item.amount.toLocaleString('id-ID')}
                         </span>
                       </div>
@@ -516,10 +550,11 @@ export default function DashboardPage({
             </div>
 
             {/* B. HABIT TODAY CARD */}
-            <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-4 flex flex-col gap-3">
+            <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-1.5">
-                  🔥 {language === 'id' ? 'Habit Hari Ini' : 'Habit Today'}
+                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-2">
+                  <img src="/icons/Habit_Tracker.png" alt="Habit Today" className="w-[26px] h-[26px] object-contain shrink-0" />
+                  {language === 'id' ? 'Habit Hari Ini' : 'Habit Today'}
                 </span>
                 <span 
                   onClick={() => setActiveView('habits')}
@@ -531,7 +566,7 @@ export default function DashboardPage({
 
               <div className="h-px bg-white/5" />
 
-              <div className="flex justify-between items-center text-[11px] font-semibold text-zinc-400 mt-1">
+              <div className="flex justify-between items-center text-[11px] font-semibold text-zinc-300 mt-1">
                 <span>⚡ {language === 'id' ? 'Progres Harian' : 'Daily Progress'}</span>
                 <span className="text-orange-500">{completedTodayHabitsCount} / {activeHabits.length} habit</span>
               </div>
@@ -547,7 +582,7 @@ export default function DashboardPage({
               {/* Habit Lists */}
               <div className="flex flex-col gap-1.5">
                 {activeHabits.length === 0 ? (
-                  <p className="text-[11px] text-zinc-500 italic py-2 text-center">
+                  <p className="text-[11px] text-zinc-400 italic py-2 text-center">
                     {language === 'id' ? 'Tidak ada habit aktif' : 'No active habits'}
                   </p>
                 ) : (
@@ -555,7 +590,7 @@ export default function DashboardPage({
                     const status = getHabitStatusToday(item.id);
                     const isCompleted = status === 'completed';
                     return (
-                      <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/3 border border-white/3 text-[11px]">
+                      <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 border border-white/5 text-[11px]">
                         <span className="text-zinc-300 font-medium truncate flex items-center gap-1.5">
                           <span>{item.icon || '✨'}</span>
                           <span className="truncate">{item.title}</span>
@@ -565,7 +600,7 @@ export default function DashboardPage({
                             ✅ Selesai
                           </span>
                         ) : (
-                          <span className="text-zinc-500 border border-zinc-600/50 text-[10px] font-medium py-0.5 px-1.5 rounded">
+                          <span className="text-zinc-400 border border-zinc-600/50 text-[10px] font-medium py-0.5 px-1.5 rounded">
                             ○ Belum
                           </span>
                         )}
@@ -582,10 +617,11 @@ export default function DashboardPage({
           <div className="flex flex-col gap-3.5">
             
             {/* C. WEEKLY CHART CARD */}
-            <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-4 flex flex-col gap-3">
+            <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-1.5">
-                  📊 {language === 'id' ? 'Ikhtisar Mingguan' : 'Weekly Overview'}
+                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-2">
+                  <img src="/icons/Visualization.png" alt="Weekly Overview" className="w-[26px] h-[26px] object-contain shrink-0" />
+                  {language === 'id' ? 'Ikhtisar Mingguan' : 'Weekly Overview'}
                 </span>
               </div>
               <div className="h-px bg-white/5" />
@@ -594,8 +630,8 @@ export default function DashboardPage({
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={last7Days} margin={{ top: 5, right: 0, left: -24, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#71717A', fontSize: 9 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#71717A', fontSize: 9 }} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#A1A1AA', fontSize: 9 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#A1A1AA', fontSize: 9 }} />
                     <RechartsTooltip
                       cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                       contentStyle={{ backgroundColor: '#0d0d0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', fontSize: '10px', color: '#fff' }}
@@ -609,12 +645,13 @@ export default function DashboardPage({
             </div>
 
             {/* D. AI INSIGHT CARD */}
-            <div className="bg-orange-500/5 border border-orange-500/20 rounded-[12px] p-4 flex flex-col gap-2.5 relative overflow-hidden">
+            <div className="bg-[#141414]/75 border border-orange-500/20 backdrop-blur-md rounded-[12px] p-4 flex flex-col gap-2.5 relative overflow-hidden">
               <div className="absolute top-[-30px] right-[-30px] w-16 h-16 bg-orange-500/10 rounded-full blur-xl pointer-events-none" />
               
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-bold text-orange-400 flex items-center gap-1.5 select-none">
-                  🤖 AI Insight
+                <span className="text-[13px] font-bold text-orange-400 flex items-center gap-2 select-none">
+                  <img src="/icons/AI.png" alt="AI Insight" className="w-[26px] h-[26px] object-contain shrink-0" />
+                  AI Insight
                 </span>
                 {loadingInsight && (
                   <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping" />
@@ -625,11 +662,11 @@ export default function DashboardPage({
 
               <div className="min-h-[64px] flex items-center justify-center">
                 {insight ? (
-                  <p className="text-[12px] leading-relaxed text-zinc-300 font-medium italic text-left">
+                  <p className="text-[12px] leading-relaxed text-zinc-100 font-medium italic text-left">
                     "{insight}"
                   </p>
                 ) : (
-                  <p className="text-[11px] text-zinc-500 italic py-2">
+                  <p className="text-[11px] text-zinc-400 italic py-2">
                     {language === 'id' ? 'Belum ada insight harian.' : 'No daily insights yet.'}
                   </p>
                 )}
@@ -638,7 +675,7 @@ export default function DashboardPage({
               <button
                 onClick={generateAIInsight}
                 disabled={loadingInsight}
-                className="w-full py-1.5 text-[11px] font-bold bg-[#0F0F0F] text-orange-400 rounded-lg hover:bg-[#141414] border border-orange-500/15 disabled:opacity-50 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                className="w-full py-1.5 text-[11px] font-bold bg-[#1f1f1f]/60 hover:bg-[#1f1f1f]/95 text-orange-400 rounded-lg border border-orange-500/25 disabled:opacity-50 transition-colors flex items-center justify-center gap-1 cursor-pointer"
               >
                 <RefreshCw size={10} className={`${loadingInsight ? 'animate-spin' : ''}`} />
                 {language === 'id' ? 'Generate Insight' : 'Generate Insight'}
@@ -651,10 +688,11 @@ export default function DashboardPage({
           <div className="flex flex-col gap-3.5">
             
             {/* E. SCHEDULE TODAY CARD */}
-            <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-4 flex flex-col gap-3">
+            <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-1.5">
-                  📅 {language === 'id' ? 'Jadwal Hari Ini' : 'Schedule Today'}
+                <span className="text-[13px] font-bold text-zinc-200 flex items-center gap-2">
+                  <img src="/icons/Schedule.png" alt="Schedule Today" className="w-[26px] h-[26px] object-contain shrink-0" />
+                  {language === 'id' ? 'Jadwal Hari Ini' : 'Schedule Today'}
                 </span>
                 <span 
                   onClick={() => setActiveView('schedule')}
@@ -665,33 +703,33 @@ export default function DashboardPage({
               </div>
               <div className="h-px bg-white/5" />
 
-              <p className="text-[10px] font-bold text-zinc-500 leading-none">
+              <p className="text-[10px] font-bold text-zinc-400 leading-none">
                 {now.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
               </p>
 
               <div className="flex flex-col gap-1.5">
                 {todayTasks.length === 0 ? (
                   <div className="flex flex-col gap-2 items-center py-3">
-                    <p className="text-[11px] text-zinc-500 italic">
+                    <p className="text-[11px] text-zinc-400 italic">
                       {language === 'id' ? 'Tidak ada jadwal hari ini' : 'No schedules today'}
                     </p>
                     <button 
                       onClick={() => setActiveView('schedule')}
-                      className="py-1 px-2 text-[10px] font-bold text-orange-500 border border-orange-500/10 rounded-md bg-orange-500/5 hover:bg-orange-500/10 cursor-pointer transition-colors"
+                      className="py-1 px-2 text-[10px] font-bold text-orange-500 border border-orange-500/20 rounded-md bg-orange-500/10 hover:bg-orange-500/20 cursor-pointer transition-colors"
                     >
                       + Tambah 
                     </button>
                   </div>
                 ) : (
                   todayTasks.slice(0, 3).map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/3 border border-white/3 text-[11px]">
+                    <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 border border-white/5 text-[11px]">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.completed ? 'bg-zinc-600' : 'bg-orange-500'}`} />
-                        <span className={`text-zinc-300 truncate font-semibold ${item.completed ? 'line-through text-zinc-600' : ''}`}>
+                        <span className={`text-zinc-200 truncate font-semibold ${item.completed ? 'line-through text-zinc-500' : ''}`}>
                           {item.title}
                         </span>
                       </div>
-                      <span className="text-[9px] font-mono font-semibold text-zinc-500 shrink-0">
+                      <span className="text-[9px] font-mono font-semibold text-zinc-400 shrink-0">
                         ⏰ {item.startTime || '09:00'}
                       </span>
                     </div>
@@ -701,15 +739,16 @@ export default function DashboardPage({
             </div>
 
             {/* F. DAILY QUOTE CARD */}
-            <div className="bg-white/3 border border-white/5 rounded-[12px] p-4 flex flex-col gap-3 relative overflow-hidden">
+            <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-4 flex flex-col gap-3 relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-bold text-zinc-400 flex items-center gap-1.5 select-none">
+                <span className="text-[13px] font-bold text-zinc-300 flex items-center gap-1.5 select-none">
+                  {/* TODO: replace with 3D icon */}
                   ✨ {language === 'id' ? 'Inspirasi Harian' : 'Daily Inspiration'}
                 </span>
                 <button
                   onClick={handleRefreshQuote}
                   disabled={loadingQuote}
-                  className="p-1 hover:bg-white/5 rounded transition-colors text-zinc-500 hover:text-zinc-300 disabled:opacity-50 cursor-pointer"
+                  className="p-1 hover:bg-white/10 rounded transition-colors text-zinc-400 hover:text-zinc-200 disabled:opacity-50 cursor-pointer"
                   title="Refresh Quote"
                 >
                   <RefreshCw size={11} className={`${loadingQuote ? 'animate-spin' : ''}`} />
@@ -721,15 +760,15 @@ export default function DashboardPage({
               <div className="min-h-[56px] flex flex-col justify-center">
                 {dailyQuote ? (
                   <>
-                    <p className="text-[12.5px] leading-relaxed text-zinc-300 italic">
+                    <p className="text-[12.5px] leading-relaxed text-zinc-200 italic font-medium">
                       "{dailyQuote.text}"
                     </p>
-                    <span className="text-[10px] text-zinc-500 font-bold mt-1 text-right block pr-1">
+                    <span className="text-[10px] text-zinc-400 font-bold mt-1 text-right block pr-1">
                       — {dailyQuote.author}
                     </span>
                   </>
                 ) : (
-                  <p className="text-[11px] text-zinc-500 italic text-center py-2">
+                  <p className="text-[11px] text-zinc-400 italic text-center py-2">
                     {language === 'id' ? 'Mendapatkan quote...' : 'Getting quote...'}
                   </p>
                 )}
@@ -737,7 +776,7 @@ export default function DashboardPage({
             </div>
 
             {/* G. QUICK ACTIONS GRID */}
-            <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-4 flex flex-col gap-3">
+            <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-4 flex flex-col gap-3">
               <span className="text-[13px] font-bold text-zinc-200">
                 ⚡ Quick Actions
               </span>
@@ -746,45 +785,45 @@ export default function DashboardPage({
               <div className="grid grid-cols-2 gap-2">
                 <button 
                   onClick={() => setActiveView('finance')}
-                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 hover:bg-[#1f1f1f]/80 border border-white/5 backdrop-blur-sm hover:border-orange-500/25 transition-all text-left cursor-pointer group"
                 >
-                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">💰 Transaksi</span>
-                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                  <span className="text-[11px] text-zinc-300 group-hover:text-zinc-100 font-semibold truncate">💰 Transaksi</span>
+                  <ArrowRight size={10} className="text-zinc-500 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
                 </button>
                 <button 
                   onClick={() => setActiveView('schedule')}
-                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 hover:bg-[#1f1f1f]/80 border border-white/5 backdrop-blur-sm hover:border-orange-500/25 transition-all text-left cursor-pointer group"
                 >
-                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">✅ Tugas</span>
-                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                  <span className="text-[11px] text-zinc-300 group-hover:text-zinc-100 font-semibold truncate">✅ Tugas</span>
+                  <ArrowRight size={10} className="text-zinc-500 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
                 </button>
                 <button 
                   onClick={() => setActiveView('habits')}
-                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 hover:bg-[#1f1f1f]/80 border border-white/5 backdrop-blur-sm hover:border-orange-500/25 transition-all text-left cursor-pointer group"
                 >
-                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">🔥 Habit</span>
-                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                  <span className="text-[11px] text-zinc-300 group-hover:text-zinc-100 font-semibold truncate">🔥 Habit</span>
+                  <ArrowRight size={10} className="text-zinc-500 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
                 </button>
                 <button 
                   onClick={() => setActiveView('targets')}
-                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 hover:bg-[#1f1f1f]/80 border border-white/5 backdrop-blur-sm hover:border-orange-500/25 transition-all text-left cursor-pointer group"
                 >
-                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">🎯 Target</span>
-                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                  <span className="text-[11px] text-zinc-300 group-hover:text-zinc-100 font-semibold truncate">🎯 Target</span>
+                  <ArrowRight size={10} className="text-zinc-500 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
                 </button>
                 <button 
                   onClick={() => setActiveView('ai_planner')}
-                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 hover:bg-[#1f1f1f]/80 border border-white/5 backdrop-blur-sm hover:border-orange-500/25 transition-all text-left cursor-pointer group"
                 >
-                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">✨ AI Plan</span>
-                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                  <span className="text-[11px] text-zinc-300 group-hover:text-zinc-100 font-semibold truncate">✨ AI Plan</span>
+                  <ArrowRight size={10} className="text-zinc-500 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
                 </button>
                 <button 
                   onClick={() => setActiveView('journal')}
-                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] hover:bg-[#141414] border border-white/8 hover:border-orange-500/25 transition-all text-left cursor-pointer group"
+                  className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 hover:bg-[#1f1f1f]/80 border border-white/5 backdrop-blur-sm hover:border-orange-500/25 transition-all text-left cursor-pointer group"
                 >
-                  <span className="text-[11px] text-zinc-400 group-hover:text-zinc-200 font-semibold truncate">📖 Jurnal</span>
-                  <ArrowRight size={10} className="text-zinc-600 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
+                  <span className="text-[11px] text-zinc-300 group-hover:text-zinc-100 font-semibold truncate">📖 Jurnal</span>
+                  <ArrowRight size={10} className="text-zinc-500 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
                 </button>
               </div>
             </div>
@@ -800,10 +839,11 @@ export default function DashboardPage({
         <div className="flex flex-col lg:hidden gap-3.5">
           
           {/* M3. Finance Card (full width) */}
-          <div className="bg-gradient-to-br from-[#0F0F0F] via-[#0F0F0F] to-orange-500/5 border border-white/8 rounded-[12px] p-3 flex flex-col gap-2.5">
+          <div className="bg-gradient-to-br from-[#141414]/75 via-[#141414]/75 to-orange-500/10 border border-white/5 backdrop-blur-md rounded-[12px] p-3 flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-bold text-zinc-200 flex items-center gap-1.5">
-                💰 Finance
+              <span className="text-[12px] font-bold text-zinc-200 flex items-center gap-2">
+                <img src="/icons/Finance.png" alt="Finance" className="w-6 h-6 object-contain shrink-0" />
+                Finance
               </span>
               <span 
                 onClick={() => setActiveView('finance')}
@@ -816,29 +856,30 @@ export default function DashboardPage({
             <div className="h-px bg-white/5" />
 
             <div className="py-0.5">
-              <span className="text-[9px] font-bold text-zinc-500 block leading-none">TOTAL SALDO</span>
+              <span className="text-[9px] font-bold text-zinc-400 block leading-none">TOTAL SALDO</span>
               <div className="text-[16px] font-mono font-black text-zinc-100 mt-1">
                 {formatCurrency(currentBalance)}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-1.5 bg-white/3 border border-white/5 rounded-lg p-2 text-left">
+            <div className="grid grid-cols-2 gap-1.5 bg-white/5 border border-white/5 rounded-lg p-2 text-left">
               <div>
-                <span className="text-[8px] font-bold text-zinc-500 uppercase block tracking-wider">Pemasukan</span>
+                <span className="text-[8px] font-bold text-zinc-400 uppercase block tracking-wider">Pemasukan</span>
                 <span className="text-[10px] font-mono font-bold text-emerald-400">{formatCurrency(thisMonthIncome)}</span>
               </div>
               <div>
-                <span className="text-[8px] font-bold text-zinc-500 uppercase block tracking-wider">Pengeluaran</span>
+                <span className="text-[8px] font-bold text-zinc-400 uppercase block tracking-wider">Pengeluaran</span>
                 <span className="text-[10px] font-mono font-bold text-red-400 truncate block">{formatCurrency(thisMonthExpense)}</span>
               </div>
             </div>
           </div>
 
           {/* M4. Habit Today (full width) */}
-          <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-3 flex flex-col gap-2.5">
+          <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-3 flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-bold text-zinc-200 flex items-center gap-1.5">
-                🔥 Habit Hari Ini
+              <span className="text-[12px] font-bold text-zinc-200 flex items-center gap-2">
+                <img src="/icons/Habit_Tracker.png" alt="Habit Today" className="w-6 h-6 object-contain shrink-0" />
+                Habit Hari Ini
               </span>
               <span 
                 onClick={() => setActiveView('habits')}
@@ -850,7 +891,7 @@ export default function DashboardPage({
 
             <div className="h-px bg-white/5" />
 
-            <div className="flex justify-between items-center text-[10px] font-semibold text-zinc-400">
+            <div className="flex justify-between items-center text-[10px] font-semibold text-zinc-300">
               <span>Progres Harian</span>
               <span className="text-orange-500">{completedTodayHabitsCount} / {activeHabits.length} habit</span>
             </div>
@@ -866,7 +907,7 @@ export default function DashboardPage({
               {activeHabits.slice(0, 3).map((item) => {
                 const isCompleted = getHabitStatusToday(item.id) === 'completed';
                 return (
-                  <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/3 border border-white/3 text-[10px]">
+                  <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 border border-white/5 text-[10px]">
                     <span className="text-zinc-300 truncate font-medium">
                       {item.icon || '✨'} {item.title}
                     </span>
@@ -878,10 +919,11 @@ export default function DashboardPage({
           </div>
 
           {/* M5. Schedule Today (full width) */}
-          <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-3 flex flex-col gap-2.5">
+          <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-3 flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-bold text-zinc-200 flex items-center gap-1.5">
-                📅 Jadwal Hari Ini
+              <span className="text-[12px] font-bold text-zinc-200 flex items-center gap-2">
+                <img src="/icons/Schedule.png" alt="Schedule Today" className="w-6 h-6 object-contain shrink-0" />
+                Jadwal Hari Ini
               </span>
               <span 
                 onClick={() => setActiveView('schedule')}
@@ -894,13 +936,13 @@ export default function DashboardPage({
             <div className="h-px bg-white/5" />
 
             {todayTasks.length === 0 ? (
-              <p className="text-[10px] text-zinc-500 italic text-center py-2">Tidak ada jadwal hari ini</p>
+              <p className="text-[10px] text-zinc-400 italic text-center py-2">Tidak ada jadwal hari ini</p>
             ) : (
               <div className="flex flex-col gap-1">
                 {todayTasks.slice(0,3).map(item => (
-                  <div key={item.id} className="flex items-center justify-between p-1.5 bg-white/3 border border-white/3 rounded text-[10px]">
-                    <span className={`truncate text-zinc-300 ${item.completed ? 'line-through text-zinc-600' : ''}`}>{item.title}</span>
-                    <span className="text-[9px] text-zinc-500 font-mono shrink-0">⏰ {item.startTime}</span>
+                  <div key={item.id} className="flex items-center justify-between p-1.5 bg-white/5 border border-white/5 rounded text-[10px]">
+                    <span className={`truncate text-zinc-300 ${item.completed ? 'line-through text-zinc-500' : ''}`}>{item.title}</span>
+                    <span className="text-[9px] text-zinc-400 font-mono shrink-0">⏰ {item.startTime}</span>
                   </div>
                 ))}
               </div>
@@ -908,29 +950,29 @@ export default function DashboardPage({
           </div>
 
           {/* M6. Quick Actions (2x3 grid) */}
-          <div className="bg-[#0F0F0F] border border-white/8 rounded-[12px] p-3 flex flex-col gap-2.5">
+          <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-3 flex flex-col gap-2.5">
             <span className="text-[12px] font-bold text-zinc-200">⚡ Quick Actions</span>
             <div className="h-px bg-white/5" />
             <div className="grid grid-cols-2 gap-1.5">
-              <button onClick={() => setActiveView('finance')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">💰 Transaksi <ArrowRight size={10} /></button>
-              <button onClick={() => setActiveView('schedule')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">✅ Tugas <ArrowRight size={10} /></button>
-              <button onClick={() => setActiveView('habits')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">🔥 Habit <ArrowRight size={10} /></button>
-              <button onClick={() => setActiveView('targets')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">🎯 Target <ArrowRight size={10} /></button>
-              <button onClick={() => setActiveView('ai_planner')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">✨ AI Plan <ArrowRight size={10} /></button>
-              <button onClick={() => setActiveView('journal')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#0F0F0F] active:bg-[#141414] border border-white/8 text-[11px] text-zinc-400 font-semibold cursor-pointer">📖 Jurnal <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('finance')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">💰 Transaksi <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('schedule')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">✅ Tugas <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('habits')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">🔥 Habit <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('targets')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">🎯 Target <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('ai_planner')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">✨ AI Plan <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('journal')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">📖 Jurnal <ArrowRight size={10} /></button>
             </div>
           </div>
 
           {/* M7. Daily Quote */}
-          <div className="bg-white/3 border border-white/5 rounded-[12px] p-3 flex flex-col gap-2">
-            <span className="text-[12px] font-bold text-zinc-400">✨ Daily Inspiration</span>
+          <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-3 flex flex-col gap-2">
+            <span className="text-[12px] font-bold text-zinc-300">✨ Daily Inspiration</span>
             <div className="h-px bg-white/5" />
             {dailyQuote ? (
-              <p className="text-[11px] leading-relaxed text-zinc-300 italic text-left">
-                "{dailyQuote.text}" <span className="text-[9px] text-zinc-500 not-italic block mt-0.5">— {dailyQuote.author}</span>
+              <p className="text-[11px] leading-relaxed text-zinc-200 italic text-left">
+                "{dailyQuote.text}" <span className="text-[9px] text-zinc-400 not-italic block mt-0.5">— {dailyQuote.author}</span>
               </p>
             ) : (
-              <p className="text-[10px] text-zinc-500 italic text-center">Loading quote...</p>
+              <p className="text-[10px] text-zinc-400 italic text-center">Loading quote...</p>
             )}
           </div>
 
@@ -941,7 +983,7 @@ export default function DashboardPage({
             ============================================================ */}
         <section className="hidden lg:flex flex-col gap-3.5 mt-2">
           <div className="text-left">
-            <span className="text-[11px] font-extrabold text-zinc-500 tracking-[0.2em] uppercase">
+            <span className="text-[11px] font-extrabold text-zinc-400 tracking-[0.2em] uppercase">
               SEMUA FITUR LIFEFLOW
             </span>
           </div>
@@ -951,16 +993,16 @@ export default function DashboardPage({
             {/* Feature 1 — Finance Tracker */}
             <div 
               onClick={() => setActiveView('finance')}
-              className="bg-[#0F0F0F] border border-white/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+              className="bg-[#141414]/75 border border-white/5 backdrop-blur-md rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
             >
-              <div className="w-9 h-9 rounded-lg bg-orange-500/12 flex items-center justify-center text-orange-500 font-semibold shrink-0">
-                <CreditCard size={16} />
+              <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                <img src="/icons/Finance.png" alt="Finance Tracker" className="w-9 h-9 object-contain" />
               </div>
               <div className="text-left min-w-0">
                 <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
                   Finance Tracker
                 </h4>
-                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                <p className="text-[11px] text-zinc-400 mt-0.5 truncate font-semibold">
                   Catat & analisis keuangan harian
                 </p>
               </div>
@@ -969,16 +1011,16 @@ export default function DashboardPage({
             {/* Feature 2 — Budget & Savings */}
             <div 
               onClick={() => setActiveView('budgets' as View)}
-              className="bg-[#0F0F0F] border border-white/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+              className="bg-[#141414]/75 border border-white/5 backdrop-blur-md rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
             >
-              <div className="w-9 h-9 rounded-lg bg-emerald-500/12 flex items-center justify-center text-emerald-400 font-semibold shrink-0">
-                <PiggyBank size={16} />
+              <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                <img src="/icons/Budgets.png" alt="Budget & Savings" className="w-9 h-9 object-contain" />
               </div>
               <div className="text-left min-w-0">
                 <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
                   Budget & Savings
                 </h4>
-                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                <p className="text-[11px] text-zinc-400 mt-0.5 truncate font-semibold">
                   Rencanakan pengisian tabungan
                 </p>
               </div>
@@ -987,16 +1029,16 @@ export default function DashboardPage({
             {/* Feature 3 — Habit Tracker */}
             <div 
               onClick={() => setActiveView('habits')}
-              className="bg-[#0F0F0F] border border-[#ffffff]/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+              className="bg-[#141414]/75 border border-white/5 backdrop-blur-md rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
             >
-              <div className="w-9 h-9 rounded-lg bg-amber-500/12 flex items-center justify-center text-amber-500 font-semibold shrink-0">
-                <Flame size={16} />
+              <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                <img src="/icons/Habit_Tracker.png" alt="Habit Tracker" className="w-9 h-9 object-contain" />
               </div>
               <div className="text-left min-w-0">
                 <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
                   Habit Tracker
                 </h4>
-                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                <p className="text-[11px] text-zinc-400 mt-0.5 truncate font-semibold">
                   Bangun konsistensi harian Anda
                 </p>
               </div>
@@ -1005,16 +1047,16 @@ export default function DashboardPage({
             {/* Feature 4 — AI Planner */}
             <div 
               onClick={() => setActiveView('ai_planner')}
-              className="bg-[#0F0F0F] border border-white/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+              className="bg-[#141414]/75 border border-white/5 backdrop-blur-md rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
             >
-              <div className="w-9 h-9 rounded-lg bg-purple-500/12 flex items-center justify-center text-purple-400 font-semibold shrink-0">
-                <Sparkles size={16} />
+              <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                <img src="/icons/AI.png" alt="AI Planner" className="w-9 h-9 object-contain" />
               </div>
               <div className="text-left min-w-0">
                 <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
                   AI Planner
                 </h4>
-                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                <p className="text-[11px] text-zinc-400 mt-0.5 truncate font-semibold">
                   AI compiles automated study plans
                 </p>
               </div>
@@ -1023,16 +1065,16 @@ export default function DashboardPage({
             {/* Feature 5 — AI Smart Space */}
             <div 
               onClick={() => setActiveView('smart_space')}
-              className="bg-[#0F0F0F] border border-white/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+              className="bg-[#141414]/75 border border-white/5 backdrop-blur-md rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
             >
-              <div className="w-9 h-9 rounded-lg bg-sky-500/12 flex items-center justify-center text-sky-400 font-semibold shrink-0">
-                <Brain size={16} />
+              <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                <img src="/icons/Analytics.png" alt="AI Smart Space" className="w-9 h-9 object-contain" />
               </div>
               <div className="text-left min-w-0">
                 <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
                   AI Smart Space
                 </h4>
-                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                <p className="text-[11px] text-zinc-400 mt-0.5 truncate font-semibold">
                   Focus, mind map & wrap summary
                 </p>
               </div>
@@ -1041,16 +1083,16 @@ export default function DashboardPage({
             {/* Feature 6 — Daily Journal */}
             <div 
               onClick={() => setActiveView('journal')}
-              className="bg-[#0F0F0F] border border-[#ffffff]/6 rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
+              className="bg-[#141414]/75 border border-white/5 backdrop-blur-md rounded-[10px] p-3.5 flex items-center gap-3 cursor-pointer hover:bg-[#141414] hover:border-orange-500/25 transition-all duration-150 select-none group"
             >
-              <div className="w-9 h-9 rounded-lg bg-yellow-500/12 flex items-center justify-center text-yellow-500 font-semibold shrink-0">
-                <BookOpen size={16} />
+              <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                <img src="/icons/Journal.png" alt="Daily Journal" className="w-9 h-9 object-contain" />
               </div>
               <div className="text-left min-w-0">
                 <h4 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-100 transition-colors leading-tight">
                   Daily Journal
                 </h4>
-                <p className="text-[11px] text-zinc-500 mt-0.5 truncate font-semibold">
+                <p className="text-[11px] text-zinc-400 mt-0.5 truncate font-semibold">
                   Refleksi harian & spiritual ritual
                 </p>
               </div>

@@ -33,7 +33,7 @@ import { Sparkles } from '../../components/ui/sparkles';
 export default function HabitTrackerPage() {
   const { t } = useLanguage();
   // ... (existing logic)
-  const { activeHabits, getHabitLogToday, getHabitStatus, saveHabit } = useHabits();
+  const { activeHabits, getHabitLogToday, getHabitStatus, saveHabit, deleteHabit } = useHabits();
   const { habitLogs } = useData();
   const [viewMode, setViewMode] = useState<'grid' | 'weekly'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
@@ -238,6 +238,7 @@ export default function HabitTrackerPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={saveHabit}
+        onDelete={deleteHabit}
         initialHabit={editingHabit}
       />
     </div>
