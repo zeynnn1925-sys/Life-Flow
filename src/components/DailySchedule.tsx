@@ -8,6 +8,7 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { exportTasks } from '../services/exportService';
 import { ConfirmationModal } from './ConfirmationModal';
+import { playReminderSound, requestNotificationPermission } from '../services/notificationService';
 
 type ScheduleView = 'daily' | 'weekly' | 'monthly';
 
@@ -20,14 +21,22 @@ export default function DailySchedule() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [enableReminder, setEnableReminder] = useState(false);
+  const [reminderMin, setReminderMin] = useState(10);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !startTime || !date) return;
+
+    // Request notification permission on submit if enabling reminder
+    if (enableReminder) {
+      await requestNotificationPermission();
+    }
 
     const newTask: Task = {
       id: crypto.randomUUID(),
@@ -36,12 +45,16 @@ export default function DailySchedule() {
       startTime,
       endTime,
       completed: false,
+      description: description || undefined,
+      reminderMinutes: enableReminder ? reminderMin : undefined,
     };
 
     saveTask(newTask);
     setTitle('');
+    setDescription('');
     setStartTime('');
     setEndTime('');
+    setEnableReminder(false);
   };
 
   const toggleTask = (id: string) => {
@@ -274,14 +287,29 @@ export default function DailySchedule() {
                             transition={{ duration: 0.3, ease: "easeOut" }}
                           />
                         </div>
-                        <div className="text-[10px] text-ink-tertiary flex items-center gap-1.5 mt-0.5">
-                          <Clock className="w-3 h-3" />
-                          <span className="font-mono">{item.startTime}</span>
-                          {item.endTime && (
-                            <>
-                              <span className="text-hairline-strong">—</span>
-                              <span className="font-mono">{item.endTime}</span>
-                            </>
+                        {item.original?.description && (
+                          <div className={`text-[11px] mt-0.5 max-w-md ${item.completed ? 'text-ink-tertiary/60 line-through' : 'text-ink-subtle'}`}>
+                            {item.original.description}
+                          </div>
+                        )}
+                        <div className="text-[10px] text-ink-tertiary flex items-center gap-1.5 mt-1 flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span className="font-mono">{item.startTime}</span>
+                            {item.endTime && (
+                              <>
+                                <span className="text-hairline-strong">—</span>
+                                <span className="font-mono">{item.endTime}</span>
+                              </>
+                            )}
+                          </span>
+                          {item.original?.reminderMinutes !== undefined && (
+                            <span className="text-[9px] bg-accent/12 text-accent px-1.5 py-0.5 rounded-md font-bold flex items-center gap-1 border border-accent/15">
+                              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse shrink-0" />
+                              {item.original.reminderMinutes === 0 
+                                ? (language === 'id' ? 'Pengingat: Mulai' : 'Reminder: Start')
+                                : `${item.original.reminderMinutes}m ${language === 'id' ? 'sebelum' : 'before'}`}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -526,6 +554,18 @@ export default function DailySchedule() {
                 placeholder="e.g. Morning Run, Meeting"
               />
             </div>
+
+            <div>
+              <label className="block text-eyebrow font-black text-ink-tertiary uppercase mb-2 tracking-widest">
+                {language === 'id' ? 'Deskripsi' : 'Description'}
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full h-24 p-4 bg-surface-2 border border-hairline rounded-md focus:border-accent outline-none text-ink text-body-sm font-medium transition-all placeholder:font-medium placeholder:text-ink-tertiary/20 shadow-inner resize-none"
+                placeholder={language === 'id' ? 'Tulis rincian acara atau catatan di sini...' : 'Write event details or notes here...'}
+              />
+            </div>
             
             <div>
               <label className="block text-eyebrow font-black text-ink-tertiary uppercase mb-2 tracking-widest">{t('date')}</label>
@@ -562,6 +602,63 @@ export default function DailySchedule() {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="bg-surface-2/45 p-4 rounded-xl border border-hairline/60 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[12px] font-bold text-ink">
+                    {language === 'id' ? 'Aktifkan Pengingat' : 'Enable Reminder'}
+                  </span>
+                  <span className="text-[10px] text-ink-tertiary">
+                    {language === 'id' ? 'Kirim notifikasi & bunyikan alarm' : 'Send notification & play alarm sound'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEnableReminder(!enableReminder)}
+                  className={`w-11 h-6 rounded-full p-1 transition-colors duration-200 focus:outline-none ${
+                    enableReminder ? 'bg-accent' : 'bg-surface-3 border border-hairline'
+                  }`}
+                >
+                  <div
+                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
+                      enableReminder ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {enableReminder && (
+                <div className="space-y-3 pt-2 border-t border-hairline">
+                  <div>
+                    <label className="block text-[10px] font-black text-ink-tertiary uppercase mb-1.5 tracking-wider">
+                      {language === 'id' ? 'Waktu Pengingat' : 'Reminder Trigger'}
+                    </label>
+                    <select
+                      value={reminderMin}
+                      onChange={(e) => setReminderMin(Number(e.target.value))}
+                      className="w-full h-11 px-3 bg-surface-3 border border-hairline rounded-md outline-none text-ink text-xs font-bold focus:border-accent"
+                    >
+                      <option value={0}>{language === 'id' ? 'Saat Acara Dimulai' : 'At Event Start'}</option>
+                      <option value={5}>5 {language === 'id' ? 'Menit Sebelum' : 'Minutes Before'}</option>
+                      <option value={10}>10 {language === 'id' ? 'Menit Sebelum' : 'Minutes Before'}</option>
+                      <option value={15}>15 {language === 'id' ? 'Menit Sebelum' : 'Minutes Before'}</option>
+                      <option value={30}>30 {language === 'id' ? 'Menit Sebelum' : 'Minutes Before'}</option>
+                      <option value={60}>1 {language === 'id' ? 'Jam Sebelum' : 'Hour Before'}</option>
+                    </select>
+                  </div>
+                  
+                  <button
+                    type="button"
+                    onClick={() => playReminderSound()}
+                    className="w-full py-2 bg-surface-3 border border-hairline hover:border-accent/40 text-ink-subtle hover:text-accent rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                  >
+                    <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                    {language === 'id' ? 'Tes Suara Pengingat' : 'Test Reminder Sound'}
+                  </button>
+                </div>
+              )}
             </div>
 
             <button

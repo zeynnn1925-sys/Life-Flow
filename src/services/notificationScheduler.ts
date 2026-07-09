@@ -5,6 +5,7 @@ import {
   notifyTargetProgress,
   notifyHabitReminder,
   notifyStreakWarning,
+  notifyTaskApproaching,
 } from './notificationService';
 import { Task, RecurringTransaction, Target, NotificationSetting } from '../types';
 import { Habit, HabitLog } from '../types/habits';
@@ -100,6 +101,33 @@ export function startNotificationScheduler(
         });
       }
     }
+
+    // Check for approaching tasks/events
+    tasks.forEach(task => {
+      if (task.completed || !task.startTime || !task.date) return;
+      if (task.reminderMinutes === undefined) return;
+      
+      try {
+        const now = new Date();
+        const [taskHour, taskMinute] = task.startTime.split(':').map(Number);
+        const [taskY, taskM, taskD] = task.date.split('-').map(Number);
+        const taskDateTime = new Date(taskY, taskM - 1, taskD, taskHour, taskMinute, 0, 0);
+        
+        const diffMs = taskDateTime.getTime() - now.getTime();
+        const diffMinutes = Math.round(diffMs / (60 * 1000));
+        
+        if (diffMinutes === task.reminderMinutes) {
+          notifyTaskApproaching(task, task.reminderMinutes);
+          addInAppNotification({
+            title: '⏰ Pengingat Jadwal',
+            message: `"${task.title}" ${task.reminderMinutes === 0 ? 'dimulai sekarang!' : `akan dimulai dalam ${task.reminderMinutes} menit!`}`,
+            type: 'info'
+          });
+        }
+      } catch (err) {
+        console.error('Error checking task reminder in scheduler:', err);
+      }
+    });
 
   }, 60 * 1000);
 }

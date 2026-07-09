@@ -51,6 +51,65 @@ export function sendBrowserNotification(title: string, options: {
   };
 }
 
+export function playReminderSound(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const audioContext = new AudioContextClass();
+    
+    const osc1 = audioContext.createOscillator();
+    const gain1 = audioContext.createGain();
+    osc1.connect(gain1);
+    gain1.connect(audioContext.destination);
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(587.33, audioContext.currentTime); // D5
+    gain1.gain.setValueAtTime(0.25, audioContext.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+    osc1.start();
+    osc1.stop(audioContext.currentTime + 0.35);
+    
+    setTimeout(() => {
+      try {
+        const osc2 = audioContext.createOscillator();
+        const gain2 = audioContext.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioContext.destination);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+        gain2.gain.setValueAtTime(0.25, audioContext.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+        osc2.start();
+        osc2.stop(audioContext.currentTime + 0.45);
+      } catch (err) {
+        console.warn("Subsequent audio trigger blocked or failed:", err);
+      }
+    }, 150);
+  } catch (e) {
+    console.warn("Audio Context failed to play sound.", e);
+  }
+}
+
+export function notifyTaskApproaching(task: Task, minutesLeft: number): void {
+  const key = `task_approaching_${task.id}_${minutesLeft}`;
+  if (!canSendNotification(key, 15 * 60 * 1000)) return;
+
+  const timeText = minutesLeft === 0 
+    ? "sekarang dimulai!" 
+    : `akan dimulai dalam ${minutesLeft} menit!`;
+    
+  const bodyText = `${task.title} ${timeText}${task.description ? `\nDeskripsi: ${task.description}` : ''}`;
+
+  sendBrowserNotification('⏰ Pengingat Jadwal — LifeFlow', {
+    body: bodyText,
+    tag: key,
+    requireInteraction: true,
+  });
+  
+  playReminderSound();
+  markNotificationSent(key);
+}
+
 export function notifyUnfinishedTasks(tasks: Task[]): void {
   const today = new Date().toISOString().split('T')[0];
   const unfinished = tasks.filter(t => t.date === today && !t.completed);
@@ -144,5 +203,7 @@ export const notificationService = {
   notifyHabitReminder,
   notifyStreakWarning,
   notifyAchievementUnlocked,
-  notifyBudgetOver
+  notifyBudgetOver,
+  playReminderSound,
+  notifyTaskApproaching
 };
