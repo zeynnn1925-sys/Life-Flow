@@ -306,7 +306,7 @@ export default function DashboardPage({
     };
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 seconds timeout
 
     try {
       const response = await fetch('/api/gemini/generate-insight-stream', {
@@ -360,7 +360,7 @@ export default function DashboardPage({
       }
 
     } catch (err: any) {
-      console.error("Failed to stream AI insight:", err);
+      console.warn("Failed to stream AI insight (gracefully falling back):", err);
       // Fallback
       const idInsights = [
         "Fokus pada kemajuan hari ini, sekecil apapun itu. Alur kerja yang konsisten mengalahkan lonjakan motivasi yang sesaat.",

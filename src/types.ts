@@ -50,7 +50,7 @@ export interface Target {
   targetValue: number;
   currentValue: number;
   unit: string;
-  category: 'health' | 'work' | 'personal' | 'finance';
+  category: string;
 }
 
 export interface Achievement {

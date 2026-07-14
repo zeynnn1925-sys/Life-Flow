@@ -24,153 +24,14 @@ import {
   Smile,
   MapPin,
   Flame,
-  HelpCircle
+  HelpCircle,
+  Pin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
-
-// Simple Sound Generation Engine using Web Audio API (procedural audio)
-class SoundGenerator {
-  private ctx: AudioContext | null = null;
-  private oscillators: OscillatorNode[] = [];
-  private biquadFilter: BiquadFilterNode | null = null;
-  private mainGain: GainNode | null = null;
-  private noiseSource: AudioBufferSourceNode | null = null;
-  private volumeValue: number = 0.25;
-
-  start(preset: string) {
-    this.stop();
-    try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContextClass) return;
-      this.ctx = new AudioContextClass();
-      this.mainGain = this.ctx.createGain();
-      this.mainGain.gain.setValueAtTime(this.volumeValue, this.ctx.currentTime);
-      this.mainGain.connect(this.ctx.destination);
-
-      this.biquadFilter = this.ctx.createBiquadFilter();
-      this.biquadFilter.type = 'lowpass';
-      this.biquadFilter.frequency.setValueAtTime(350, this.ctx.currentTime);
-      this.biquadFilter.connect(this.mainGain);
-
-      if (preset === 'zen') {
-        // Binaural Beats: Base of 110Hz left and 114Hz right, plus warm ambient notes
-        const oscL = this.ctx.createOscillator();
-        const oscR = this.ctx.createOscillator();
-        const pannerL = this.ctx.createStereoPanner ? this.ctx.createStereoPanner() : null;
-        const pannerR = this.ctx.createStereoPanner ? this.ctx.createStereoPanner() : null;
-
-        oscL.type = 'sine';
-        oscL.frequency.setValueAtTime(110, this.ctx.currentTime);
-        oscR.type = 'sine';
-        oscR.frequency.setValueAtTime(114, this.ctx.currentTime);
-
-        if (pannerL && pannerR) {
-          pannerL.pan.setValueAtTime(-1, this.ctx.currentTime);
-          pannerR.pan.setValueAtTime(1, this.ctx.currentTime);
-          oscL.connect(pannerL).connect(this.biquadFilter);
-          oscR.connect(pannerR).connect(this.biquadFilter);
-        } else {
-          oscL.connect(this.biquadFilter);
-          oscR.connect(this.biquadFilter);
-        }
-        oscL.start();
-        oscR.start();
-        this.oscillators.push(oscL, oscR);
-
-        // Low warm drone pad
-        const oscPad = this.ctx.createOscillator();
-        oscPad.type = 'triangle';
-        oscPad.frequency.setValueAtTime(55, this.ctx.currentTime);
-        const padGain = this.ctx.createGain();
-        padGain.gain.setValueAtTime(0.5, this.ctx.currentTime);
-        oscPad.connect(padGain).connect(this.biquadFilter);
-        oscPad.start();
-        this.oscillators.push(oscPad);
-
-      } else if (preset === 'space') {
-        const chord = [130.81, 196.00, 261.63, 311.13]; // Cm/C5 space chord
-        chord.forEach((freq, idx) => {
-          const osc = this.ctx!.createOscillator();
-          osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
-          osc.frequency.setValueAtTime(freq, this.ctx!.currentTime);
-
-          // Space LFO modulation
-          const lfo = this.ctx!.createOscillator();
-          lfo.frequency.setValueAtTime(0.15 + idx * 0.05, this.ctx!.currentTime);
-          const lfoGain = this.ctx!.createGain();
-          lfoGain.gain.setValueAtTime(2.0, this.ctx!.currentTime);
-          lfo.connect(lfoGain).connect(osc.frequency);
-          lfo.start();
-          this.oscillators.push(lfo);
-
-          const gainNode = this.ctx!.createGain();
-          gainNode.gain.setValueAtTime(0.1, this.ctx!.currentTime);
-          osc.connect(gainNode).connect(this.biquadFilter!);
-          osc.start();
-          this.oscillators.push(osc);
-        });
-      } else if (preset === 'rain' || preset === 'waves') {
-        const bufferSize = 2 * this.ctx.sampleRate;
-        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
-
-        const noise = this.ctx.createBufferSource();
-        noise.buffer = noiseBuffer;
-        noise.loop = true;
-
-        this.biquadFilter.frequency.setValueAtTime(preset === 'rain' ? 300 : 180, this.ctx.currentTime);
-
-        const noiseGain = this.ctx.createGain();
-        noiseGain.gain.setValueAtTime(preset === 'rain' ? 0.4 : 0.6, this.ctx.currentTime);
-
-        if (preset === 'waves') {
-          // Slow organic swell of sea waves
-          const waveLfo = this.ctx.createOscillator();
-          waveLfo.frequency.setValueAtTime(0.1, this.ctx.currentTime); // 10 second wave swell
-          const waveLfoGain = this.ctx.createGain();
-          waveLfoGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-          waveLfo.connect(waveLfoGain).connect(noiseGain.gain);
-          waveLfo.start();
-          this.oscillators.push(waveLfo);
-        }
-
-        noise.connect(noiseGain).connect(this.biquadFilter);
-        noise.start();
-        this.noiseSource = noise;
-      }
-    } catch (e) {
-      console.warn("Audio Context initialization failed or forbidden inside sandbox iframe", e);
-    }
-  }
-
-  stop() {
-    this.oscillators.forEach(osc => {
-      try { osc.stop(); } catch(e) {}
-    });
-    this.oscillators = [];
-    if (this.noiseSource) {
-      try { this.noiseSource.stop(); } catch(e) {}
-      this.noiseSource = null;
-    }
-    if (this.ctx) {
-      try { this.ctx.close(); } catch(e) {}
-      this.ctx = null;
-    }
-  }
-
-  setVolume(volume: number) {
-    this.volumeValue = volume;
-    if (this.mainGain && this.ctx) {
-      this.mainGain.gain.setValueAtTime(volume, this.ctx.currentTime);
-    }
-  }
-}
+import { usePomodoro } from '../contexts/PomodoroContext';
 
 export default function SmartSpace() {
   const { language } = useLanguage();
@@ -180,124 +41,31 @@ export default function SmartSpace() {
 
   const [activeTab, setActiveTab] = useState<'focus' | 'weather' | 'mindmap' | 'wrapup'>('focus');
 
-  // Audio state
-  const [isPlayingNoise, setIsPlayingNoise] = useState(false);
-  const [noisePreset, setNoisePreset] = useState('zen');
-  const [volume, setVolume] = useState(0.25);
-  const audioEngine = useRef<SoundGenerator | null>(null);
-
-  // Initialize engine once
-  useEffect(() => {
-    audioEngine.current = new SoundGenerator();
-    return () => {
-      if (audioEngine.current) {
-        audioEngine.current.stop();
-      }
-    };
-  }, []);
-
-  const handleNoisePlayToggle = (presetName: string) => {
-    if (!audioEngine.current) return;
-    if (isPlayingNoise && noisePreset === presetName) {
-      audioEngine.current.stop();
-      setIsPlayingNoise(false);
-    } else {
-      setNoisePreset(presetName);
-      audioEngine.current.start(presetName);
-      audioEngine.current.setVolume(volume);
-      setIsPlayingNoise(true);
-    }
-  };
+  // Consume Pomodoro and Audio state globally from PomodoroContext
+  const {
+    pomoMinutes,
+    pomoSeconds,
+    pomoActive,
+    pomoMode,
+    selectedTaskId,
+    setSelectedTaskId,
+    breathingText,
+    isPlayingNoise,
+    noisePreset,
+    volume,
+    handleNoisePlayToggle,
+    setVolume,
+    isFloating,
+    setIsFloating,
+    isMinimized,
+    setIsMinimized,
+    resetTimer,
+    selectPomoMode,
+    setPomoActive
+  } = usePomodoro();
 
   const handleLevelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const vol = parseFloat(e.target.value);
-    setVolume(vol);
-    if (audioEngine.current) {
-      audioEngine.current.setVolume(vol);
-    }
-  };
-
-  // 1. FOCUS SPACE STATE (Pomodoro + Breath Guide)
-  const [pomoMinutes, setPomoMinutes] = useState(25);
-  const [pomoSeconds, setPomoSeconds] = useState(0);
-  const [pomoActive, setPomoActive] = useState(false);
-  const [pomoMode, setPomoMode] = useState<'focus' | 'short_break' | 'long_break'>('focus');
-  const [selectedTaskId, setSelectedTaskId] = useState<string>('');
-  const [breathingText, setBreathingText] = useState<'Inhale' | 'Hold' | 'Exhale' | 'Pause'>('Inhale');
-  const [breathingPhase, setBreathingPhase] = useState(0); // 0 to 3
-
-  // Breath guide interval
-  useEffect(() => {
-    if (!pomoActive) return;
-    const interval = setInterval(() => {
-      setBreathingPhase(prev => {
-        const next = (prev + 1) % 4;
-        const texts: Record<number, 'Inhale' | 'Hold' | 'Exhale' | 'Pause'> = {
-          0: 'Inhale',
-          1: 'Hold',
-          2: 'Exhale',
-          3: 'Pause'
-        };
-        setBreathingText(texts[next]);
-        return next;
-      });
-    }, 4000); // 4 seconds cycles mirroring standard box breathing
-
-    return () => clearInterval(interval);
-  }, [pomoActive]);
-
-  // Pomodoro timer core logic
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (pomoActive) {
-      timer = setInterval(() => {
-        if (pomoSeconds > 0) {
-          setPomoSeconds(pomoSeconds - 1);
-        } else if (pomoMinutes > 0) {
-          setPomoMinutes(pomoMinutes - 1);
-          setPomoSeconds(59);
-        } else {
-          // Timer finished!
-          setPomoActive(false);
-          const alertChime = new AudioContext(); // temporary ding chime
-          const osc = alertChime.createOscillator();
-          const gain = alertChime.createGain();
-          osc.connect(gain).connect(alertChime.destination);
-          osc.frequency.setValueAtTime(880, alertChime.currentTime);
-          gain.gain.setValueAtTime(0.2, alertChime.currentTime);
-          osc.start();
-          osc.stop(alertChime.currentTime + 0.35);
-
-          // Automatically complete linked task if selected!
-          if (selectedTaskId) {
-            const task = tasks.find(t => t.id === selectedTaskId);
-            if (task) {
-              saveTask({ ...task, completed: true });
-            }
-          }
-          alert(isId ? "Waktu sesi fokus selesai! Sempurna!" : "Focus session completed! Outstanding performance!");
-          resetTimer();
-        }
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [pomoActive, pomoMinutes, pomoSeconds]);
-
-  const resetTimer = () => {
-    setPomoActive(false);
-    if (pomoMode === 'focus') setPomoMinutes(25);
-    else if (pomoMode === 'short_break') setPomoMinutes(5);
-    else setPomoMinutes(15);
-    setPomoSeconds(0);
-  };
-
-  const selectPomoMode = (mode: 'focus' | 'short_break' | 'long_break') => {
-    setPomoMode(mode);
-    setPomoActive(false);
-    if (mode === 'focus') setPomoMinutes(25);
-    else if (mode === 'short_break') setPomoMinutes(5);
-    else setPomoMinutes(15);
-    setPomoSeconds(0);
+    setVolume(parseFloat(e.target.value));
   };
 
   // 2. WEATHER PLANNER STATE
@@ -700,6 +468,7 @@ Date: ${new Date().toLocaleDateString(isId ? 'id-ID' : 'en-US')}
                       ? 'bg-rose-500/15 border border-rose-500/40 text-rose-400 hover:bg-rose-500/25' 
                       : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 hover:shadow-lg'
                   }`}
+                  title={pomoActive ? (isId ? "Jeda Sesi" : "Pause Session") : (isId ? "Mulai Sesi" : "Start Session")}
                 >
                   {pomoActive ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
                 </button>
@@ -709,6 +478,17 @@ Date: ${new Date().toLocaleDateString(isId ? 'id-ID' : 'en-US')}
                   title="Reset Timer"
                 >
                   <RotateCcw size={16} />
+                </button>
+                <button
+                  onClick={() => setIsFloating(!isFloating)}
+                  className={`w-12 h-12 border rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                    isFloating
+                      ? 'bg-violet-600 border-violet-500 text-white hover:bg-violet-500 hover:shadow-md'
+                      : 'bg-slate-900 border-white/5 hover:border-slate-700 text-slate-300'
+                  }`}
+                  title={isId ? "Tampilkan Pewaktu Melayang" : "Float Timer on Screen"}
+                >
+                  <Pin size={16} className={isFloating ? "rotate-45 text-violet-200 animate-pulse" : ""} />
                 </button>
               </div>
 

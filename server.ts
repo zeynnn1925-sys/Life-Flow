@@ -110,7 +110,7 @@ async function startServer() {
       
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash",
         contents: prompt
       });
       res.json({ text: response.text });
@@ -167,7 +167,7 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
 
       const ai = getGeminiClient();
       const responseStream = await ai.models.generateContentStream({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash",
         contents: userPrompt,
         config: {
           systemInstruction: systemInstruction,
@@ -206,7 +206,7 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
       
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash",
         contents: prompt
       });
       res.json({ text: response.text });
@@ -250,7 +250,7 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
 
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash",
         contents: prompt,
       });
       res.json({ text: response.text });
@@ -282,24 +282,31 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
 
   app.post('/api/gemini/scan-receipt', async (req, res) => {
     try {
-      const { base64Image, mimeType } = req.body;
+      const { base64Image, mimeType, categories } = req.body;
       const ai = getGeminiClient();
+      
+      let systemPrompt = "You are an expert financial receipt scanner. Extract store name (description), total amount, date, and items. ";
+      if (categories && Array.isArray(categories) && categories.length > 0) {
+        systemPrompt += "Match the receipt with the best fitting category ID from this list: " + JSON.stringify(categories) + ". Return the matched category's ID in the 'categoryId' field. Choose carefully based on the items or store name.";
+      }
+
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash",
         contents: {
           parts: [
             {
               inlineData: {
                 data: base64Image,
-                mimeType: mimeType,
+                mimeType: mimeType || "image/jpeg",
               },
             },
             {
-              text: "Analyze this receipt and extract the following information. Return ONLY a valid JSON object with no markdown formatting or backticks. If you cannot find a value, leave it empty or 0. The JSON should have these keys: 'description' (string, the main store or item name), 'amount' (number, the total amount paid), 'date' (string, YYYY-MM-DD format), 'notes' (string, any extra details or items).",
+              text: "Analyze this receipt image and extract: store name as 'description', total amount as 'amount', date as 'date' (YYYY-MM-DD format), items or details as 'notes' (and append receipt date here if found), and best-matching category ID as 'categoryId'. Return as JSON.",
             },
           ],
         },
         config: {
+          systemInstruction: systemPrompt,
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -308,6 +315,7 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
               amount: { type: Type.NUMBER },
               date: { type: Type.STRING },
               notes: { type: Type.STRING },
+              categoryId: { type: Type.STRING },
             },
             required: ["description", "amount", "date"],
           },
@@ -321,7 +329,8 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
         description: "Struk Belanja / Receipt",
         amount: 0,
         date: new Date().toISOString().split('T')[0],
-        notes: "Maaf, pemindaian otomatis sedang sibuk. Silakan masukkan detail secara manual."
+        notes: "Maaf, pemindaian otomatis sedang sibuk. Silakan masukkan detail secara manual.",
+        categoryId: ""
       };
       res.json({ text: JSON.stringify(fallbackJson) });
     }
@@ -333,7 +342,7 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
       const langPrompt = language === 'id' ? 'in Indonesian' : 'in English';
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash",
         contents: `Create a highly productive and realistic daily schedule for ${date} ${langPrompt}. 
         For each activity, specify:
         1. The title of the activity.
@@ -428,6 +437,203 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
 
       const chosenPlan = language === 'id' ? defaultPlanId : defaultPlanEn;
       res.json({ text: JSON.stringify(chosenPlan) });
+    }
+  });
+
+  app.post('/api/gemini/generate-challenges', async (req, res) => {
+    const { language } = req.body;
+    try {
+      const isIndo = language === 'id';
+      const prompt = `Generate a list of exactly 3 highly motivating and actionable daily/weekly challenges/targets for productivity, health, finance, or personal development that the user should try or perform today. Provide standard title, description, category, targetValue, and unit for each. Language of titles, descriptions and units must be strictly in ${isIndo ? 'Indonesian' : 'English'}. The category MUST be exactly one of: 'health', 'work', 'personal', or 'finance'.`;
+
+      const ai = getGeminiClient();
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING },
+                description: { type: Type.STRING },
+                category: { type: Type.STRING },
+                targetValue: { type: Type.NUMBER },
+                unit: { type: Type.STRING }
+              },
+              required: ["title", "description", "category", "targetValue", "unit"]
+            }
+          }
+        }
+      });
+      res.json({ text: response.text });
+    } catch (error: any) {
+      console.error('Gemini generate-challenges error (falling back):', error);
+      const fallbackId = [
+        {
+          title: "Minum Air Hidrasi",
+          description: "Minum 2 liter air putih hari ini untuk menjaga metabolisme tubuh dan fokus berpikir.",
+          category: "health",
+          targetValue: 2,
+          unit: "Liter"
+        },
+        {
+          title: "Membaca Buku",
+          description: "Membaca minimal 10 halaman buku pengembangan diri atau pengetahuan hari ini.",
+          category: "personal",
+          targetValue: 10,
+          unit: "Halaman"
+        },
+        {
+          title: "Catat Pengeluaran",
+          description: "Disiplin mencatat minimal 1 pengeluaran atau tabungan hari ini di LifeFlow.",
+          category: "finance",
+          targetValue: 1,
+          unit: "Kali"
+        }
+      ];
+      const fallbackEn = [
+        {
+          title: "Hydration Intake",
+          description: "Drink 2 liters of water today to keep your energy high and mind clear.",
+          category: "health",
+          targetValue: 2,
+          unit: "Liters"
+        },
+        {
+          title: "Knowledge Boost",
+          description: "Read at least 10 pages of any self-improvement or educational book.",
+          category: "personal",
+          targetValue: 10,
+          unit: "Pages"
+        },
+        {
+          title: "Financial Logging",
+          description: "Log at least 1 expense or saving item in LifeFlow to stay mindful.",
+          category: "finance",
+          targetValue: 1,
+          unit: "Times"
+        }
+      ];
+      const chosenFallback = language === 'id' ? fallbackId : fallbackEn;
+      res.json({ text: JSON.stringify(chosenFallback) });
+    }
+  });
+
+  app.post('/api/gemini/classify-jobs', async (req, res) => {
+    const { language, links } = req.body;
+    try {
+      const ai = getGeminiClient();
+      const isIndo = language === 'id';
+      
+      const prompt = `
+        You are an expert career advisor and industrial classification system.
+        Analyze this array of Indonesian companies/portals with job listing links:
+        ${JSON.stringify(links)}
+        
+        Classify each item into a refined sector, write a short, appealing career outlook/prospect note, and suggest a specific action goal with a target value (usually 1) and unit (e.g., 'Lamaran', 'Profile Setup', 'Apply', 'Check').
+        Provide the response as a JSON array matching the exact order of the inputs.
+        Each item in the array MUST contain:
+        - "id": string (the exact ID of the input)
+        - "refinedSector": string (refined sector name in ${isIndo ? 'Indonesian' : 'English'})
+        - "careerProspect": string (1 brief professional sentence in ${isIndo ? 'Indonesian' : 'English'})
+        - "recommendedGoal": string (actionable goal title in ${isIndo ? 'Indonesian' : 'English'})
+        - "targetValue": number (typically 1)
+        - "unit": string (e.g. "Lamaran", "Pengecekan", "Application" in ${isIndo ? 'Indonesian' : 'English'})
+        
+        Return ONLY valid JSON.
+      `;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                refinedSector: { type: Type.STRING },
+                careerProspect: { type: Type.STRING },
+                recommendedGoal: { type: Type.STRING },
+                targetValue: { type: Type.NUMBER },
+                unit: { type: Type.STRING }
+              },
+              required: ["id", "refinedSector", "careerProspect", "recommendedGoal", "targetValue", "unit"]
+            }
+          }
+        }
+      });
+      res.json({ text: response.text });
+    } catch (error: any) {
+      console.error('Gemini classify-jobs error, running dynamic keyword-based fallback:', error);
+      
+      // Smart Keyword fallback
+      const isIndo = language === 'id';
+      const fallbackList = (links || []).map((lnk: any) => {
+        let refinedSector = isIndo ? "Sektor Industri Umum" : "General Industrial Sector";
+        let careerProspect = isIndo 
+          ? "Peluang karir yang solid dengan jenjang karir terstruktur di perusahaan terkemuka." 
+          : "Solid career prospects with structured professional growth in a leading organization.";
+        let recommendedGoal = isIndo ? "Kirim Lamaran & CV" : "Submit Application & CV";
+        let unit = isIndo ? "Lamaran" : "Application";
+
+        const nameLower = (lnk.name || "").toLowerCase();
+        
+        if (nameLower.includes("kai") || nameLower.includes("commuter") || nameLower.includes("services") || nameLower.includes("wisata") || nameLower.includes("bandara")) {
+          refinedSector = isIndo ? "Perkeretaapian & Transportasi Publik" : "Railways & Public Transport";
+          careerProspect = isIndo
+            ? "Bekerja di BUMN perkeretaapian menawarkan stabilitas kerja tinggi dan tunjangan komprehensif."
+            : "Working in state-owned rail group offers premium job security and robust allowances.";
+          recommendedGoal = isIndo ? `Daftar Rekrutmen Bersama ${lnk.name}` : `Apply for ${lnk.name} Recruitments`;
+        } else if (nameLower.includes("coffee") || nameLower.includes("kfc") || nameLower.includes("gacoan") || nameLower.includes("roti") || nameLower.includes("burger") || nameLower.includes("hokben") || nameLower.includes("richeese")) {
+          refinedSector = isIndo ? "Kuliner & Layanan Makanan (F&B)" : "Culinary & Food Services (F&B)";
+          careerProspect = isIndo
+            ? "Industri F&B yang tumbuh pesat dengan kesempatan belajar operasional bisnis ritel makanan yang kuat."
+            : "Fast-growing food industry with hands-on exposure to scaled retail food operations.";
+          recommendedGoal = isIndo ? `Daftar Staff / Crew di ${lnk.name}` : `Apply for Crew/Staff at ${lnk.name}`;
+        } else if (nameLower.includes("toyota") || nameLower.includes("honda") || nameLower.includes("yamaha") || nameLower.includes("daihatsu") || nameLower.includes("bridgestone") || nameLower.includes("otoparts")) {
+          refinedSector = isIndo ? "Otomotif & Manufaktur Presisi" : "Automotive & Precision Manufacturing";
+          careerProspect = isIndo
+            ? "Pusat teknologi otomotif global dengan kompensasi di atas rata-rata industri nasional."
+            : "Hub of global automotive technology with highly competitive industrial compensation.";
+          recommendedGoal = isIndo ? `Daftar Engineering/Operator di ${lnk.name}` : `Apply for Engineer/Operator at ${lnk.name}`;
+        } else if (nameLower.includes("unilever") || nameLower.includes("wings") || nameLower.includes("kalbe") || nameLower.includes("kao") || nameLower.includes("garudafood")) {
+          refinedSector = isIndo ? "FMCG & Farmasi Konsumen" : "FMCG & Consumer Healthcare";
+          careerProspect = isIndo
+            ? "Perusahaan barang konsumsi sehari-hari dengan program Management Trainee kelas dunia."
+            : "Fast-moving consumer goods giant with world-class management training frameworks.";
+          recommendedGoal = isIndo ? `Lamar Lowongan MT/Staff ${lnk.name}` : `Submit MT/Staff application to ${lnk.name}`;
+        } else if (nameLower.includes("mandiri")) {
+          refinedSector = isIndo ? "Perbankan & Keuangan Negara" : "Banking & State-Owned Finance";
+          careerProspect = isIndo
+            ? "Bergabung dengan salah satu bank terbesar di Indonesia untuk membangun portofolio finansial profesional."
+            : "Join one of the largest banks in Indonesia to forge an outstanding financial portfolio.";
+          recommendedGoal = isIndo ? "Lamar Officer Development Program (ODP)" : "Apply for Officer Development Program (ODP)";
+          unit = isIndo ? "Aplikasi" : "Application";
+        } else if (nameLower.includes("xl") || nameLower.includes("vidio")) {
+          refinedSector = isIndo ? "Telekomunikasi & Media Digital" : "Telecom & Digital Media Services";
+          careerProspect = isIndo
+            ? "Ekosistem digital modern yang dinamis untuk karir di bidang teknologi dan kreatif."
+            : "Dynamic, modern digital ecosystem optimal for technology and creative career tracks.";
+          recommendedGoal = isIndo ? "Kirim Portofolio & CV" : "Submit Portfolio & CV";
+        }
+
+        return {
+          id: lnk.id,
+          refinedSector,
+          careerProspect,
+          recommendedGoal,
+          targetValue: 1,
+          unit
+        };
+      });
+
+      res.json({ text: JSON.stringify(fallbackList) });
     }
   });
 

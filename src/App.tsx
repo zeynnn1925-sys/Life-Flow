@@ -33,6 +33,7 @@ import AchievementSystem from './components/AchievementSystem';
 import NotificationSettings from './components/NotificationSettings';
 import AIPlanner from './components/AIPlanner';
 import SmartSpace from './components/SmartSpace';
+import { FloatingPomodoro } from './components/FloatingPomodoro';
 import DigitalClock from './components/DigitalClock';
 import { BudgetAndSavings } from './components/BudgetAndSavings';
 import { Logo } from './components/Logo';
@@ -470,6 +471,7 @@ export default function App() {
       >
         {renderView()}
       </AppShell>
+      <FloatingPomodoro activeView={activeView} setActiveView={setActiveView} />
       <OnboardingTour
         user={user}
         activeView={activeView}

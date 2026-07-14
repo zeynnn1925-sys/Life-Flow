@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { exportTransactions } from '../services/exportService';
 import { scanReceipt } from '../services/aiService';
 import { ConfirmationModal } from './ConfirmationModal';
+import { matchCategoryByKeywords } from '../utils/categoryMatcher';
 import ChatBotSimulator from './ChatBotSimulator';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -107,26 +108,32 @@ export default function FinanceTracker() {
       reader.onloadend = async () => {
         const base64Data = (reader.result as string).split(',')[1];
         try {
-          const result = await scanReceipt(base64Data, file.type);
+          const result = await scanReceipt(
+            base64Data, 
+            file.type || 'image/jpeg',
+            categories.map(c => ({ id: c.id, name: c.name, type: c.type, group: c.group }))
+          );
+          
           if (result.description) setDescription(result.description);
           if (result.amount) setAmount(result.amount.toString());
           if (result.notes) setNotes(result.notes);
-          setType('expense');
           
-          // Try to auto-match category
-          if (result.description) {
-            const lowerDesc = result.description.toLowerCase();
-            const matchedCat = categories.find(c => c.type === 'expense' && lowerDesc.includes(c.name.toLowerCase()));
+          // Try to auto-match category returned from Gemini, fallback to our optimized keyword matcher
+          if (result.categoryId) {
+            const matchedCat = categories.find(c => c.id === result.categoryId);
             if (matchedCat) {
               setSelectedCategoryId(matchedCat.id);
+              if (matchedCat.type) setType(matchedCat.type as 'income' | 'expense');
             }
+          } else if (result.description) {
+            const matchResult = matchCategoryByKeywords(result.description, categories);
+            setSelectedCategoryId(matchResult.categoryId);
+            setType(matchResult.type);
           }
         } catch (err) {
           console.error(err);
           // Set error message instead of alert
           const errorMsg = t('scanError') || 'Failed to scan receipt. Please try again.';
-          // Assuming there's a way to show errors, if not we can add a state
-          // For now, we'll just log it and maybe set it to notes
           setNotes(errorMsg);
         } finally {
           setIsScanning(false);
@@ -435,7 +442,34 @@ export default function FinanceTracker() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-24 h-fit">
-          <form onSubmit={addTransaction} className="bg-surface-1 p-6 rounded-lg shadow-card border border-hairline space-y-4">
+          <form onSubmit={addTransaction} className="relative bg-surface-1 p-6 rounded-lg shadow-card border border-hairline space-y-4 overflow-hidden">
+            <AnimatePresence>
+              {isScanning && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-surface-1/90 backdrop-blur-xs rounded-lg flex flex-col items-center justify-center z-10 space-y-3 p-6 text-center"
+                >
+                  <div className="relative w-16 h-16 flex items-center justify-center bg-accent/10 rounded-full border border-accent/20">
+                    <Loader2 className="w-10 h-10 text-accent animate-spin" />
+                    <Camera className="w-5 h-5 text-accent absolute" />
+                    <motion.div 
+                      className="absolute left-0 right-0 h-0.5 bg-accent shadow-glow-accent"
+                      animate={{ top: ['10%', '90%', '10%'] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  </div>
+                  <div className="text-body-sm font-bold text-ink animate-pulse">
+                    {t('scanning') || 'Scanning Receipt...'}
+                  </div>
+                  <div className="text-caption text-ink-subtle">
+                    Gemini AI is analyzing receipt & matching category...
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-heading-sm font-bold text-ink">{t('addTransaction')}</h3>
               <div className="flex items-center gap-2">
@@ -451,7 +485,7 @@ export default function FinanceTracker() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isScanning}
-                  className="flex items-center gap-2 px-3 py-1.5 text-button font-medium text-accent bg-accent/10 hover:bg-accent/20 rounded-pill transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 text-button font-bold text-white bg-accent hover:bg-accent-hover rounded-pill transition-all disabled:opacity-50 shadow-glow-accent hover:scale-[1.03] active:scale-[0.97] duration-200 border border-accent/20"
                   title={t('scanReceipt') || 'Scan Receipt'}
                 >
                   {isScanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}

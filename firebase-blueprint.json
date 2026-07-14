@@ -76,7 +76,7 @@
         "targetValue": { "type": "number" },
         "currentValue": { "type": "number" },
         "unit": { "type": "string" },
-        "category": { "type": "string", "enum": ["health", "work", "personal", "finance"] },
+        "category": { "type": "string" },
         "userId": { "type": "string" }
       },
       "required": ["id", "title", "targetValue", "currentValue", "unit", "category", "userId"]

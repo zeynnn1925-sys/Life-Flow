@@ -19,6 +19,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Transaction } from '../types';
+import { matchCategoryByKeywords } from '../utils/categoryMatcher';
 
 interface Message {
   id: string;
@@ -118,39 +119,10 @@ export default function ChatBotSimulator() {
     // Capitalize first letter
     desc = desc.charAt(0).toUpperCase() + desc.slice(1);
 
-    // 3. Match category mapping
-    let matchedCategoryId = '';
-    const categoriesList = categories;
-
-    const lowerDesc = desc.toLowerCase();
-    
-    // Default categories categories matching
-    if (lowerDesc.includes('makan') || lowerDesc.includes('bakso') || lowerDesc.includes('kuliner') || lowerDesc.includes('kopi') || lowerDesc.includes('lunch') || lowerDesc.includes('breakfast') || lowerDesc.includes('dinner') || lowerDesc.includes('food') || lowerDesc.includes('coffee') || lowerDesc.includes('starbucks')) {
-      matchedCategoryId = categoriesList.find(c => c.name.toLowerCase().includes('food') || c.id === 'e3')?.id || '';
-    } else if (lowerDesc.includes('bensin') || lowerDesc.includes('gojek') || lowerDesc.includes('grab') || lowerDesc.includes('transport') || lowerDesc.includes('petrol') || lowerDesc.includes('car') || lowerDesc.includes('motor') || lowerDesc.includes('taxi')) {
-      matchedCategoryId = categoriesList.find(c => c.name.toLowerCase().includes('transport') || c.id === 'e4')?.id || '';
-    } else if (lowerDesc.includes('gaji') || lowerDesc.includes('salary') || lowerDesc.includes('income') || lowerDesc.includes('bonus') || lowerDesc.includes('royalti')) {
-      matchedCategoryId = categoriesList.find(c => c.type === 'income')?.id || 'i1';
-    } else if (lowerDesc.includes('listrik') || lowerDesc.includes('air') || lowerDesc.includes('wifi') || lowerDesc.includes('internet') || lowerDesc.includes('pulsa') || lowerDesc.includes('utilities') || lowerDesc.includes('zap') || lowerDesc.includes('token')) {
-      matchedCategoryId = categoriesList.find(c => c.name.toLowerCase().includes('utilities') || c.id === 'e2')?.id || '';
-    } else if (lowerDesc.includes('bioskop') || lowerDesc.includes('film') || lowerDesc.includes('nonton') || lowerDesc.includes('youtube') || lowerDesc.includes('spotify') || lowerDesc.includes('game') || lowerDesc.includes('netflix') || lowerDesc.includes('cinema') || lowerDesc.includes('entertainment')) {
-      matchedCategoryId = categoriesList.find(c => c.name.toLowerCase().includes('entertainment') || c.id === 'e6')?.id || '';
-    } else if (lowerDesc.includes('dokter') || lowerDesc.includes('sakit') || lowerDesc.includes('obat') || lowerDesc.includes('apotek') || lowerDesc.includes('health') || lowerDesc.includes('klinik')) {
-      matchedCategoryId = categoriesList.find(c => c.name.toLowerCase().includes('health') || c.id === 'e5')?.id || '';
-    } else if (lowerDesc.includes('kos') || lowerDesc.includes('kontrakan') || lowerDesc.includes('sewa') || lowerDesc.includes('housing') || lowerDesc.includes('rent') || lowerDesc.includes('apartment')) {
-      matchedCategoryId = categoriesList.find(c => c.name.toLowerCase().includes('housing') || c.id === 'e1')?.id || '';
-    }
-
-    // Fallback Expense Category if empty
-    if (!matchedCategoryId) {
-      matchedCategoryId = categoriesList.find(c => c.type === 'expense' && (c.name.toLowerCase().includes('food') || c.name.toLowerCase().includes('personal care') || c.id === 'e8'))?.id || categoriesList[0]?.id || '';
-    }
-
-    // 4. Decide transaction type
-    let type: 'income' | 'expense' = 'expense';
-    if (lowerDesc.includes('gaji') || lowerDesc.includes('masuk') || lowerDesc.includes('income') || lowerDesc.includes('salary') || lowerDesc.includes('bonus') || lowerDesc.includes('jp') || lowerDesc.includes('untung')) {
-      type = 'income';
-    }
+    // 3. Match category mapping using the optimized multi-lingual category matcher
+    const matchResult = matchCategoryByKeywords(desc, categories);
+    const matchedCategoryId = matchResult.categoryId;
+    const type = matchResult.type;
 
     return {
       description: desc,

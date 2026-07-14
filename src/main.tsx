@@ -7,19 +7,22 @@ import { AuthProvider } from './contexts/AuthContext.tsx';
 import { DataProvider } from './contexts/DataContext.tsx';
 import { ThemeProvider } from './contexts/ThemeContext.tsx';
 import { NotificationProvider } from './contexts/NotificationContext.tsx';
+import { PomodoroProvider } from './contexts/PomodoroContext.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
-      <DataProvider>
-        <ThemeProvider>
-          <LanguageProvider>
-            <NotificationProvider>
-              <App />
-            </NotificationProvider>
-          </LanguageProvider>
-        </ThemeProvider>
-      </DataProvider>
+      <LanguageProvider>
+        <DataProvider>
+          <PomodoroProvider>
+            <ThemeProvider>
+              <NotificationProvider>
+                <App />
+              </NotificationProvider>
+            </ThemeProvider>
+          </PomodoroProvider>
+        </DataProvider>
+      </LanguageProvider>
     </AuthProvider>
   </StrictMode>,
 );
