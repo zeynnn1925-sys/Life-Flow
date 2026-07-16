@@ -44,6 +44,12 @@ export interface Task {
   outlookEventId?: string;
 }
 
+export interface SubTask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface Target {
   id: string;
   title: string;
@@ -51,6 +57,7 @@ export interface Target {
   currentValue: number;
   unit: string;
   category: string;
+  subTasks?: SubTask[];
 }
 
 export interface Achievement {

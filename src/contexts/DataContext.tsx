@@ -89,7 +89,7 @@ interface DataContextType {
   deleteSavingsGoal: (id: string) => Promise<void>;
   saveHabit: (h: Habit) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
-  logHabit: (habitId: string, count: number, note?: string) => Promise<void>;
+  logHabit: (habitId: string, count: number, note?: string, mood?: number) => Promise<void>;
   skipHabit: (habitId: string, note?: string) => Promise<void>;
   resetCategories: () => Promise<void>;
   clearError: () => void;
@@ -492,10 +492,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logHabit = async (habitId: string, count: number, note?: string) => {
+  const logHabit = async (habitId: string, count: number, note?: string, mood?: number) => {
     if (!user) return;
     try {
-      await habitService.logHabit(user.uid, habitId, count, note);
+      await habitService.logHabit(user.uid, habitId, count, note, mood);
     } catch (error) {
       handleError(error, OperationType.WRITE, `users/${user.uid}/habit_logs/${habitId}`);
     }

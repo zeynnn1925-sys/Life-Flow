@@ -36,7 +36,7 @@ export const habitService = {
     await deleteDoc(habitRef);
   },
 
-  async logHabit(userId: string, habitId: string, count: number, note?: string) {
+  async logHabit(userId: string, habitId: string, count: number, note?: string, mood?: number) {
     const today = new Date().toISOString().split('T')[0];
     const logId = `${habitId}_${today}`;
     const logRef = doc(db, `users/${userId}/habit_logs/${logId}`);
@@ -49,7 +49,8 @@ export const habitService = {
       await updateDoc(logRef, clean({
         completedCount: increment(count),
         completedAt: arrayUnion(now),
-        note: note || logSnap.data().note
+        note: note !== undefined ? note : logSnap.data().note,
+        mood: mood !== undefined ? mood : logSnap.data().mood
       }));
     } else {
       const newLog: HabitLog = {
@@ -59,6 +60,7 @@ export const habitService = {
         completedCount: count,
         completedAt: [now],
         note,
+        mood: mood as any,
         skipped: false
       };
       await setDoc(logRef, clean({ ...newLog, userId }));

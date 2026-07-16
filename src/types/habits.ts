@@ -28,6 +28,7 @@ export interface Habit {
   longestStreak: number;
   totalCompletions: number;
   linkedGoalId?: string;
+  subTasks?: { id: string; title: string; completed: boolean; }[];
 }
 
 export interface HabitLog {

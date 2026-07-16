@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as LucideIcons from 'lucide-react';
 import { 
   Plus, 
   Search, 
@@ -15,7 +16,17 @@ import {
   Brain,
   History,
   Sparkles as SparklesIcon,
-  Target as TargetIcon
+  Target as TargetIcon,
+  CheckSquare,
+  Square,
+  Smile,
+  MessageSquare,
+  Coins,
+  Trash2,
+  Minus,
+  Check,
+  X,
+  DollarSign
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useHabits } from '../../hooks/useHabits';
@@ -31,14 +42,134 @@ import { Habit } from '../../types/habits';
 import { Sparkles } from '../../components/ui/sparkles';
 
 export default function HabitTrackerPage() {
-  const { t } = useLanguage();
-  // ... (existing logic)
-  const { activeHabits, getHabitLogToday, getHabitStatus, saveHabit, deleteHabit } = useHabits();
-  const { habitLogs } = useData();
+  const { t, language } = useLanguage();
+  const { activeHabits, getHabitLogToday, getHabitStatus, saveHabit, deleteHabit, logHabit, skipHabit } = useHabits();
+  const { habitLogs, saveTransaction, categories } = useData();
   const [viewMode, setViewMode] = useState<'grid' | 'weekly'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
+
+  // Side Drawer detail, subtasks & checklist states
+  const [selectedHabitForDetail, setSelectedHabitForDetail] = useState<Habit | null>(null);
+  const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
+  
+  // Daily check-in custom feedback log state
+  const [logNoteText, setLogNoteText] = useState('');
+  const [selectedMood, setSelectedMood] = useState<number | undefined>(undefined);
+  const [feedbackSuccess, setFeedbackSuccess] = useState(false);
+
+  // Finance relation states
+  const [financeLogAmount, setFinanceLogAmount] = useState('');
+  const [financeLogDesc, setFinanceLogDesc] = useState('');
+  const [financeLogCat, setFinanceLogCat] = useState('');
+  const [financeLogType, setFinanceLogType] = useState<'expense' | 'income'>('expense');
+  const [financeLogSuccess, setFinanceLogSuccess] = useState(false);
+
+  // Get active version of selected habit for real-time drawer rendering
+  const currentHabitDetail = selectedHabitForDetail 
+    ? activeHabits.find(h => h.id === selectedHabitForDetail.id) || selectedHabitForDetail 
+    : null;
+
+  // Sync log's note & mood when drawer is loaded or today's log updates
+  useEffect(() => {
+    if (selectedHabitForDetail) {
+      const todayLog = getHabitLogToday(selectedHabitForDetail.id);
+      setLogNoteText(todayLog?.note || '');
+      setSelectedMood(todayLog?.mood || undefined);
+    }
+  }, [selectedHabitForDetail, habitLogs]);
+
+  const handleAddSubTask = (habit: Habit, titleText: string) => {
+    if (!titleText.trim()) return;
+    const newST = {
+      id: crypto.randomUUID(),
+      title: titleText.trim(),
+      completed: false
+    };
+    const updated: Habit = {
+      ...habit,
+      subTasks: [...(habit.subTasks || []), newST]
+    };
+    saveHabit(updated);
+    setNewSubTaskTitle('');
+  };
+
+  const handleToggleSubTask = (habit: Habit, subTaskId: string) => {
+    const updatedSubTasks = (habit.subTasks || []).map(st => 
+      st.id === subTaskId ? { ...st, completed: !st.completed } : st
+    );
+    const updated: Habit = {
+      ...habit,
+      subTasks: updatedSubTasks
+    };
+    saveHabit(updated);
+  };
+
+  const handleDeleteSubTask = (habit: Habit, subTaskId: string) => {
+    const updatedSubTasks = (habit.subTasks || []).filter(st => st.id !== subTaskId);
+    const updated: Habit = {
+      ...habit,
+      subTasks: updatedSubTasks
+    };
+    saveHabit(updated);
+  };
+
+  const handleIncrementCount = async (habit: Habit, incrementVal: number = 1) => {
+    try {
+      await logHabit(habit.id, incrementVal, logNoteText, selectedMood);
+    } catch (error) {
+      console.error('Failed to log habit count:', error);
+    }
+  };
+
+  const handleSaveFeedbackAndMood = async (habit: Habit) => {
+    try {
+      await logHabit(habit.id, 0, logNoteText, selectedMood);
+      setFeedbackSuccess(true);
+      setTimeout(() => setFeedbackSuccess(false), 2500);
+    } catch (error) {
+      console.error('Failed to save habit notes & mood:', error);
+    }
+  };
+
+  const handleSaveRelatedFinanceLog = (e: React.FormEvent, habit: Habit) => {
+    e.preventDefault();
+    if (!financeLogAmount || isNaN(parseFloat(financeLogAmount))) return;
+
+    const amount = parseFloat(financeLogAmount);
+    const desc = financeLogDesc.trim() || habit.title;
+    const txId = crypto.randomUUID();
+    
+    // Default fallback financial category
+    let catId = financeLogCat;
+    if (!catId) {
+      const matchedCats = categories.filter(c => c.type === financeLogType);
+      catId = matchedCats.length > 0 ? matchedCats[0].id : (financeLogType === 'expense' ? 'e3' : 'i1');
+    }
+
+    const newTx = {
+      id: txId,
+      description: desc,
+      amount: amount,
+      type: financeLogType,
+      category: catId,
+      date: new Date().toISOString().split('T')[0],
+    };
+
+    // Save actual transaction to Firestore
+    saveTransaction(newTx);
+
+    // Auto-update habit count progress by 1!
+    logHabit(habit.id, 1, logNoteText, selectedMood);
+
+    // Clear form and display success alert
+    setFinanceLogAmount('');
+    setFinanceLogDesc('');
+    setFinanceLogCat('');
+    setFinanceLogSuccess(true);
+    setTimeout(() => setFinanceLogSuccess(false), 3000);
+  };
 
   const handleAddHabit = () => {
     setEditingHabit(undefined);
@@ -174,6 +305,7 @@ export default function HabitTrackerPage() {
                     logToday={getHabitLogToday(habit.id)}
                     status={getHabitStatus(habit.id)}
                     onEdit={() => handleEditHabit(habit)}
+                    onViewDetail={() => setSelectedHabitForDetail(habit)}
                   />
                 ))}
                 
@@ -241,6 +373,418 @@ export default function HabitTrackerPage() {
         onDelete={deleteHabit}
         initialHabit={editingHabit}
       />
+
+      {/* SIDE DRAWER: Habit Details, Checklist, Mood Tracker & Financial Sync */}
+      <AnimatePresence>
+        {currentHabitDetail && (
+          <div className="fixed inset-0 z-[80] flex justify-end">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedHabitForDetail(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            {/* Drawer Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-lg h-full bg-surface-1 border-l border-hairline shadow-modal flex flex-col justify-between z-10"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-hairline flex items-center justify-between bg-surface-2">
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center border border-hairline shadow-sm"
+                    style={{ backgroundColor: `${currentHabitDetail.color}15`, color: currentHabitDetail.color }}
+                  >
+                    {(() => {
+                      const IconNode = (LucideIcons as any)[currentHabitDetail.icon] || LucideIcons.Circle;
+                      return <IconNode size={24} />;
+                    })()}
+                  </div>
+                  <div>
+                    <h3 className="text-body-sm font-black text-ink tracking-tight uppercase">
+                      {language === 'id' ? 'Detail Kebiasaan' : 'Habit Detail'}
+                    </h3>
+                    <p className="text-[10px] text-ink-tertiary font-bold tracking-widest uppercase">
+                      Kategori: {currentHabitDetail.category}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedHabitForDetail(null)}
+                  className="p-1.5 hover:bg-surface-3 rounded-pill text-ink-tertiary hover:text-ink transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Content (Scrollable) */}
+              <div className="flex-1 p-6 overflow-y-auto space-y-8 scrollbar-thin">
+                {/* Title and Streak Statistics Card */}
+                <div className="bg-surface-2/60 p-5 rounded-xl border border-hairline space-y-4">
+                  <div>
+                    <h4 className="text-heading-xs font-black text-ink uppercase tracking-tight leading-snug">
+                      {currentHabitDetail.title}
+                    </h4>
+                    {currentHabitDetail.description && (
+                      <p className="text-xs text-ink-tertiary mt-1">
+                        {currentHabitDetail.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Streaks stats */}
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="bg-surface-1 p-3 rounded-lg border border-hairline flex items-center gap-2.5">
+                      <Flame className="w-5 h-5 text-warning fill-warning" />
+                      <div>
+                        <p className="text-[9px] text-ink-tertiary font-bold uppercase tracking-wider">Streak</p>
+                        <p className="text-xs font-black text-ink font-mono">{currentHabitDetail.currentStreak || 0} Hari</p>
+                      </div>
+                    </div>
+                    <div className="bg-surface-1 p-3 rounded-lg border border-hairline flex items-center gap-2.5">
+                      <Trophy className="w-5 h-5 text-accent" />
+                      <div>
+                        <p className="text-[9px] text-ink-tertiary font-bold uppercase tracking-wider">Terbaik</p>
+                        <p className="text-xs font-black text-ink font-mono">{currentHabitDetail.longestStreak || 0} Hari</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Progress Controller (Interactive Count Adjustments) */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-ink-tertiary font-mono">
+                      <span>
+                        Progres Hari Ini:{' '}
+                        <strong className="text-ink">
+                          {getHabitLogToday(currentHabitDetail.id)?.completedCount || 0}
+                        </strong>{' '}
+                        / {currentHabitDetail.targetCount} {currentHabitDetail.unit || 'kali'}
+                      </span>
+                      <span className="font-black" style={{ color: currentHabitDetail.color }}>
+                        {Math.round(
+                          Math.min(
+                            100,
+                            (((getHabitLogToday(currentHabitDetail.id)?.completedCount || 0) /
+                              currentHabitDetail.targetCount) *
+                              100)
+                          )
+                        )}
+                        %
+                      </span>
+                    </div>
+
+                    <div className="h-2.5 w-full bg-surface-2 rounded-full overflow-hidden border border-hairline">
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{ 
+                          backgroundColor: currentHabitDetail.color,
+                          width: `${Math.min(
+                            100,
+                            (((getHabitLogToday(currentHabitDetail.id)?.completedCount || 0) /
+                              currentHabitDetail.targetCount) *
+                              100)
+                          )}%` 
+                        }}
+                      />
+                    </div>
+
+                    {/* Progress Adjuster Buttons */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => handleIncrementCount(currentHabitDetail, -1)}
+                        disabled={(getHabitLogToday(currentHabitDetail.id)?.completedCount || 0) <= 0}
+                        className="flex-1 h-9 bg-surface-2 hover:bg-surface-3 disabled:opacity-40 border border-hairline rounded text-xs font-bold text-ink transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        <Minus className="w-4 h-4" />
+                        {language === 'id' ? 'Kurangi' : 'Reduce'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleIncrementCount(currentHabitDetail, 1)}
+                        className="flex-1 h-9 text-white hover:opacity-90 rounded text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                        style={{ backgroundColor: currentHabitDetail.color }}
+                      >
+                        <Plus className="w-4 h-4" />
+                        {language === 'id' ? 'Tambah Progres' : 'Add Progress'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Checklist (Notion-style micro-steps) */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-hairline pb-2">
+                    <h4 className="text-xs font-black text-ink uppercase tracking-wider flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4 text-accent" />
+                      {language === 'id' ? 'Micro-Steps / Checklist' : 'Micro-Steps / Checklist'}
+                    </h4>
+                    <span className="text-[10px] font-mono font-bold text-ink-tertiary bg-surface-2 px-2 py-0.5 border border-hairline rounded">
+                      {(currentHabitDetail.subTasks || []).filter(st => st.completed).length} / {(currentHabitDetail.subTasks || []).length}
+                    </span>
+                  </div>
+
+                  {/* Checklist Subtask list */}
+                  <div className="space-y-2.5 max-h-[220px] overflow-y-auto scrollbar-none pr-1">
+                    {(currentHabitDetail.subTasks || []).length === 0 ? (
+                      <p className="text-xs text-ink-subtle italic text-center py-4">
+                        {language === 'id' ? 'Belum ada langkah kecil. Tambahkan di bawah!' : 'No micro-steps yet. Add one below!'}
+                      </p>
+                    ) : (
+                      (currentHabitDetail.subTasks || []).map((st) => (
+                        <div key={st.id} className="flex items-center justify-between gap-3 group/item bg-surface-1 p-2 rounded border border-hairline hover:border-hairline-strong transition-all">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleSubTask(currentHabitDetail, st.id)}
+                              className="text-ink-tertiary hover:text-accent transition-colors"
+                            >
+                              {st.completed ? (
+                                <CheckSquare className="w-4.5 h-4.5 text-accent" />
+                              ) : (
+                                <Square className="w-4.5 h-4.5" />
+                              )}
+                            </button>
+                            <span className={`text-xs font-medium text-ink truncate ${st.completed ? 'line-through text-ink-tertiary opacity-70' : ''}`}>
+                              {st.title}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSubTask(currentHabitDetail, st.id)}
+                            className="p-1 text-ink-tertiary hover:text-danger rounded md:opacity-0 group-hover/item:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Add subtask input */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newSubTaskTitle}
+                      onChange={(e) => setNewSubTaskTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAddSubTask(currentHabitDetail, newSubTaskTitle);
+                        }
+                      }}
+                      placeholder={language === 'id' ? 'Tambah langkah kecil... (Enter)' : 'Add micro-step... (Enter)'}
+                      className="flex-1 h-9 px-3 bg-surface-1 border border-hairline rounded text-xs focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink transition-all placeholder:text-ink-subtle"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleAddSubTask(currentHabitDetail, newSubTaskTitle)}
+                      className="h-9 px-4 bg-accent text-white rounded text-xs font-bold hover:bg-accent-hover transition-colors"
+                    >
+                      {language === 'id' ? 'Tambah' : 'Add'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Mood and Notes Reflection Area */}
+                <div className="border-t border-hairline pt-6 space-y-4">
+                  <div className="flex items-center gap-2 border-b border-hairline pb-2">
+                    <MessageSquare className="w-4 h-4 text-accent" />
+                    <h4 className="text-xs font-black text-ink uppercase tracking-wider">
+                      {language === 'id' ? 'Refleksi & Mood Hari Ini' : 'Reflection & Mood Today'}
+                    </h4>
+                  </div>
+
+                  {/* Mood Selector (1 to 5) */}
+                  <div className="space-y-2">
+                    <label className="block text-[10px] text-ink-tertiary font-bold uppercase tracking-wider">
+                      {language === 'id' ? 'Bagaimana perasaan Anda menjalankan kebiasaan ini?' : 'How did you feel doing this habit?'}
+                    </label>
+                    <div className="flex justify-between max-w-xs mx-auto gap-2 p-1.5 bg-surface-2 rounded-lg border border-hairline shadow-inner">
+                      {[
+                        { val: 1, label: '😞' },
+                        { val: 2, label: '😐' },
+                        { val: 3, label: '🙂' },
+                        { val: 4, label: '😃' },
+                        { val: 5, label: '🤩' },
+                      ].map((m) => (
+                        <button
+                          key={m.val}
+                          type="button"
+                          onClick={() => setSelectedMood(m.val)}
+                          className={`w-10 h-10 rounded-md text-xl flex items-center justify-center transition-all ${
+                            selectedMood === m.val
+                              ? 'bg-surface-1 border border-hairline scale-115 shadow-glow-accent ring-1 ring-accent/30'
+                              : 'opacity-50 hover:opacity-100 hover:scale-105'
+                          }`}
+                        >
+                          {m.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Notes input */}
+                  <div className="space-y-2">
+                    <label className="block text-[10px] text-ink-tertiary font-bold uppercase tracking-wider">
+                      {language === 'id' ? 'Catatan Refleksi' : 'Reflection Note'}
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={logNoteText}
+                      onChange={(e) => setLogNoteText(e.target.value)}
+                      placeholder={language === 'id' ? 'Tulis kendala, pelajaran, atau rasa syukur...' : 'Write challenges, takeaways, or gratitude...'}
+                      className="w-full p-3 bg-surface-1 border border-hairline rounded text-xs focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink transition-all placeholder:text-ink-subtle resize-none"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSaveFeedbackAndMood(currentHabitDetail)}
+                    className="w-full h-9 bg-accent/10 border border-accent/20 text-accent font-black text-[10px] uppercase tracking-widest rounded hover:bg-accent hover:text-white transition-all"
+                  >
+                    {language === 'id' ? 'Simpan Refleksi & Mood' : 'Save Reflection & Mood'}
+                  </button>
+
+                  {feedbackSuccess && (
+                    <motion.p
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-[10px] font-black text-success text-center uppercase tracking-wider"
+                    >
+                      ✅ {language === 'id' ? 'Refleksi Disimpan!' : 'Reflection saved successfully!'}
+                    </motion.p>
+                  )}
+                </div>
+
+                {/* Database Relation (LifeFlow Financial Sync) */}
+                <div className="border-t border-hairline pt-6 space-y-4">
+                  <div className="flex items-center justify-between border-b border-hairline pb-2">
+                    <h4 className="text-xs font-black text-ink uppercase tracking-wider flex items-center gap-2">
+                      <Coins className="w-4 h-4 text-accent" />
+                      {language === 'id' ? 'Relasi Finansial (LifeFlow Sync)' : 'Financial Relation (LifeFlow Sync)'}
+                    </h4>
+                    <span className="text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded font-black tracking-widest uppercase">Auto-sync</span>
+                  </div>
+
+                  <p className="text-xs text-ink-tertiary leading-relaxed">
+                    {language === 'id' 
+                      ? 'Hubungkan kebiasaan ini dengan log pengeluaran/pemasukan sungguhan untuk memperbarui target produktivitas Anda secara otomatis.' 
+                      : 'Sync this habit with an actual expense or income transaction to auto-advance progress.'}
+                  </p>
+
+                  <form onSubmit={(e) => handleSaveRelatedFinanceLog(e, currentHabitDetail)} className="space-y-3 bg-surface-2/40 p-4 rounded-xl border border-hairline">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] text-ink-tertiary font-bold uppercase tracking-wider mb-1">
+                          {language === 'id' ? 'Tipe Transaksi' : 'Tx Type'}
+                        </label>
+                        <select
+                          value={financeLogType}
+                          onChange={(e) => {
+                            setFinanceLogType(e.target.value as 'expense' | 'income');
+                            setFinanceLogCat(''); 
+                          }}
+                          className="w-full h-9 px-2 bg-surface-1 border border-hairline rounded text-xs text-ink outline-none cursor-pointer"
+                        >
+                          <option value="expense">{language === 'id' ? 'Pengeluaran' : 'Expense'}</option>
+                          <option value="income">{language === 'id' ? 'Pemasukan' : 'Income'}</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] text-ink-tertiary font-bold uppercase tracking-wider mb-1">
+                          {language === 'id' ? 'Kategori Finansial' : 'Finance Category'}
+                        </label>
+                        <select
+                          value={financeLogCat}
+                          onChange={(e) => setFinanceLogCat(e.target.value)}
+                          className="w-full h-9 px-2 bg-surface-1 border border-hairline rounded text-xs text-ink outline-none cursor-pointer"
+                        >
+                          <option value="">{language === 'id' ? '-- Pilih Kategori --' : '-- Choose Category --'}</option>
+                          {categories
+                            .filter(c => c.type === financeLogType)
+                            .map(c => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] text-ink-tertiary font-bold uppercase tracking-wider mb-1">
+                          {language === 'id' ? 'Jumlah' : 'Amount'}
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-ink-tertiary font-mono">
+                            {financeLogType === 'expense' ? '-' : '+'}
+                          </span>
+                          <input
+                            type="number"
+                            required
+                            min="1"
+                            value={financeLogAmount}
+                            onChange={(e) => setFinanceLogAmount(e.target.value)}
+                            placeholder="e.g. 50000"
+                            className="w-full h-9 pl-6 pr-3 bg-surface-1 border border-hairline rounded text-xs focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink font-mono transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] text-ink-tertiary font-bold uppercase tracking-wider mb-1">
+                          {language === 'id' ? 'Deskripsi Transaksi' : 'Description'}
+                        </label>
+                        <input
+                          type="text"
+                          value={financeLogDesc}
+                          onChange={(e) => setFinanceLogDesc(e.target.value)}
+                          placeholder={currentHabitDetail.title}
+                          className="w-full h-9 px-3 bg-surface-1 border border-hairline rounded text-xs focus:border-accent focus:ring-1 focus:ring-accent outline-none text-ink transition-all placeholder:text-ink-subtle"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full h-9 bg-accent text-white rounded font-bold hover:bg-accent-hover transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest shadow-glow-accent"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {language === 'id' ? 'Simpan Transaksi & Selesaikan Target' : 'Log Tx & Add Progress'}
+                    </button>
+
+                    {financeLogSuccess && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-[10px] font-black text-success text-center uppercase tracking-wider"
+                      >
+                        ✅ {language === 'id' ? 'Transaksi Disimpan & Target Kebiasaan Diperbarui!' : 'Transaction logged & Habit updated!'}
+                      </motion.div>
+                    )}
+                  </form>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-5 border-t border-hairline bg-surface-2 flex items-center gap-3">
+                <div className="text-[10px] font-mono text-ink-tertiary leading-relaxed uppercase">
+                  ID: <span className="font-bold">{currentHabitDetail.id.slice(0, 8)}...</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

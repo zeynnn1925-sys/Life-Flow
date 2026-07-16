@@ -14,9 +14,10 @@ interface HabitCardProps {
   logToday?: HabitLog;
   status: 'pending' | 'in_progress' | 'completed' | 'skipped';
   onEdit?: () => void;
+  onViewDetail?: () => void;
 }
 
-export function HabitCard({ habit, logToday, status, onEdit }: HabitCardProps) {
+export function HabitCard({ habit, logToday, status, onEdit, onViewDetail }: HabitCardProps) {
   const { t } = useLanguage();
   const { handleCheckIn, handleSkip } = useHabitCheckIn();
   const IconComponent = (LucideIcons as any)[habit.icon] || LucideIcons.Circle;
@@ -26,7 +27,7 @@ export function HabitCard({ habit, logToday, status, onEdit }: HabitCardProps) {
   return (
     <motion.div
       layout
-      onClick={onEdit}
+      onClick={() => onViewDetail ? onViewDetail() : onEdit?.()}
       className={`relative p-8 rounded-lg transition-all cursor-pointer ${
         status === 'completed' 
           ? 'bg-surface-3 border-2 border-hairline-strong' 

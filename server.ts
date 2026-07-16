@@ -109,13 +109,22 @@ async function startServer() {
         : "Provide 1 short, elegant, and highly practical peak performance productivity advice regarding matching daily routines, habits (consistent efforts), and financial peace.";
       
       const ai = getGeminiClient();
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt
-      });
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt
+        });
+      } catch (geminiError: any) {
+        console.warn('Gemini 3.5 Flash failed for generate-insight, retrying with gemini-3.1-flash-lite...', geminiError);
+        response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: prompt
+        });
+      }
       res.json({ text: response.text });
     } catch (error: any) {
-      console.error('Gemini generate-insight error (falling back):', error);
+      console.error('Gemini generate-insight error (falling back to static list):', error);
       const fallbackId = [
         "Fokus pada kemajuan hari ini, sekecil apapun itu. Alur kerja yang konsisten mengalahkan lonjakan motivasi yang sesaat.",
         "Kelola energi Anda dengan bijak, bukan hanya waktu Anda. Mulailah hari dengan prioritas keuangan dan tugas yang paling berdampak.",
@@ -133,15 +142,14 @@ async function startServer() {
   });
 
   app.post('/api/gemini/generate-insight-stream', async (req, res) => {
-    try {
-      const { language, context } = req.body;
-      
-      let systemInstruction = '';
-      let userPrompt = '';
-      
-      if (language === 'id') {
-        systemInstruction = "Anda adalah asisten keuangan pribadi AI yang cerdas, tajam, dan sangat membantu. Analisis data keuangan pengguna dan berikan 1 kalimat insight yang sangat praktis, langsung dapat diterapkan (actionable), dan spesifik terhadap data mereka. Fokus pada apa yang harus mereka lakukan untuk menyeimbangkan anggaran atau mencapai target.";
-        userPrompt = `
+    const { language, context } = req.body;
+    
+    let systemInstruction = '';
+    let userPrompt = '';
+    
+    if (language === 'id') {
+      systemInstruction = "Anda adalah asisten keuangan pribadi AI yang cerdas, tajam, dan sangat membantu. Analisis data keuangan pengguna dan berikan 1 kalimat insight yang sangat praktis, langsung dapat diterapkan (actionable), dan spesifik terhadap data mereka. Fokus pada apa yang harus mereka lakukan untuk menyeimbangkan anggaran atau mencapai target.";
+      userPrompt = `
 Berikut adalah data finansial saya saat ini:
 - Saldo saat ini: Rp ${(context?.balance ?? 0).toLocaleString('id-ID')}
 - Total Pemasukan Bulan Ini: Rp ${(context?.thisMonthIncome ?? 0).toLocaleString('id-ID')}
@@ -151,9 +159,9 @@ Berikut adalah data finansial saya saat ini:
 
 Berikan 1 kalimat analisis/insight finansial yang super tajam dan taktis berdasarkan data di atas. Jangan berikan kata sambutan, basa-basi, atau tanda kutip di awal dan di akhir.
 `;
-      } else {
-        systemInstruction = "You are an intelligent, sharp, and highly supportive AI financial personal advisor. Analyze the user's financial data and provide 1 extremely practical, actionable, and specific insight based on their data. Focus on what they should do to optimize budgets or reach targets.";
-        userPrompt = `
+    } else {
+      systemInstruction = "You are an intelligent, sharp, and highly supportive AI financial personal advisor. Analyze the user's financial data and provide 1 extremely practical, actionable, and specific insight based on their data. Focus on what they should do to optimize budgets or reach targets.";
+      userPrompt = `
 Here is my current financial data:
 - Current Balance: Rp ${(context?.balance ?? 0).toLocaleString('en-US')}
 - Total Income This Month: Rp ${(context?.thisMonthIncome ?? 0).toLocaleString('en-US')}
@@ -163,36 +171,124 @@ Here is my current financial data:
 
 Provide 1 short, actionable, and extremely sharp financial advice based on the data above. Do not use intro text, friendly greetings, or quotes around the response.
 `;
+    }
+
+    const generateDynamicInsight = () => {
+      const balance = context?.balance ?? 0;
+      const income = context?.thisMonthIncome ?? 0;
+      const expense = context?.thisMonthExpense ?? 0;
+      const topCat = context?.topExpenseCategory;
+      const targets = context?.targets ?? [];
+
+      if (language === 'id') {
+        if (expense > income) {
+          const diff = expense - income;
+          return `Pengeluaran Anda bulan ini melebihi pemasukan sebesar Rp ${diff.toLocaleString('id-ID')}. Segera batasi pengeluaran non-esensial${topCat ? ` terutama di kategori ${topCat.category}` : ''} untuk menyeimbangkan keuangan Anda.`;
+        }
+        
+        const activeTargets = targets.filter((t: any) => t.target > 0 && t.current < t.target);
+        if (activeTargets.length > 0) {
+          activeTargets.sort((a: any, b: any) => (a.current / a.target) - (b.current / b.target));
+          const lowestTarget = activeTargets[0];
+          const pct = Math.round((lowestTarget.current / lowestTarget.target) * 100);
+          return `Arus kas Anda positif bulan ini! Pertimbangkan mengalokasikan kelebihan dana untuk mempercepat target '${lowestTarget.title}' yang saat ini baru tercapai ${pct}%.`;
+        }
+
+        if (topCat && topCat.amount > 0) {
+          return `Pengeluaran terbesar Anda bulan ini berada di kategori '${topCat.category}' sebesar Rp ${topCat.amount.toLocaleString('id-ID')}. Pantau terus pos ini agar anggaran tetap seimbang.`;
+        }
+
+        return `Pertahankan kebiasaan finansial yang luar biasa ini! Saldo Anda Rp ${balance.toLocaleString('id-ID')} berada dalam posisi yang sangat aman dan stabil untuk memulai investasi baru.`;
+      } else {
+        if (expense > income) {
+          const diff = expense - income;
+          return `Your expenses exceed your income this month by Rp ${diff.toLocaleString('en-US')}. Immediately limit non-essential spending${topCat ? ` particularly in the ${topCat.category} category` : ''} to balance your budget.`;
+        }
+        
+        const activeTargets = targets.filter((t: any) => t.target > 0 && t.current < t.target);
+        if (activeTargets.length > 0) {
+          activeTargets.sort((a: any, b: any) => (a.current / a.target) - (b.current / b.target));
+          const lowestTarget = activeTargets[0];
+          const pct = Math.round((lowestTarget.current / lowestTarget.target) * 100);
+          return `Your cash flow is positive this month! Consider routing surplus funds to boost your '${lowestTarget.title}' target, currently at ${pct}% progress.`;
+        }
+
+        if (topCat && topCat.amount > 0) {
+          return `Your highest spending this month is in '${topCat.category}' at Rp ${topCat.amount.toLocaleString('en-US')}. Keep a close eye on this area to preserve your surplus.`;
+        }
+
+        return `Excellent financial habits! Your balance of Rp ${balance.toLocaleString('en-US')} is in a very secure, stable position, making it a great time to focus on consistent growth.`;
       }
+    };
 
-      const ai = getGeminiClient();
-      const responseStream = await ai.models.generateContentStream({
-        model: "gemini-3.5-flash",
-        contents: userPrompt,
-        config: {
-          systemInstruction: systemInstruction,
-          maxOutputTokens: 150,
-          temperature: 0.7,
-        }
-      });
-
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Transfer-Encoding', 'chunked');
-
-      for await (const chunk of responseStream) {
-        if (chunk.text) {
-          res.write(chunk.text);
-        }
+    const streamFallback = async (text: string) => {
+      if (!res.headersSent) {
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
+      }
+      const words = text.split(' ');
+      for (let i = 0; i < words.length; i++) {
+        const chunk = words[i] + (i === words.length - 1 ? '' : ' ');
+        res.write(chunk);
+        await new Promise(resolve => setTimeout(resolve, 40));
       }
       res.end();
-    } catch (error: any) {
-      console.error('Gemini generate-insight-stream error:', error);
-      if (!res.headersSent) {
-        res.status(500).json({ error: error.message || 'Failed to stream insight' });
-      } else {
-        res.write(' [Error streaming response]');
+    };
+
+    try {
+      const ai = getGeminiClient();
+      try {
+        const responseStream = await ai.models.generateContentStream({
+          model: "gemini-3.5-flash",
+          contents: userPrompt,
+          config: {
+            systemInstruction: systemInstruction,
+            maxOutputTokens: 150,
+            temperature: 0.7,
+          }
+        });
+
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
+
+        for await (const chunk of responseStream) {
+          if (chunk.text) {
+            res.write(chunk.text);
+          }
+        }
         res.end();
+      } catch (geminiError: any) {
+        console.warn('Gemini 3.5 Flash streaming failed, attempting gemini-3.1-flash-lite...', geminiError);
+        try {
+          const fallbackStream = await ai.models.generateContentStream({
+            model: "gemini-3.1-flash-lite",
+            contents: userPrompt,
+            config: {
+              systemInstruction: systemInstruction,
+              maxOutputTokens: 150,
+              temperature: 0.7,
+            }
+          });
+
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          res.setHeader('Transfer-Encoding', 'chunked');
+
+          for await (const chunk of fallbackStream) {
+            if (chunk.text) {
+              res.write(chunk.text);
+            }
+          }
+          res.end();
+        } catch (liteError: any) {
+          console.error('Gemini 3.1 Flash Lite streaming also failed, running dynamic fallback insight...', liteError);
+          const fallbackInsight = generateDynamicInsight();
+          await streamFallback(fallbackInsight);
+        }
       }
+    } catch (error: any) {
+      console.error('Gemini generate-insight-stream client or fallback error:', error);
+      const fallbackInsight = generateDynamicInsight();
+      await streamFallback(fallbackInsight);
     }
   });
 
@@ -205,10 +301,19 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
       Keep it under 150 characters. Be supportive but professional. Use Indonesian language (Bahasa Indonesia).`;
       
       const ai = getGeminiClient();
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt
-      });
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt
+        });
+      } catch (geminiError) {
+        console.warn('Gemini 3.5 Flash failed for habit-coach, retrying with gemini-3.1-flash-lite...', geminiError);
+        response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: prompt
+        });
+      }
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini habit-coach error (falling back):', error);
@@ -249,10 +354,19 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
       `;
 
       const ai = getGeminiClient();
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-      });
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+        });
+      } catch (geminiError) {
+        console.warn('Gemini 3.5 Flash failed for finance-advisor, retrying with gemini-3.1-flash-lite...', geminiError);
+        response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: prompt,
+        });
+      }
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini finance-advisor error (falling back):', error);
@@ -290,37 +404,73 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
         systemPrompt += "Match the receipt with the best fitting category ID from this list: " + JSON.stringify(categories) + ". Return the matched category's ID in the 'categoryId' field. Choose carefully based on the items or store name.";
       }
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: {
-          parts: [
-            {
-              inlineData: {
-                data: base64Image,
-                mimeType: mimeType || "image/jpeg",
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: {
+            parts: [
+              {
+                inlineData: {
+                  data: base64Image,
+                  mimeType: mimeType || "image/jpeg",
+                },
               },
-            },
-            {
-              text: "Analyze this receipt image and extract: store name as 'description', total amount as 'amount', date as 'date' (YYYY-MM-DD format), items or details as 'notes' (and append receipt date here if found), and best-matching category ID as 'categoryId'. Return as JSON.",
-            },
-          ],
-        },
-        config: {
-          systemInstruction: systemPrompt,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              description: { type: Type.STRING },
-              amount: { type: Type.NUMBER },
-              date: { type: Type.STRING },
-              notes: { type: Type.STRING },
-              categoryId: { type: Type.STRING },
-            },
-            required: ["description", "amount", "date"],
+              {
+                text: "Analyze this receipt image and extract: store name as 'description', total amount as 'amount', date as 'date' (YYYY-MM-DD format), items or details as 'notes' (and append receipt date here if found), and best-matching category ID as 'categoryId'. Return as JSON.",
+              },
+            ],
           },
-        },
-      });
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                description: { type: Type.STRING },
+                amount: { type: Type.NUMBER },
+                date: { type: Type.STRING },
+                notes: { type: Type.STRING },
+                categoryId: { type: Type.STRING },
+              },
+              required: ["description", "amount", "date"],
+            },
+          },
+        });
+      } catch (geminiError) {
+        console.warn('Gemini 3.5 Flash failed for scan-receipt, retrying with gemini-3.1-flash-lite...', geminiError);
+        response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: {
+            parts: [
+              {
+                inlineData: {
+                  data: base64Image,
+                  mimeType: mimeType || "image/jpeg",
+                },
+              },
+              {
+                text: "Analyze this receipt image and extract: store name as 'description', total amount as 'amount', date as 'date' (YYYY-MM-DD format), items or details as 'notes' (and append receipt date here if found), and best-matching category ID as 'categoryId'. Return as JSON.",
+              },
+            ],
+          },
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                description: { type: Type.STRING },
+                amount: { type: Type.NUMBER },
+                date: { type: Type.STRING },
+                notes: { type: Type.STRING },
+                categoryId: { type: Type.STRING },
+              },
+              required: ["description", "amount", "date"],
+            },
+          },
+        });
+      }
 
       res.json({ text: response.text });
     } catch (error: any) {
@@ -341,37 +491,50 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
     try {
       const langPrompt = language === 'id' ? 'in Indonesian' : 'in English';
       const ai = getGeminiClient();
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: `Create a highly productive and realistic daily schedule for ${date} ${langPrompt}. 
-        For each activity, specify:
-        1. The title of the activity.
-        2. Start and end times.
-        3. A specific 'challenge' to make it engaging.
-        4. The specific field of study or work (e.g., 'React Development', 'Digital Marketing', 'Data Science').
-        5. A list of tools needed for this field (e.g., ['VS Code', 'React Docs', 'Figma']).
-        6. A target percentage of completion or a specific target metric (e.g., 20, 50, 100).
-        Return it in JSON format.`,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                title: { type: Type.STRING },
-                startTime: { type: Type.STRING },
-                endTime: { type: Type.STRING },
-                challenge: { type: Type.STRING },
-                fieldToStudy: { type: Type.STRING },
-                toolsNeeded: { type: Type.ARRAY, items: { type: Type.STRING } },
-                targetPercentage: { type: Type.NUMBER }
-              },
-              required: ["title", "startTime", "endTime", "challenge", "fieldToStudy", "toolsNeeded", "targetPercentage"]
-            }
+      let response;
+      const planPrompt = `Create a highly productive and realistic daily schedule for ${date} ${langPrompt}. 
+      For each activity, specify:
+      1. The title of the activity.
+      2. Start and end times.
+      3. A specific 'challenge' to make it engaging.
+      4. The specific field of study or work (e.g., 'React Development', 'Digital Marketing', 'Data Science').
+      5. A list of tools needed for this field (e.g., ['VS Code', 'React Docs', 'Figma']).
+      6. A target percentage of completion or a specific target metric (e.g., 20, 50, 100).
+      Return it in JSON format.`;
+      const planConfig = {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              title: { type: Type.STRING },
+              startTime: { type: Type.STRING },
+              endTime: { type: Type.STRING },
+              challenge: { type: Type.STRING },
+              fieldToStudy: { type: Type.STRING },
+              toolsNeeded: { type: Type.ARRAY, items: { type: Type.STRING } },
+              targetPercentage: { type: Type.NUMBER }
+            },
+            required: ["title", "startTime", "endTime", "challenge", "fieldToStudy", "toolsNeeded", "targetPercentage"]
           }
         }
-      });
+      };
+
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: planPrompt,
+          config: planConfig
+        });
+      } catch (geminiError) {
+        console.warn('Gemini 3.5 Flash failed for productivity-plan, retrying with gemini-3.1-flash-lite...', geminiError);
+        response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: planPrompt,
+          config: planConfig
+        });
+      }
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini productivity-plan error (falling back):', error);
@@ -447,27 +610,39 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
       const prompt = `Generate a list of exactly 3 highly motivating and actionable daily/weekly challenges/targets for productivity, health, finance, or personal development that the user should try or perform today. Provide standard title, description, category, targetValue, and unit for each. Language of titles, descriptions and units must be strictly in ${isIndo ? 'Indonesian' : 'English'}. The category MUST be exactly one of: 'health', 'work', 'personal', or 'finance'.`;
 
       const ai = getGeminiClient();
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                title: { type: Type.STRING },
-                description: { type: Type.STRING },
-                category: { type: Type.STRING },
-                targetValue: { type: Type.NUMBER },
-                unit: { type: Type.STRING }
-              },
-              required: ["title", "description", "category", "targetValue", "unit"]
-            }
+      const challengeConfig = {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              title: { type: Type.STRING },
+              description: { type: Type.STRING },
+              category: { type: Type.STRING },
+              targetValue: { type: Type.NUMBER },
+              unit: { type: Type.STRING }
+            },
+            required: ["title", "description", "category", "targetValue", "unit"]
           }
         }
-      });
+      };
+
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: challengeConfig
+        });
+      } catch (geminiError) {
+        console.warn('Gemini 3.5 Flash failed for generate-challenges, retrying with gemini-3.1-flash-lite...', geminiError);
+        response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: prompt,
+          config: challengeConfig
+        });
+      }
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini generate-challenges error (falling back):', error);
@@ -546,28 +721,40 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
         Return ONLY valid JSON.
       `;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                id: { type: Type.STRING },
-                refinedSector: { type: Type.STRING },
-                careerProspect: { type: Type.STRING },
-                recommendedGoal: { type: Type.STRING },
-                targetValue: { type: Type.NUMBER },
-                unit: { type: Type.STRING }
-              },
-              required: ["id", "refinedSector", "careerProspect", "recommendedGoal", "targetValue", "unit"]
-            }
+      let response;
+      const jobConfig = {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              id: { type: Type.STRING },
+              refinedSector: { type: Type.STRING },
+              careerProspect: { type: Type.STRING },
+              recommendedGoal: { type: Type.STRING },
+              targetValue: { type: Type.NUMBER },
+              unit: { type: Type.STRING }
+            },
+            required: ["id", "refinedSector", "careerProspect", "recommendedGoal", "targetValue", "unit"]
           }
         }
-      });
+      };
+
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: jobConfig
+        });
+      } catch (geminiError) {
+        console.warn('Gemini 3.5 Flash failed for classify-jobs, retrying with gemini-3.1-flash-lite...', geminiError);
+        response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: prompt,
+          config: jobConfig
+        });
+      }
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini classify-jobs error, running dynamic keyword-based fallback:', error);
