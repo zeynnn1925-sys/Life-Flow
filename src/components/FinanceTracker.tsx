@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Transaction, Category, RecurringTransaction } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ExportFinanceReportButton } from './ExportReportButtons';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
@@ -373,6 +374,18 @@ export default function FinanceTracker() {
 
   const balance = totalIncome - totalExpense;
 
+  const exportableTransactions = transactions.map(t => {
+    const cat = categories.find(c => c.id === t.category);
+    const categoryName = cat ? getTranslatedCategoryName(cat.name) : t.category;
+    return {
+      date: t.date,
+      description: t.description,
+      category: categoryName,
+      type: t.type,
+      amount: t.amount
+    };
+  });
+
   const filteredCategories = categories.filter(c => c.type === type);
 
   const getCategory = (id: string) => categories.find(c => c.id === id);
@@ -672,6 +685,10 @@ export default function FinanceTracker() {
                 </button>
               </div>
               <div className="flex items-center gap-4">
+                <ExportFinanceReportButton
+                  transactions={exportableTransactions}
+                  periodLabel={new Date().toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'long', year: 'numeric' })}
+                />
                 <button
                   onClick={() => {
                     const getCategoryName = (idOrName: string) => {

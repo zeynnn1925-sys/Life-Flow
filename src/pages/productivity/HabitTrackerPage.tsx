@@ -40,11 +40,12 @@ import { Target } from '../../types';
 import { AddHabitModal } from '../../components/habits/AddHabitModal';
 import { Habit } from '../../types/habits';
 import { Sparkles } from '../../components/ui/sparkles';
+import { ExportProductivityReportButton } from '../../components/ExportReportButtons';
 
 export default function HabitTrackerPage() {
   const { t, language } = useLanguage();
   const { activeHabits, getHabitLogToday, getHabitStatus, saveHabit, deleteHabit, logHabit, skipHabit } = useHabits();
-  const { habitLogs, saveTransaction, categories } = useData();
+  const { habitLogs, saveTransaction, categories, targets } = useData();
   const [viewMode, setViewMode] = useState<'grid' | 'weekly'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -278,6 +279,23 @@ export default function HabitTrackerPage() {
                   <History size={20} />
                 </button>
               </div>
+              <div className="w-px h-8 bg-hairline mx-2" />
+              <ExportProductivityReportButton
+                habits={activeHabits.map(h => ({
+                  title: h.title,
+                  category: h.category,
+                  currentStreak: h.currentStreak,
+                  totalCompletions: h.totalCompletions
+                }))}
+                targets={targets.map(t => ({
+                  title: t.title,
+                  category: t.category,
+                  currentValue: t.currentValue,
+                  targetValue: t.targetValue,
+                  unit: t.unit
+                }))}
+                periodLabel={new Date().toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'long', year: 'numeric' })}
+              />
               <div className="w-px h-8 bg-hairline mx-2" />
               <button 
                 onClick={handleAddHabit}

@@ -101,6 +101,154 @@ async function startServer() {
     OBJECT: 'OBJECT',
   };
 
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  async function callGeminiWithFallback(params: {
+    contents: any;
+    config?: any;
+    primaryModel?: string;
+    fallbackModel?: string;
+    endpointLabel: string;
+  }) {
+    const ai = getGeminiClient();
+    const primary = params.primaryModel || "gemini-3.5-flash";
+    const fallback = params.fallbackModel || "gemini-3.1-flash-lite";
+    const label = params.endpointLabel;
+
+    const isTemporaryError = (err: any) => {
+      const msg = String(err?.message || '').toLowerCase();
+      const status = String(err?.status || '').toLowerCase();
+      const code = err?.code;
+      return (
+        code === 503 ||
+        code === 429 ||
+        status.includes('unavailable') ||
+        status.includes('resource_exhausted') ||
+        msg.includes('503') ||
+        msg.includes('429') ||
+        msg.includes('demand') ||
+        msg.includes('quota') ||
+        msg.includes('limit') ||
+        msg.includes('unavailable') ||
+        msg.includes('busy')
+      );
+    };
+
+    // 1. Try Primary Model (up to 2 attempts for transient errors)
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        return await ai.models.generateContent({
+          model: primary,
+          contents: params.contents,
+          config: params.config,
+        });
+      } catch (err: any) {
+        const isTransient = isTemporaryError(err);
+        if (isTransient && attempt < 2) {
+          console.warn(`[Gemini - ${label}] Primary model ${primary} failed (transient error, attempt ${attempt}/2). Retrying in 500ms...`);
+          await delay(500);
+          continue;
+        }
+        console.warn(`[Gemini - ${label}] Primary model ${primary} failed completely. Switching to fallback ${fallback}. Error: ${err?.message || err}`);
+        break;
+      }
+    }
+
+    // 2. Try Fallback Model (up to 2 attempts for transient errors)
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        return await ai.models.generateContent({
+          model: fallback,
+          contents: params.contents,
+          config: params.config,
+        });
+      } catch (err: any) {
+        const isTransient = isTemporaryError(err);
+        if (isTransient && attempt < 2) {
+          console.warn(`[Gemini - ${label}] Fallback model ${fallback} failed (transient error, attempt ${attempt}/2). Retrying in 500ms...`);
+          await delay(500);
+          continue;
+        }
+        console.error(`[Gemini - ${label}] Fallback model ${fallback} also failed. Propagating error to static fallback handler.`);
+        throw err;
+      }
+    }
+    throw new Error(`[Gemini - ${label}] Unknown error occurred during fallback chain.`);
+  }
+
+  async function callGeminiStreamWithFallback(params: {
+    contents: any;
+    config?: any;
+    primaryModel?: string;
+    fallbackModel?: string;
+    endpointLabel: string;
+  }) {
+    const ai = getGeminiClient();
+    const primary = params.primaryModel || "gemini-3.5-flash";
+    const fallback = params.fallbackModel || "gemini-3.1-flash-lite";
+    const label = params.endpointLabel;
+
+    const isTemporaryError = (err: any) => {
+      const msg = String(err?.message || '').toLowerCase();
+      const status = String(err?.status || '').toLowerCase();
+      const code = err?.code;
+      return (
+        code === 503 ||
+        code === 429 ||
+        status.includes('unavailable') ||
+        status.includes('resource_exhausted') ||
+        msg.includes('503') ||
+        msg.includes('429') ||
+        msg.includes('demand') ||
+        msg.includes('quota') ||
+        msg.includes('limit') ||
+        msg.includes('unavailable') ||
+        msg.includes('busy')
+      );
+    };
+
+    // 1. Try Primary Model (up to 2 attempts for transient errors)
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        return await ai.models.generateContentStream({
+          model: primary,
+          contents: params.contents,
+          config: params.config,
+        });
+      } catch (err: any) {
+        const isTransient = isTemporaryError(err);
+        if (isTransient && attempt < 2) {
+          console.warn(`[GeminiStream - ${label}] Primary model ${primary} failed (transient error, attempt ${attempt}/2). Retrying in 500ms...`);
+          await delay(500);
+          continue;
+        }
+        console.warn(`[GeminiStream - ${label}] Primary model ${primary} failed completely. Switching to fallback ${fallback}. Error: ${err?.message || err}`);
+        break;
+      }
+    }
+
+    // 2. Try Fallback Model (up to 2 attempts for transient errors)
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        return await ai.models.generateContentStream({
+          model: fallback,
+          contents: params.contents,
+          config: params.config,
+        });
+      } catch (err: any) {
+        const isTransient = isTemporaryError(err);
+        if (isTransient && attempt < 2) {
+          console.warn(`[GeminiStream - ${label}] Fallback model ${fallback} failed (transient error, attempt ${attempt}/2). Retrying in 500ms...`);
+          await delay(500);
+          continue;
+        }
+        console.error(`[GeminiStream - ${label}] Fallback model ${fallback} also failed. Propagating error to static fallback handler.`);
+        throw err;
+      }
+    }
+    throw new Error(`[GeminiStream - ${label}] Unknown error occurred during fallback chain.`);
+  }
+
   app.post('/api/gemini/generate-insight', async (req, res) => {
     const { language } = req.body;
     try {
@@ -108,20 +256,10 @@ async function startServer() {
         ? "Berikan 1 kalimat motivasi produktivitas harian yang sangat singkat, elegan, praktis, berkaitan dengan pengelolaan saldo finansial, tugas hiasan (dekorasi kegiatan), dan kebiasaan."
         : "Provide 1 short, elegant, and highly practical peak performance productivity advice regarding matching daily routines, habits (consistent efforts), and financial peace.";
       
-      const ai = getGeminiClient();
-      let response;
-      try {
-        response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: prompt
-        });
-      } catch (geminiError: any) {
-        console.warn('Gemini 3.5 Flash failed for generate-insight, retrying with gemini-3.1-flash-lite...', geminiError);
-        response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt
-        });
-      }
+      const response = await callGeminiWithFallback({
+        contents: prompt,
+        endpointLabel: 'generate-insight',
+      });
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini generate-insight error (falling back to static list):', error);
@@ -236,57 +374,27 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
     };
 
     try {
-      const ai = getGeminiClient();
-      try {
-        const responseStream = await ai.models.generateContentStream({
-          model: "gemini-3.5-flash",
-          contents: userPrompt,
-          config: {
-            systemInstruction: systemInstruction,
-            maxOutputTokens: 150,
-            temperature: 0.7,
-          }
-        });
+      const responseStream = await callGeminiStreamWithFallback({
+        contents: userPrompt,
+        config: {
+          systemInstruction: systemInstruction,
+          maxOutputTokens: 150,
+          temperature: 0.7,
+        },
+        endpointLabel: 'generate-insight-stream',
+      });
 
-        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-        res.setHeader('Transfer-Encoding', 'chunked');
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Transfer-Encoding', 'chunked');
 
-        for await (const chunk of responseStream) {
-          if (chunk.text) {
-            res.write(chunk.text);
-          }
-        }
-        res.end();
-      } catch (geminiError: any) {
-        console.warn('Gemini 3.5 Flash streaming failed, attempting gemini-3.1-flash-lite...', geminiError);
-        try {
-          const fallbackStream = await ai.models.generateContentStream({
-            model: "gemini-3.1-flash-lite",
-            contents: userPrompt,
-            config: {
-              systemInstruction: systemInstruction,
-              maxOutputTokens: 150,
-              temperature: 0.7,
-            }
-          });
-
-          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-          res.setHeader('Transfer-Encoding', 'chunked');
-
-          for await (const chunk of fallbackStream) {
-            if (chunk.text) {
-              res.write(chunk.text);
-            }
-          }
-          res.end();
-        } catch (liteError: any) {
-          console.error('Gemini 3.1 Flash Lite streaming also failed, running dynamic fallback insight...', liteError);
-          const fallbackInsight = generateDynamicInsight();
-          await streamFallback(fallbackInsight);
+      for await (const chunk of responseStream) {
+        if (chunk.text) {
+          res.write(chunk.text);
         }
       }
+      res.end();
     } catch (error: any) {
-      console.error('Gemini generate-insight-stream client or fallback error:', error);
+      console.error('Gemini generate-insight-stream error, running dynamic fallback insight:', error);
       const fallbackInsight = generateDynamicInsight();
       await streamFallback(fallbackInsight);
     }
@@ -300,20 +408,10 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
       give me ONE specific, actionable, and motivating tip to improve consistency today. 
       Keep it under 150 characters. Be supportive but professional. Use Indonesian language (Bahasa Indonesia).`;
       
-      const ai = getGeminiClient();
-      let response;
-      try {
-        response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: prompt
-        });
-      } catch (geminiError) {
-        console.warn('Gemini 3.5 Flash failed for habit-coach, retrying with gemini-3.1-flash-lite...', geminiError);
-        response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt
-        });
-      }
+      const response = await callGeminiWithFallback({
+        contents: prompt,
+        endpointLabel: 'habit-coach',
+      });
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini habit-coach error (falling back):', error);
@@ -353,20 +451,10 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
         Please provide your advice in ${language === 'id' ? 'Indonesian' : 'English'}. Keep it concise, practical, and formatted with bullet points or short paragraphs. Focus on exactly what they need to cut or increase to hit the 50/30/20 targets perfectly.
       `;
 
-      const ai = getGeminiClient();
-      let response;
-      try {
-        response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: prompt,
-        });
-      } catch (geminiError) {
-        console.warn('Gemini 3.5 Flash failed for finance-advisor, retrying with gemini-3.1-flash-lite...', geminiError);
-        response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt,
-        });
-      }
+      const response = await callGeminiWithFallback({
+        contents: prompt,
+        endpointLabel: 'finance-advisor',
+      });
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini finance-advisor error (falling back):', error);
@@ -397,80 +485,43 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
   app.post('/api/gemini/scan-receipt', async (req, res) => {
     try {
       const { base64Image, mimeType, categories } = req.body;
-      const ai = getGeminiClient();
       
       let systemPrompt = "You are an expert financial receipt scanner. Extract store name (description), total amount, date, and items. ";
       if (categories && Array.isArray(categories) && categories.length > 0) {
         systemPrompt += "Match the receipt with the best fitting category ID from this list: " + JSON.stringify(categories) + ". Return the matched category's ID in the 'categoryId' field. Choose carefully based on the items or store name.";
       }
 
-      let response;
-      try {
-        response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: {
-            parts: [
-              {
-                inlineData: {
-                  data: base64Image,
-                  mimeType: mimeType || "image/jpeg",
-                },
+      const response = await callGeminiWithFallback({
+        contents: {
+          parts: [
+            {
+              inlineData: {
+                data: base64Image,
+                mimeType: mimeType || "image/jpeg",
               },
-              {
-                text: "Analyze this receipt image and extract: store name as 'description', total amount as 'amount', date as 'date' (YYYY-MM-DD format), items or details as 'notes' (and append receipt date here if found), and best-matching category ID as 'categoryId'. Return as JSON.",
-              },
-            ],
-          },
-          config: {
-            systemInstruction: systemPrompt,
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                description: { type: Type.STRING },
-                amount: { type: Type.NUMBER },
-                date: { type: Type.STRING },
-                notes: { type: Type.STRING },
-                categoryId: { type: Type.STRING },
-              },
-              required: ["description", "amount", "date"],
             },
-          },
-        });
-      } catch (geminiError) {
-        console.warn('Gemini 3.5 Flash failed for scan-receipt, retrying with gemini-3.1-flash-lite...', geminiError);
-        response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: {
-            parts: [
-              {
-                inlineData: {
-                  data: base64Image,
-                  mimeType: mimeType || "image/jpeg",
-                },
-              },
-              {
-                text: "Analyze this receipt image and extract: store name as 'description', total amount as 'amount', date as 'date' (YYYY-MM-DD format), items or details as 'notes' (and append receipt date here if found), and best-matching category ID as 'categoryId'. Return as JSON.",
-              },
-            ],
-          },
-          config: {
-            systemInstruction: systemPrompt,
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                description: { type: Type.STRING },
-                amount: { type: Type.NUMBER },
-                date: { type: Type.STRING },
-                notes: { type: Type.STRING },
-                categoryId: { type: Type.STRING },
-              },
-              required: ["description", "amount", "date"],
+            {
+              text: "Analyze this receipt image and extract: store name as 'description', total amount as 'amount', date as 'date' (YYYY-MM-DD format), items or details as 'notes' (and append receipt date here if found), and best-matching category ID as 'categoryId'. Return as JSON.",
             },
+          ],
+        },
+        config: {
+          systemInstruction: systemPrompt,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              description: { type: Type.STRING },
+              amount: { type: Type.NUMBER },
+              date: { type: Type.STRING },
+              notes: { type: Type.STRING },
+              categoryId: { type: Type.STRING },
+            },
+            required: ["description", "amount", "date"],
           },
-        });
-      }
+        },
+        endpointLabel: 'scan-receipt',
+      });
 
       res.json({ text: response.text });
     } catch (error: any) {
@@ -490,8 +541,6 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
     const { date, language } = req.body;
     try {
       const langPrompt = language === 'id' ? 'in Indonesian' : 'in English';
-      const ai = getGeminiClient();
-      let response;
       const planPrompt = `Create a highly productive and realistic daily schedule for ${date} ${langPrompt}. 
       For each activity, specify:
       1. The title of the activity.
@@ -521,20 +570,11 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
         }
       };
 
-      try {
-        response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: planPrompt,
-          config: planConfig
-        });
-      } catch (geminiError) {
-        console.warn('Gemini 3.5 Flash failed for productivity-plan, retrying with gemini-3.1-flash-lite...', geminiError);
-        response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: planPrompt,
-          config: planConfig
-        });
-      }
+      const response = await callGeminiWithFallback({
+        contents: planPrompt,
+        config: planConfig,
+        endpointLabel: 'productivity-plan',
+      });
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini productivity-plan error (falling back):', error);
@@ -628,21 +668,11 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
         }
       };
 
-      let response;
-      try {
-        response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: prompt,
-          config: challengeConfig
-        });
-      } catch (geminiError) {
-        console.warn('Gemini 3.5 Flash failed for generate-challenges, retrying with gemini-3.1-flash-lite...', geminiError);
-        response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt,
-          config: challengeConfig
-        });
-      }
+      const response = await callGeminiWithFallback({
+        contents: prompt,
+        config: challengeConfig,
+        endpointLabel: 'generate-challenges',
+      });
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini generate-challenges error (falling back):', error);
@@ -700,7 +730,6 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
   app.post('/api/gemini/classify-jobs', async (req, res) => {
     const { language, links } = req.body;
     try {
-      const ai = getGeminiClient();
       const isIndo = language === 'id';
       
       const prompt = `
@@ -721,7 +750,6 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
         Return ONLY valid JSON.
       `;
 
-      let response;
       const jobConfig = {
         responseMimeType: "application/json",
         responseSchema: {
@@ -741,20 +769,11 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
         }
       };
 
-      try {
-        response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: prompt,
-          config: jobConfig
-        });
-      } catch (geminiError) {
-        console.warn('Gemini 3.5 Flash failed for classify-jobs, retrying with gemini-3.1-flash-lite...', geminiError);
-        response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt,
-          config: jobConfig
-        });
-      }
+      const response = await callGeminiWithFallback({
+        contents: prompt,
+        config: jobConfig,
+        endpointLabel: 'classify-jobs',
+      });
       res.json({ text: response.text });
     } catch (error: any) {
       console.error('Gemini classify-jobs error, running dynamic keyword-based fallback:', error);
