@@ -45,7 +45,7 @@ export function WeeklyHabitGrid({ habits, logs }: WeeklyHabitGridProps) {
                     >
                       <Icon size={18} />
                     </div>
-                    <span className="text-body-sm font-black text-ink uppercase tracking-tight">{habit.title}</span>
+                    <span className="text-body-sm font-semibold text-ink">{habit.title}</span>
                   </div>
                 </td>
                 {days.map(day => {
@@ -57,7 +57,7 @@ export function WeeklyHabitGrid({ habits, logs }: WeeklyHabitGridProps) {
                     <td key={day.date} className="py-5 px-4 text-center">
                       <div className="flex justify-center">
                         <div className={`w-10 h-10 rounded-md flex items-center justify-center transition-all shadow-sm ${
-                          isCompleted ? 'shadow-glow-accent' : isSkipped ? 'bg-surface-3 text-ink-tertiary opacity-40 italic' : 'bg-surface-2 border border-hairline'
+                          isCompleted ? '' : isSkipped ? 'bg-surface-3 text-ink-tertiary opacity-40 italic' : 'bg-surface-2 border border-hairline'
                         }`}
                         style={isCompleted ? { backgroundColor: habit.color, color: '#fff' } : {}}
                         >

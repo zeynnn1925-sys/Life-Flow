@@ -25,7 +25,7 @@ export function HabitStreakMilestone({ streak }: HabitStreakMilestoneProps) {
 
       <div className="relative h-6 bg-surface-2 rounded-pill overflow-hidden mb-8 border border-hairline shadow-inner p-1">
         <motion.div 
-          className="h-full rounded-pill bg-warning shadow-glow-warning flex items-center justify-end px-3"
+          className="h-full rounded-pill bg-warning flex items-center justify-end px-3"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
         >
@@ -39,7 +39,7 @@ export function HabitStreakMilestone({ streak }: HabitStreakMilestoneProps) {
             key={m}
             className={`flex flex-col items-center gap-2 p-3 rounded-md transition-all border ${
               streak >= m 
-                ? 'bg-surface-1 border-warning/40 shadow-glow-warning text-warning' 
+                ? 'bg-surface-1 border-warning/40 text-warning' 
                 : 'bg-surface-2 border-hairline text-ink-tertiary opacity-30 grayscale'
             }`}
           >

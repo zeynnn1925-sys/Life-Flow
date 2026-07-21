@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Send, Brain, Target, MessageSquare } from 'lucide-react';
+import { Brain, Send } from 'lucide-react';
 import { Habit } from '../../types/habits';
 
 interface AIHabitCoachProps {
@@ -28,10 +28,10 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
       }
 
       const data = await response.json();
-      setAdvice(data.text || "Tetap semangat! Konsistensi adalah kunci.");
+      setAdvice(data.text || "Belum ada pola yang cukup buat dianalisis. Coba lagi setelah checkin beberapa hari.");
     } catch (error) {
       console.error("AI Habit Coach Error:", error);
-      setAdvice("Gagal terhubung dengan Coach. Coba lagi nanti ya.");
+      setAdvice("Lagi gak bisa connect. Coba lagi bentar lagi.");
     } finally {
       setLoading(false);
     }
@@ -53,18 +53,18 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
             if (!advice && !loading) getCoachAdvice();
           }
         }}
-        className="w-full p-8 rounded-lg bg-surface-1 border border-hairline shadow-glow-primary hover:border-accent/40 active:scale-[0.98] transition-all overflow-hidden group cursor-pointer"
+        className="w-full p-8 rounded-lg bg-surface-1 border border-hairline hover:border-accent/40 active:scale-[0.98] transition-all overflow-hidden group cursor-pointer"
         id="ai-habit-coach-toggle"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-pill -mr-16 -mt-16 blur-2xl group-hover:bg-accent/10 transition-all duration-700" />
         
         <div className="relative flex items-center gap-6">
           <div className="w-14 h-14 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-center text-accent shadow-sm transition-transform group-hover:rotate-12">
-            <Sparkles size={28} />
+            <Brain size={28} />
           </div>
           <div className="text-left">
-            <h4 className="text-heading-sm font-black text-ink uppercase tracking-tight">AI Habit Coach</h4>
-            <p className="text-body-sm text-ink-tertiary">Dapatkan tips personal hari ini</p>
+            <h4 className="text-heading-sm font-black text-ink uppercase tracking-tight">Baca Pola Kebiasaan</h4>
+            <p className="text-body-sm text-ink-tertiary">Analisis singkat dari data checkin kamu</p>
           </div>
         </div>
 
@@ -79,11 +79,11 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
               {loading ? (
                 <div className="flex items-center gap-3 text-accent font-black text-eyebrow uppercase tracking-widest animate-pulse">
                   <div className="w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
-                  <span>Coach sedang berpikir...</span>
+                  <span>Menganalisis data checkin...</span>
                 </div>
               ) : (
                 <div className="bg-surface-2 p-6 rounded-md border border-hairline shadow-inner italic leading-relaxed text-body-sm text-ink-subtle font-medium relative">
-                  <div className="absolute -top-3 left-4 px-2 bg-surface-1 text-[10px] font-black text-accent uppercase tracking-widest">Advice</div>
+                  <div className="absolute -top-3 left-4 px-2 bg-surface-1 text-[10px] font-black text-accent uppercase tracking-widest">Analisis</div>
                    "{advice}"
                 </div>
               )}
@@ -94,7 +94,7 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
                   className="mt-6 flex items-center gap-3 text-eyebrow font-black uppercase tracking-widest text-ink-tertiary hover:text-accent transition-colors active:scale-95"
                 >
                   <Send size={14} className="group-hover:translate-x-1 transition-transform" />
-                  Coba Advice Lain
+                  Analisis Ulang
                 </button>
               )}
             </motion.div>

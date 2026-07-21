@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import * as LucideIcons from 'lucide-react';
 import { 
   Plus, 
@@ -332,7 +332,7 @@ export default function HabitTrackerPage() {
                     <div className="p-6 bg-surface-3 rounded-pill w-fit mx-auto mb-6 shadow-inner">
                       <TargetIcon className="text-ink-tertiary/20" size={56} />
                     </div>
-                    <h3 className="text-heading-sm font-black text-ink uppercase tracking-tight">Belum ada kebiasaan</h3>
+                    <h3 className="text-heading-sm font-bold text-ink">Belum ada kebiasaan</h3>
                     <p className="text-body-sm text-ink-subtle mt-2 font-medium">Mulai perjalananmu hari ini dengan kebiasaan baru!</p>
                   </div>
                 )}

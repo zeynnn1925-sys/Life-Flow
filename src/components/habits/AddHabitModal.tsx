@@ -233,7 +233,7 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                               onClick={() => setFormData({ ...formData, frequency: freq as HabitFrequency })}
                               className={`flex-1 h-14 rounded-md border-2 transition-all font-black text-eyebrow uppercase tracking-widest active:scale-[0.98] ${
                                 isSelected 
-                                  ? 'border-accent bg-accent text-white shadow-glow-accent' 
+                                  ? 'border-accent bg-accent text-white' 
                                   : 'border-hairline bg-surface-2 text-ink-tertiary hover:border-hairline-strong shadow-sm'
                               }`}
                             >
