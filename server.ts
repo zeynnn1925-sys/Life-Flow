@@ -111,7 +111,7 @@ async function startServer() {
     endpointLabel: string;
   }) {
     const ai = getGeminiClient();
-    const primary = params.primaryModel || "gemini-3.5-flash";
+    const primary = params.primaryModel || "gemini-3.6-flash";
     const fallback = params.fallbackModel || "gemini-3.1-flash-lite";
     const label = params.endpointLabel;
 
@@ -184,7 +184,7 @@ async function startServer() {
     endpointLabel: string;
   }) {
     const ai = getGeminiClient();
-    const primary = params.primaryModel || "gemini-3.5-flash";
+    const primary = params.primaryModel || "gemini-3.6-flash";
     const fallback = params.fallbackModel || "gemini-3.1-flash-lite";
     const label = params.endpointLabel;
 
