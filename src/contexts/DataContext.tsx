@@ -204,8 +204,42 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       handleError(error, OperationType.GET, `users/${userId}/recurring_transactions`);
     });
 
-    const unsubCategories = onSnapshot(collection(db, `users/${userId}/categories`), (snapshot) => {
-      setCategories(snapshot.docs.map(doc => doc.data() as Category));
+    const unsubCategories = onSnapshot(collection(db, `users/${userId}/categories`), async (snapshot) => {
+      if (snapshot.empty) {
+        // Auto-seed default categories for new users so they immediately have structured categories
+        const DEFAULT_CATEGORIES: Category[] = [
+          // Income
+          { id: 'i1', name: 'Regular Income', icon: 'Briefcase', type: 'income', color: '#f77f00', group: 'Pendapatan Rutin' },
+          { id: 'i2', name: 'Irregular Income', icon: 'Gift', type: 'income', color: '#f77f00', group: 'Pendapatan Tidak Rutin' },
+          { id: 'i3', name: 'Passive/Investment', icon: 'Landmark', type: 'income', color: '#f77f00', group: 'Pendapatan Pasif' },
+          
+          // Expenses - Needs
+          { id: 'e1', name: 'Housing', icon: 'Home', type: 'expense', color: '#d62828', group: 'Needs' },
+          { id: 'e2', name: 'Utilities', icon: 'Zap', type: 'expense', color: '#d62828', group: 'Needs' },
+          { id: 'e3', name: 'Food', icon: 'Utensils', type: 'expense', color: '#d62828', group: 'Needs' },
+          { id: 'e4', name: 'Transport', icon: 'Car', type: 'expense', color: '#d62828', group: 'Needs' },
+          { id: 'e5', name: 'Health', icon: 'Heart', type: 'expense', color: '#d62828', group: 'Needs' },
+          
+          // Expenses - Wants
+          { id: 'e6', name: 'Entertainment', icon: 'Gamepad', type: 'expense', color: '#eae2b7', group: 'Wants' },
+          { id: 'e7', name: 'Social', icon: 'Users', type: 'expense', color: '#eae2b7', group: 'Wants' },
+          { id: 'e8', name: 'Personal Care', icon: 'ShoppingBag', type: 'expense', color: '#eae2b7', group: 'Wants' },
+          
+          // Expenses - Savings & Debt
+          { id: 'e9', name: 'Emergency Fund', icon: 'ShieldCheck', type: 'expense', color: '#fcbf49', group: 'Savings & Debt' },
+          { id: 'e10', name: 'Investment', icon: 'PieChart', type: 'expense', color: '#fcbf49', group: 'Savings & Debt' },
+          { id: 'e11', name: 'Debt', icon: 'CreditCard', type: 'expense', color: '#fcbf49', group: 'Savings & Debt' },
+        ];
+        try {
+          for (const cat of DEFAULT_CATEGORIES) {
+            await setDoc(doc(db, `users/${userId}/categories/${cat.id}`), cleanFirestoreData({ ...cat, userId }));
+          }
+        } catch (e) {
+          console.error('Failed to auto-seed default categories:', e);
+        }
+      } else {
+        setCategories(snapshot.docs.map(doc => doc.data() as Category));
+      }
     }, (error) => {
       handleError(error, OperationType.GET, `users/${userId}/categories`);
     });
