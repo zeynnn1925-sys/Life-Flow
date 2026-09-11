@@ -1,0 +1,20 @@
+{
+  "title": "Asesor de Vida y Finanzas IA",
+  "subtitle": "Tu copiloto proactivo para presupuestos, optimización de hábitos y productividad",
+  "chat_placeholder": "Pregunta cualquier cosa sobre tu flujo de caja, rutinas o plan de productividad...",
+  "send": "Enviar",
+  "thinking": "El Asesor está analizando tus datos en tiempo real...",
+  "quick_prompts_title": "Consultas Sugeridas",
+  "prompt_budget": "¿Cómo va mi presupuesto de gastos este mes?",
+  "prompt_habits": "¿Qué hábito necesita mayor constancia esta semana?",
+  "prompt_targets": "¿Qué tan cerca estoy de alcanzar mis objetivos financieros activos?",
+  "prompt_plan": "Crea un plan de rutina personalizado para mañana.",
+  "clear_history": "Limpiar Conversación",
+  "disclaimer": "Los consejos de la IA se sintetizan a partir de tus registros en Firestore para fines de planificación personal.",
+  "copy_response": "Copiar Respuesta",
+  "copied": "¡Copiado al portapapeles!",
+  "minimize": "Minimizar",
+  "open_advisor": "Asesor IA LifeFlow",
+  "online_badge": "Sincronización en Vivo",
+  "offline_notice": "El asesor requiere conexión a internet para el análisis con Gemini AI."
+}

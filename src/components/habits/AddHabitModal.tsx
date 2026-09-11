@@ -15,18 +15,16 @@ interface AddHabitModalProps {
   initialHabit?: Habit;
 }
 
-const CATEGORIES: { id: HabitCategory; label: string; icon: string; color: string }[] = [
-  { id: 'health', label: 'Health', icon: 'Heart', color: '#ef4444' },
-  { id: 'mind', label: 'Mind', icon: 'Brain', color: '#8b5cf6' },
-  { id: 'fitness', label: 'Fitness', icon: 'Dumbbell', color: '#f97316' },
-  { id: 'finance', label: 'Finance', icon: 'Wallet', color: '#10b981' },
-  { id: 'social', label: 'Social', icon: 'Users', color: '#3b82f6' },
-  { id: 'creativity', label: 'Creativity', icon: 'Palette', color: '#ec4899' },
-  { id: 'learning', label: 'Learning', icon: 'BookOpen', color: '#f59e0b' },
-  { id: 'custom', label: 'Custom', icon: 'Plus', color: '#6366f1' },
+const CATEGORIES: { id: HabitCategory; labelEn: string; labelId: string; labelEs: string; labelDe: string; labelAr: string; icon: string; color: string }[] = [
+  { id: 'health', labelEn: 'Health', labelId: 'Kesehatan', labelEs: 'Salud', labelDe: 'Gesundheit', labelAr: 'صحة', icon: 'Heart', color: '#ef4444' },
+  { id: 'mind', labelEn: 'Mind', labelId: 'Pikiran', labelEs: 'Mente', labelDe: 'Geist', labelAr: 'عقل', icon: 'Brain', color: '#8b5cf6' },
+  { id: 'fitness', labelEn: 'Fitness', labelId: 'Kebugaran', labelEs: 'Fitness', labelDe: 'Fitness', labelAr: 'لياقة', icon: 'Dumbbell', color: '#f97316' },
+  { id: 'finance', labelEn: 'Finance', labelId: 'Keuangan', labelEs: 'Finanzas', labelDe: 'Finanzen', labelAr: 'مالية', icon: 'Wallet', color: '#10b981' },
+  { id: 'social', labelEn: 'Social', labelId: 'Sosial', labelEs: 'Social', labelDe: 'Sozial', labelAr: 'اجتماعي', icon: 'Users', color: '#3b82f6' },
+  { id: 'creativity', labelEn: 'Creativity', labelId: 'Kreativitas', labelEs: 'Creatividad', labelDe: 'Kreativität', labelAr: 'إبداع', icon: 'Palette', color: '#ec4899' },
+  { id: 'learning', labelEn: 'Learning', labelId: 'Belajar', labelEs: 'Aprendizaje', labelDe: 'Lernen', labelAr: 'تعلم', icon: 'BookOpen', color: '#f59e0b' },
+  { id: 'custom', labelEn: 'Custom', labelId: 'Kustom', labelEs: 'Personalizado', labelDe: 'Benutzerdef.', labelAr: 'مخصص', icon: 'Plus', color: '#6366f1' },
 ];
-
-const ICONS = ['Activity', 'Book', 'Coffee', 'Code', 'Dumbbell', 'Heart', 'Moon', 'Music', 'Sun', 'Smile', 'Star', 'Target', 'Zap', 'Waves'];
 
 export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit }: AddHabitModalProps) {
   const { language, t } = useLanguage();
@@ -42,7 +40,7 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
     timeOfDay: 'anytime',
     difficulty: 'medium',
     targetCount: 1,
-    unit: 'kali',
+    unit: language === 'id' ? 'kali' : language === 'es' ? 'veces' : language === 'de' ? 'mal' : language === 'ar' ? 'مرات' : 'times',
     reminderTime: '09:00',
     isArchived: false,
     order: 0,
@@ -50,6 +48,16 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
     longestStreak: 0,
     totalCompletions: 0
   });
+
+  const getCategoryLabel = (cat: typeof CATEGORIES[0]) => {
+    switch (language) {
+      case 'id': return cat.labelId;
+      case 'es': return cat.labelEs;
+      case 'de': return cat.labelDe;
+      case 'ar': return cat.labelAr;
+      default: return cat.labelEn;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +76,7 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
         timeOfDay: formData.timeOfDay as HabitTimeOfDay || 'anytime',
         difficulty: formData.difficulty as HabitDifficulty || 'medium',
         targetCount: formData.targetCount || 1,
-        unit: formData.unit || 'kali',
+        unit: formData.unit || (language === 'id' ? 'kali' : 'times'),
         reminderTime: formData.reminderTime,
         isArchived: formData.isArchived || false,
         createdAt: initialHabit?.createdAt || Timestamp.now(),
@@ -107,10 +115,14 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
             <div className="p-8 border-b border-hairline flex items-center justify-between bg-surface-1/50 backdrop-blur-md">
               <div>
                 <h2 className="text-heading-sm font-black text-ink uppercase tracking-tight">
-                  {initialHabit ? 'Edit Kebiasaan' : 'Tambah Kebiasaan Baru'}
+                  {initialHabit 
+                    ? (language === 'id' ? 'Edit Kebiasaan' : language === 'es' ? 'Editar Hábito' : language === 'de' ? 'Gewohnheit bearbeiten' : language === 'ar' ? 'تعديل العادة' : 'Edit Habit')
+                    : (language === 'id' ? 'Tambah Kebiasaan Baru' : language === 'es' ? 'Agregar Nuevo Hábito' : language === 'de' ? 'Neue Gewohnheit hinzufügen' : language === 'ar' ? 'إضافة عادة جديدة' : 'Add New Habit')}
                 </h2>
                 <div className="flex items-center gap-2 mt-1">
-                  <p className="text-eyebrow font-black text-ink-tertiary uppercase tracking-widest">Langkah {step} dari 2</p>
+                  <p className="text-eyebrow font-black text-ink-tertiary uppercase tracking-widest">
+                    {language === 'id' ? `Langkah ${step} dari 2` : language === 'es' ? `Paso ${step} de 2` : language === 'de' ? `Schritt ${step} von 2` : language === 'ar' ? `الخطوة ${step} من 2` : `Step ${step} of 2`}
+                  </p>
                   <div className="w-12 h-1 bg-surface-2 rounded-pill overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
@@ -140,7 +152,9 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                     className="space-y-8"
                   >
                     <div>
-                      <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-3">Nama Kebiasaan</label>
+                      <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-3">
+                        {language === 'id' ? 'Nama Kebiasaan' : language === 'es' ? 'Nombre del Hábito' : language === 'de' ? 'Name der Gewohnheit' : language === 'ar' ? 'اسم العادة' : 'Habit Name'}
+                      </label>
                       <input
                         autoFocus
                         type="text"
@@ -148,12 +162,14 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         className="w-full h-14 px-6 bg-surface-2 border border-hairline rounded-md outline-none focus:border-accent font-black text-ink text-body-lg transition-all placeholder:font-medium placeholder:text-ink-tertiary/20"
-                        placeholder="Misal: Minum Air Putih"
+                        placeholder={language === 'id' ? 'Misal: Minum Air Putih' : language === 'es' ? 'Ej: Beber 2L de agua' : language === 'de' ? 'z.B.: 2L Wasser trinken' : language === 'ar' ? 'مثال: شرب الماء' : 'e.g. Drink 2L Water'}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-4">Kategori</label>
+                      <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-4">
+                        {language === 'id' ? 'Kategori' : language === 'es' ? 'Categoría' : language === 'de' ? 'Kategorie' : language === 'ar' ? 'الفئة' : 'Category'}
+                      </label>
                       <div className="grid grid-cols-4 gap-3">
                         {CATEGORIES.map((cat) => {
                           const Icon = (LucideIcons as any)[cat.icon] || LucideIcons.Circle;
@@ -172,7 +188,7 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                               <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-inner transition-transform group-hover:scale-110" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>
                                 <Icon size={24} />
                               </div>
-                              <span className={`text-[10px] font-black uppercase tracking-widest ${isSelected ? 'text-accent' : 'text-ink-tertiary'}`}>{cat.label}</span>
+                              <span className={`text-[10px] font-black uppercase tracking-widest ${isSelected ? 'text-accent' : 'text-ink-tertiary'}`}>{getCategoryLabel(cat)}</span>
                             </button>
                           );
                         })}
@@ -189,7 +205,9 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                   >
                     <div className="grid grid-cols-2 gap-8">
                       <div>
-                        <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-3">Target Harian</label>
+                        <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-3">
+                          {language === 'id' ? 'Target Harian' : language === 'es' ? 'Meta Diaria' : language === 'de' ? 'Tagesziel' : language === 'ar' ? 'الهدف اليومي' : 'Daily Target'}
+                        </label>
                         <div className="flex items-center gap-2">
                           <input
                             type="number"
@@ -203,12 +221,14 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                             value={formData.unit}
                             onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
                             className="flex-1 h-14 px-6 bg-surface-2 border border-hairline rounded-md outline-none focus:border-accent font-black text-ink text-body-lg shadow-inner"
-                            placeholder="Unit (gelas, jam...)"
+                            placeholder={language === 'id' ? 'Unit (gelas, jam...)' : language === 'es' ? 'Unidad (vasos, horas...)' : language === 'de' ? 'Einheit (Gläser, Std...)' : language === 'ar' ? 'الوحدة (أكواب، ساعات...)' : 'Unit (glasses, hours...)'}
                           />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-3">Waktu Pengingat</label>
+                        <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-3">
+                          {language === 'id' ? 'Waktu Pengingat' : language === 'es' ? 'Hora del Recordatorio' : language === 'de' ? 'Erinnerungszeit' : language === 'ar' ? 'وقت التذكير' : 'Reminder Time'}
+                        </label>
                         <div className="relative group/input">
                           <Clock size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-tertiary group-hover/input:text-accent transition-colors" />
                           <input
@@ -222,10 +242,17 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                     </div>
 
                     <div>
-                      <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-4">Frekuensi</label>
+                      <label className="block text-eyebrow font-black text-ink-tertiary uppercase tracking-widest mb-4">
+                        {language === 'id' ? 'Frekuensi' : language === 'es' ? 'Frecuencia' : language === 'de' ? 'Häufigkeit' : language === 'ar' ? 'التكرار' : 'Frequency'}
+                      </label>
                       <div className="flex gap-4">
                         {['daily', 'weekdays', 'weekends'].map((freq) => {
                           const isSelected = formData.frequency === freq;
+                          const label = freq === 'weekdays' 
+                            ? (language === 'id' ? 'Hari Kerja' : language === 'es' ? 'Días Laborables' : language === 'de' ? 'Werktage' : language === 'ar' ? 'أيام العمل' : 'Weekdays')
+                            : freq === 'weekends'
+                            ? (language === 'id' ? 'Akhir Pekan' : language === 'es' ? 'Fines de Semana' : language === 'de' ? 'Wochenende' : language === 'ar' ? 'عطلة نهاية الأسبوع' : 'Weekends')
+                            : (language === 'id' ? 'Setiap Hari' : language === 'es' ? 'Todos los Días' : language === 'de' ? 'Täglich' : language === 'ar' ? 'يوميًا' : 'Every Day');
                           return (
                             <button
                               key={freq}
@@ -237,7 +264,7 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                                   : 'border-hairline bg-surface-2 text-ink-tertiary hover:border-hairline-strong shadow-sm'
                               }`}
                             >
-                              {freq === 'weekdays' ? 'Hari Kerja' : freq === 'weekends' ? 'Akhir Pekan' : 'Setiap Hari'}
+                              {label}
                             </button>
                           );
                         })}
@@ -255,7 +282,7 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                       onClick={() => setStep(1)}
                       className="flex-1 h-14 bg-surface-2 text-ink-tertiary font-black text-button uppercase tracking-widest rounded-pill border border-hairline hover:bg-surface-3 transition-colors"
                     >
-                      Kembali
+                      {language === 'id' ? 'Kembali' : language === 'es' ? 'Atrás' : language === 'de' ? 'Zurück' : language === 'ar' ? 'رجوع' : 'Back'}
                     </button>
                   )}
                   
@@ -266,7 +293,7 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                       onClick={() => setStep(2)}
                       className="flex-1 h-14 bg-accent text-white font-black text-button uppercase tracking-widest rounded-pill hover:bg-accent-hover transition-all shadow-glow-accent disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      Lanjut
+                      {language === 'id' ? 'Lanjut' : language === 'es' ? 'Siguiente' : language === 'de' ? 'Weiter' : language === 'ar' ? 'التالي' : 'Next'}
                     </button>
                   ) : (
                     <button
@@ -287,7 +314,7 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
                     className="w-full h-12 bg-danger/10 text-danger hover:bg-danger hover:text-white font-black text-button uppercase tracking-widest rounded-pill transition-all flex items-center justify-center gap-2 border border-danger/20"
                   >
                     <Trash2 size={16} />
-                    {language === 'id' ? 'Hapus Kebiasaan' : 'Delete Habit'}
+                    {language === 'id' ? 'Hapus Kebiasaan' : language === 'es' ? 'Eliminar Hábito' : language === 'de' ? 'Gewohnheit löschen' : language === 'ar' ? 'حذف العادة' : 'Delete Habit'}
                   </button>
                 )}
               </div>
@@ -298,10 +325,10 @@ export function AddHabitModal({ isOpen, onClose, onSave, onDelete, initialHabit 
 
       <ConfirmationModal
         isOpen={showDeleteConfirm}
-        title={language === 'id' ? 'Hapus Kebiasaan' : 'Delete Habit'}
-        message={language === 'id' ? 'Apakah Anda yakin ingin menghapus kebiasaan ini? Semua riwayat dan statistik kebiasaan ini akan hilang.' : 'Are you sure you want to delete this habit? All history and statistics for this habit will be lost.'}
-        confirmText={language === 'id' ? 'Hapus' : 'Delete'}
-        cancelText={language === 'id' ? 'Batal' : 'Cancel'}
+        title={language === 'id' ? 'Hapus Kebiasaan' : language === 'es' ? 'Eliminar Hábito' : language === 'de' ? 'Gewohnheit löschen' : language === 'ar' ? 'حذف العادة' : 'Delete Habit'}
+        message={language === 'id' ? 'Apakah Anda yakin ingin menghapus kebiasaan ini? Semua riwayat dan statistik kebiasaan ini akan hilang.' : language === 'es' ? '¿Estás seguro de que deseas eliminar este hábito? Se perderán todos sus historiales y estadísticas.' : language === 'de' ? 'Möchtest du diese Gewohnheit wirklich löschen? Alle Verläufe gehen verloren.' : language === 'ar' ? 'هل أنت متأكد من رغبتك في حذف هذه العادة؟ سيتم مسح السجل والإحصائيات.' : 'Are you sure you want to delete this habit? All history and statistics for this habit will be lost.'}
+        confirmText={language === 'id' ? 'Hapus' : language === 'es' ? 'Eliminar' : language === 'de' ? 'Löschen' : language === 'ar' ? 'حذف' : 'Delete'}
+        cancelText={language === 'id' ? 'Batal' : language === 'es' ? 'Cancelar' : language === 'de' ? 'Abbrechen' : language === 'ar' ? 'إلغاء' : 'Cancel'}
         type="danger"
         onConfirm={async () => {
           if (initialHabit && onDelete) {

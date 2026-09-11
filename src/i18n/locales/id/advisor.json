@@ -1,0 +1,20 @@
+{
+  "title": "Penasihat AI & Keuangan",
+  "subtitle": "Kopilot proaktif Anda untuk perencanaan anggaran, optimalisasi kebiasaan, dan produktivitas",
+  "chat_placeholder": "Tanyakan apa saja tentang arus kas, rutinitas, atau rencana produktivitas Anda...",
+  "send": "Kirim",
+  "thinking": "Penasihat sedang menganalisis data real-time Anda...",
+  "quick_prompts_title": "Pertanyaan Rekomendasi",
+  "prompt_budget": "Bagaimana kondisi anggaran pengeluaran saya bulan ini?",
+  "prompt_habits": "Kebiasaan mana yang perlu saya tingkatkan konsistensinya minggu ini?",
+  "prompt_targets": "Seberapa dekat saya dengan target finansial aktif saya?",
+  "prompt_plan": "Buatkan rencana rutinitas harian yang optimal untuk besok.",
+  "clear_history": "Hapus Riwayat Chat",
+  "disclaimer": "Saran AI disintesis secara aman dari data profil Firestore Anda untuk perencanaan pribadi.",
+  "copy_response": "Salin Jawaban",
+  "copied": "Berhasil disalin ke papan klip!",
+  "minimize": "Kecilkan",
+  "open_advisor": "Asisten AI LifeFlow",
+  "online_badge": "Sinkron Real-time",
+  "offline_notice": "Penasihat memerlukan koneksi internet untuk analisis Gemini AI secara langsung."
+}

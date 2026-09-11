@@ -58,6 +58,7 @@ import { useTheme } from './contexts/ThemeContext';
 import { useNotifications } from './contexts/NotificationContext';
 import JournalPage from './components/JournalPage';
 import OnboardingTour from './components/OnboardingTour';
+import AdvisorChat from './components/AdvisorChat';
 
 interface UINotification {
   id: string;
@@ -472,6 +473,7 @@ export default function App() {
         {renderView()}
       </AppShell>
       <FloatingPomodoro activeView={activeView} setActiveView={setActiveView} />
+      <AdvisorChat />
       <OnboardingTour
         user={user}
         activeView={activeView}

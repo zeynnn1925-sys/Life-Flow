@@ -22,6 +22,7 @@ import { Logo } from '../Logo';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { View } from '../../types';
+import { PWAInstallButton } from '../PWAInstallButton';
 
 interface SidebarProps {
   activeView: View;
@@ -52,20 +53,20 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
         { id: 'habits', label: t('habits') || 'Habit Tracker', icon: Zap },
         { id: 'ai_planner', label: t('aiPlanner'), icon: Sparkles },
         { id: 'targets', label: t('targets'), icon: TargetIcon },
-        { id: 'smart_space', label: language === 'id' ? 'AI Smart Space' : 'AI Smart Space', icon: BrainCircuit },
-        { id: 'journal', label: language === 'id' ? 'Jurnal Refleksi' : 'Daily Journal', icon: BookOpen },
+        { id: 'smart_space', label: t('smartSpace') || (language === 'es' ? 'Espacio Inteligente' : language === 'ar' ? 'المساحة الذكية' : language === 'de' ? 'Smart Space' : language === 'id' ? 'Ruang Pintar' : 'Smart Space'), icon: BrainCircuit },
+        { id: 'journal', label: t('journal') || (language === 'es' ? 'Diario y Reflexión' : language === 'ar' ? 'اليوميات والتأمل' : language === 'de' ? 'Journal & Reflexion' : language === 'id' ? 'Jurnal Refleksi' : 'Daily Journal'), icon: BookOpen },
       ]
     },
     {
       title: t('system'),
       items: [
-        { id: 'tour', label: language === 'id' ? 'Tur Pemandu' : 'Interactive Tour', icon: HelpCircle },
+        { id: 'tour', label: language === 'es' ? 'Guía Interactiva' : language === 'ar' ? 'الجولة الإرشادية' : language === 'de' ? 'Interaktive Tour' : language === 'id' ? 'Tur Pemandu' : 'Interactive Tour', icon: HelpCircle },
         { id: 'achievements', label: t('achievements'), icon: Trophy },
         { id: 'account', label: t('userAccount') || 'Account', icon: Globe },
         { id: 'settings', label: t('settings'), icon: Settings },
       ]
     }
-  ], [t]);
+  ], [t, language]);
 
   const profileSection = React.useMemo(() => (
     <div className="flex items-center gap-2">
@@ -131,6 +132,7 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
 
       {/* Bottom Section */}
       <div className="p-[10px] border-t border-hairline shrink-0 space-y-2">
+        {!isCollapsed && <PWAInstallButton variant="sidebar" />}
         {profileSection}
         
           <button 

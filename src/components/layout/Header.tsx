@@ -1,5 +1,5 @@
-import React from 'react';
-import { Bell, Moon, Sun, Menu as MenuIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Bell, Moon, Sun, Menu as MenuIcon, Globe } from 'lucide-react';
 import { Logo } from '../Logo';
 import DigitalClock from '../DigitalClock';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,7 +7,10 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { View } from '../../types';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Language } from '../../translations';
+import { SyncStatusIndicator } from '../SyncStatusIndicator';
+import { PWAInstallButton } from '../PWAInstallButton';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 
 interface HeaderProps {
   activeView: View;
@@ -16,28 +19,42 @@ interface HeaderProps {
 
 export default function Header({ activeView, onMenuToggle }: HeaderProps) {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { notifications: inAppNotifications } = useNotifications();
-  const [showNotifications, setShowNotifications] = React.useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+
+  const languages: { code: Language; label: string; flag: string }[] = [
+    { code: 'en', label: 'English', flag: '🇺🇸' },
+    { code: 'id', label: 'Indonesia', flag: '🇮🇩' },
+    { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+    { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+  ];
 
   return (
-    <div className="flex-1 flex items-center justify-between h-full w-full">
+    <div className="flex-1 flex items-center justify-between h-full w-full px-2 sm:px-4">
       {/* Left Section */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Mobile Logo & Brand */}
         <div className="lg:hidden flex items-center gap-2">
-          <Logo className="w-8 h-8" />
-          <span className="text-lg font-black text-[#f7f8f8] tracking-tight">{t('appName')}</span>
+          <Logo className="w-7 h-7" />
+          <span className="text-base font-black text-ink tracking-tight">{t('appName')}</span>
         </div>
 
         {/* Desktop Sidebar Toggle */}
-        <button 
+        <button
           onClick={onMenuToggle}
-          className="hidden lg:flex items-center justify-center w-8 h-8 rounded-md hover:bg-white/5 text-[#62666d] hover:text-[#9ca3af] transition-colors"
+          className="hidden lg:flex items-center justify-center w-8 h-8 rounded-md hover:bg-surface-2 text-ink-subtle hover:text-ink transition-colors"
+          title="Toggle Menu"
         >
           <MenuIcon size={16} />
         </button>
+
+        {/* Sync Status Badge */}
+        <div className="hidden md:block">
+          <SyncStatusIndicator compact />
+        </div>
       </div>
 
       {/* Middle Section - Clock */}
@@ -46,7 +63,18 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-2 lg:gap-4">
+      <div className="flex items-center gap-1.5 sm:gap-3">
+        {/* PWA Install Button */}
+        <PWAInstallButton />
+
+        {/* Sync indicator for small screens */}
+        <div className="md:hidden">
+          <SyncStatusIndicator compact />
+        </div>
+
+        {/* Language Selector Dropdown */}
+        <LanguageSwitcher />
+
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
@@ -58,23 +86,28 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
 
         {/* Notifications */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2 text-[#62666d] hover:text-[#9ca3af] hover:bg-white/5 rounded-md relative transition-colors"
+            className="p-2 text-ink-subtle hover:text-ink hover:bg-surface-2 rounded-md relative transition-colors"
           >
             <Bell size={16} />
             {inAppNotifications.length > 0 && (
-              <span className="absolute top-2 right-2 w.5 h-1.5 bg-[#e23b4a] rounded-full border border-[#010102]" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-surface-1" />
             )}
           </button>
         </div>
 
         {/* User Profile */}
-        <div className="flex items-center gap-3 pl-2 lg:pl-4 border-l border-white/10 ml-2">
+        <div className="flex items-center gap-2 pl-2 border-l border-hairline">
           {user?.photoURL ? (
-            <img src={user.photoURL} alt="" className="w-[26px] h-[26px] rounded-full object-cover border border-white/10" referrerPolicy="no-referrer" />
+            <img
+              src={user.photoURL}
+              alt=""
+              className="w-7 h-7 rounded-full object-cover border border-hairline"
+              referrerPolicy="no-referrer"
+            />
           ) : (
-            <div className="w-[26px] h-[26px] rounded-full bg-[#5e6ad2] flex items-center justify-center text-white font-bold text-[10px]">
+            <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-white font-bold text-[11px]">
               {user?.displayName?.charAt(0) || 'U'}
             </div>
           )}

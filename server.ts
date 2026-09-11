@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
 import firebaseConfig from './firebase-applet-config.json' assert { type: 'json' };
+import { advisorRouter } from './server/routes/advisorRoute';
 
 // Lazy initialization of Firebase Admin
 let adminApp: admin.app.App | null = null;
@@ -70,6 +71,9 @@ async function startServer() {
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', adminInitialized: !!getFirebaseAdmin() });
   });
+
+  // AI Advisor Router with auth & verified server context
+  app.use('/api/advisor', authenticate, advisorRouter);
 
   // Client-safe Gemini API endpoints
   let geminiClient: any = null;

@@ -1,0 +1,20 @@
+{
+  "title": "AI Life & Financial Advisor",
+  "subtitle": "Your proactive copilot for budgeting, habit optimization, and productivity",
+  "chat_placeholder": "Ask anything about your cashflow, routines, or productivity plan...",
+  "send": "Send",
+  "thinking": "Advisor is analyzing your real-time data...",
+  "quick_prompts_title": "Suggested Inquiries",
+  "prompt_budget": "How is my spending budget holding up this month?",
+  "prompt_habits": "Which habit needs more consistency this week?",
+  "prompt_targets": "How close am I to reaching my active financial targets?",
+  "prompt_plan": "Create a personalized routine plan for tomorrow.",
+  "clear_history": "Clear Conversation",
+  "disclaimer": "AI advice is synthesized from your authenticated Firestore profile records for personal planning.",
+  "copy_response": "Copy Response",
+  "copied": "Copied to clipboard!",
+  "minimize": "Minimize",
+  "open_advisor": "LifeFlow AI Advisor",
+  "online_badge": "Real-time Sync",
+  "offline_notice": "Advisor requires network connection for real-time Gemini AI analysis."
+}

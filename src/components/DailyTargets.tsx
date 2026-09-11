@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ConfirmationModal } from './ConfirmationModal';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Legend } from 'recharts';
 import confetti from 'canvas-confetti';
+import { useTranslation } from 'react-i18next';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
@@ -13,6 +14,8 @@ import { originalCareerLinks } from '../data/careerLinks';
 
 export default function DailyTargets() {
   const { t, language } = useLanguage();
+  const { t: tTarget } = useTranslation('targets');
+  const { t: tCommon } = useTranslation('common');
   const { targets, saveTarget, deleteTarget: deleteTargetFromDb, saveTransaction, categories } = useData();
 
   const totalActiveTargets = targets.length;
