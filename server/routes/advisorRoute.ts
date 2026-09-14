@@ -1,16 +1,9 @@
 import { Router, Request, Response } from 'express';
-import * as admin from 'firebase-admin';
 import { GoogleGenAI } from '@google/genai';
+import { getFirebaseAdmin } from '../firebaseAdmin';
+import firebaseConfig from '../../firebase-applet-config.json' assert { type: 'json' };
 
 export const advisorRouter = Router();
-
-// Helper to access Firebase Admin SDK instance
-function getFirebaseAdmin() {
-  if (admin.apps.length > 0) {
-    return admin.app();
-  }
-  return null;
-}
 
 // Lazy Gemini client helper
 let geminiClient: any = null;
@@ -41,7 +34,7 @@ async function callAdvisorGeminiWithFallback(params: {
   fallbackModel?: string;
 }) {
   const ai = getGeminiClient();
-  const primary = params.primaryModel || 'gemini-3.6-flash';
+  const primary = params.primaryModel || 'gemini-3.8-flash';
   const fallback = params.fallbackModel || 'gemini-3.1-flash-lite';
 
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -70,7 +63,7 @@ async function callAdvisorGeminiWithFallback(params: {
 
 /**
  * Server-side verified context builder
- * NEVER trusts raw client payload; queries Firestore server-side using authenticated uid.
+ * Queries Firestore server-side using authenticated uid.
  */
 async function buildAdvisorContext(uid: string, language: string = 'en') {
   const adminApp = getFirebaseAdmin();
@@ -79,9 +72,11 @@ async function buildAdvisorContext(uid: string, language: string = 'en') {
   let targets: any[] = [];
   let tasks: any[] = [];
 
-  if (adminApp && uid && uid !== 'dev-user') {
+  if (adminApp && uid && uid !== 'dev-user' && uid !== 'anonymous-user' && uid !== 'guest-user') {
     try {
-      const db = adminApp.firestore();
+      const db = (firebaseConfig as any).firestoreDatabaseId
+        ? adminApp.firestore((firebaseConfig as any).firestoreDatabaseId)
+        : adminApp.firestore();
       
       // Fetch user records in parallel with limits
       const [txSnap, habitSnap, targetSnap, taskSnap] = await Promise.all([

@@ -32,9 +32,9 @@ export const BackgroundBeams = ({ className }: { className?: string }) => {
             y2="450"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#494FDF" stopOpacity="0" offset="0" />
-            <stop stopColor="#494FDF" offset="0.5" />
-            <stop stopColor="#494FDF" stopOpacity="0" offset="1" />
+            <stop stopColor="#FF5500" stopOpacity="0" offset="0" />
+            <stop stopColor="#FF5500" offset="0.5" />
+            <stop stopColor="#FF5500" stopOpacity="0" offset="1" />
           </linearGradient>
         </defs>
       </svg>

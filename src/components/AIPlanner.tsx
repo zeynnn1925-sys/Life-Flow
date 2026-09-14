@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Quote, Trophy, CheckCircle2, Circle, Clock, RefreshCw, BrainCircuit, GripVertical } from 'lucide-react';
+import { Quote, Trophy, CheckCircle2, Circle, Clock, RefreshCw, BrainCircuit, GripVertical } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { DailyQuote, AIProductivityPlan, AIPlanItem } from '../types';
@@ -87,7 +87,7 @@ export default function AIPlanner() {
         </div>
         <div className="relative z-10 space-y-6">
           <div className="flex items-center gap-3 text-accent text-eyebrow uppercase">
-            <Sparkles size={16} />
+            <Quote size={16} />
             {t('dailyInspiration')}
           </div>
           {loadingQuote ? (

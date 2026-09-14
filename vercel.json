@@ -1,5 +1,10 @@
 {
   "installCommand": "npm install --legacy-peer-deps",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/gemini/productivity-plan", "destination": "/api/gemini/productivity-plan" },
+    { "source": "/api/productivity-plan", "destination": "/api/productivity-plan" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

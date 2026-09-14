@@ -5,7 +5,6 @@ import {
   Trash2, 
   Search, 
   Calendar, 
-  Sparkles, 
   Heart, 
   Smile, 
   Brain, 
@@ -14,7 +13,11 @@ import {
   RefreshCw, 
   Check, 
   HelpCircle,
-  Clock
+  Clock,
+  Compass,
+  Lightbulb,
+  Trophy,
+  Bot
 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
@@ -33,10 +36,10 @@ export interface JournalEntry {
 
 const MOODS = [
   { id: 'happy', labelEn: 'Happy', labelId: 'Bahagia', labelEs: 'Feliz', labelDe: 'Glücklich', labelAr: 'سعيد', emoji: '🌟', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20' },
-  { id: 'productive', labelEn: 'Productive', labelId: 'Produktif', labelEs: 'Productivo', labelDe: 'Produktiv', labelAr: 'منتج', emoji: '🚀', color: 'text-indigo-400 bg-indigo-400/10 border-indigo-400/20' },
+  { id: 'productive', labelEn: 'Productive', labelId: 'Produktif', labelEs: 'Productivo', labelDe: 'Produktiv', labelAr: 'منتج', emoji: '🚀', color: 'text-orange-400 bg-orange-400/10 border-orange-400/20' },
   { id: 'calm', labelEn: 'Calm', labelId: 'Tenang', labelEs: 'Tranquilo', labelDe: 'Ruhig', labelAr: 'هادئ', emoji: '🍃', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' },
   { id: 'proud', labelEn: 'Proud', labelId: 'Bangga', labelEs: 'Orgulloso', labelDe: 'Stolz', labelAr: 'فخور', emoji: '🏆', color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' },
-  { id: 'anxious', labelEn: 'Anxious', labelId: 'Cemas', labelEs: 'Ansioso', labelDe: 'Ängstlich', labelAr: 'قلق', emoji: '💭', color: 'text-violet-400 bg-violet-400/10 border-violet-400/20' },
+  { id: 'anxious', labelEn: 'Anxious', labelId: 'Cemas', labelEs: 'Ansioso', labelDe: 'Ängstlich', labelAr: 'قلق', emoji: '💭', color: 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20' },
   { id: 'restless', labelEn: 'Restless', labelId: 'Lelah', labelEs: 'Cansado', labelDe: 'Rastlos', labelAr: 'مرهق', emoji: '🌀', color: 'text-rose-400 bg-rose-400/10 border-rose-400/20' },
 ];
 
@@ -130,19 +133,19 @@ export default function JournalPage() {
   useEffect(() => {
     switch (language) {
       case 'id':
-        setMascotBubble("Halo! Aku Flowy, peri pelindung kedamaianmu! Yuk, luangkan waktu sejenak untuk menulis jurnal hari ini. Aku siap menemanimu! ✨");
+        setMascotBubble("Selamat datang di jurnal pribadimu. Luangkan sejenak waktu untuk mencatat refleksi hari ini.");
         break;
       case 'es':
-        setMascotBubble("¡Hola! Soy Flowy, tu compañero de reflexión. Tómate un momento tranquilo para escribir tu diario hoy. ¡Estoy aquí para acompañarte! ✨");
+        setMascotBubble("Bienvenido a tu diario personal. Tómate un momento para registrar tus reflexiones de hoy.");
         break;
       case 'de':
-        setMascotBubble("Hallo! Ich bin Flowy, dein Achtsamkeitsbegleiter! Nimm dir einen kurzen Moment zum Journaling. Ich bin für dich da! ✨");
+        setMascotBubble("Willkommen in deinem persönlichen Journal. Nimm dir einen Moment für deine tägliche Reflexion.");
         break;
       case 'ar':
-        setMascotBubble("مرحبًا! أنا فلوي، رفيقك للتأمل والصفاء الذهني! خذ دقيقة لكتابة يومياتك وسأكون بجانبك دائمًا! ✨");
+        setMascotBubble("مرحبًا بك في يومياتك الخاصة. خذ دقيقة لكتابة تأملاتك وأفكارك لليوم.");
         break;
       default:
-        setMascotBubble("Hey there! I'm Flowy, your mindfulness guardian! Let's take a peaceful moment to journal today. I'm right here to accompany you! ✨");
+        setMascotBubble("Welcome to your personal journal. Take a moment to capture your thoughts and reflections today.");
         break;
     }
   }, [language]);
@@ -259,15 +262,15 @@ export default function JournalPage() {
 
         setMascotMood('thinking');
         if (language === 'id') {
-          setMascotBubble("Jurnal telah dihapus. Tak apa, ingatan hangatnya akan selalu ada bersamamu. ✨");
+          setMascotBubble("Jurnal telah dihapus. Tak apa, ingatan hangatnya akan selalu ada bersamamu.");
         } else if (language === 'es') {
-          setMascotBubble("Entrada eliminada. Los aprendizajes y recuerdos siempre permanecerán contigo. ✨");
+          setMascotBubble("Entrada eliminada. Los aprendizajes y recuerdos siempre permanecerán contigo.");
         } else if (language === 'de') {
-          setMascotBubble("Eintrag gelöscht. Deine Erkenntnisse bleiben in deinem Herzen. ✨");
+          setMascotBubble("Eintrag gelöscht. Deine Erkenntnisse bleiben in deinem Herzen.");
         } else if (language === 'ar') {
-          setMascotBubble("تم حذف اليومية. ستبقى الدروس والعبر معك دائمًا. ✨");
+          setMascotBubble("تم حذف اليومية. ستبقى الدروس والعبر معك دائمًا.");
         } else {
-          setMascotBubble("Journal deleted. It's okay, the warm insights will always remain inside your heart. ✨");
+          setMascotBubble("Journal deleted. It's okay, the warm insights will always remain inside your heart.");
         }
       } catch (err) {
         console.error("Error deleting journal", err);
@@ -311,12 +314,16 @@ export default function JournalPage() {
     }
   };
 
-  const getMascotExpression = () => {
+  const renderMascotVisual = () => {
     switch (mascotMood) {
-      case 'proud': return '(✿◠‿◠)🏆';
-      case 'thinking': return '(•◡•)💭';
-      case 'calm': return '(◕‿◕✿)🍃';
-      default: return '(o^◇^o)✨';
+      case 'proud':
+        return <Trophy className="w-9 h-9 text-amber-400" />;
+      case 'thinking':
+        return <Lightbulb className="w-9 h-9 text-amber-500" />;
+      case 'calm':
+        return <Compass className="w-9 h-9 text-emerald-400" />;
+      default:
+        return <Bot className="w-9 h-9 text-accent" />;
     }
   };
 
@@ -358,7 +365,7 @@ export default function JournalPage() {
         
         {/* Animated Mascot Companion Card */}
         <div className="bg-[#0b0c10] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none" />
           
           <div className="relative z-10 flex flex-col items-center">
             
@@ -373,7 +380,7 @@ export default function JournalPage() {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500/20 to-teal-400/20 flex items-center justify-center border-2 border-violet-500/40 relative shadow-inner mb-4 cursor-pointer"
+              className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center border-2 border-accent/30 relative shadow-inner mb-4 cursor-pointer"
               onClick={() => {
                 setMascotMood('happy');
                 const reactions = language === 'id' 
@@ -388,20 +395,16 @@ export default function JournalPage() {
                 setMascotBubble(reactions[Math.floor(Math.random() * reactions.length)]);
               }}
             >
-              <div className="absolute -inset-1 rounded-full bg-violet-400/10 blur-xl opacity-60 animate-pulse" />
-              <span className="text-3xl font-black drop-shadow tracking-widest">{getMascotExpression()}</span>
-              
-              <div className="absolute -top-1 -right-1 text-yellow-400 text-sm animate-bounce">✨</div>
-              <div className="absolute bottom-1 left-0 text-violet-400 text-[10px] animate-pulse">🌸</div>
+              {renderMascotVisual()}
             </motion.div>
 
             {/* Title & Speech Bubble */}
-            <h3 className="text-sm font-black text-violet-400 tracking-wider uppercase mb-3 flex items-center gap-1.5 bg-violet-950/30 px-3 py-1 rounded-full border border-violet-500/10">
-              <Brain className="w-3.5 h-3.5" />
-              FLOWY COMPANION
+            <h3 className="text-xs font-bold text-slate-300 tracking-wider uppercase mb-3 flex items-center gap-1.5 bg-surface-2 px-3 py-1 rounded-md border border-white/5">
+              <Brain className="w-3.5 h-3.5 text-accent" />
+              Journal Companion
             </h3>
 
-            <div className="w-full bg-[#11131c] border border-white/5 rounded-xl p-4 text-[12px] text-slate-300 leading-relaxed mb-4 relative min-h-[80px] flex items-center">
+            <div className="w-full bg-[#11131c] border border-white/5 rounded-xl p-4 text-[12px] text-slate-300 leading-relaxed mb-4 relative min-h-[70px] flex items-center">
               <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-[#11131c]" />
               <p className="text-center w-full">{mascotBubble}</p>
             </div>
@@ -413,61 +416,61 @@ export default function JournalPage() {
                 onClick={() => {
                   setMascotMood('calm');
                   if (language === 'id') {
-                    setMascotBubble("Carilah tempat duduk yang nyaman, rilekskan bahmu, tarik napas dalam... dan hembuskan perlahan. Sekarang, mari luapkan emosimu di kertas digital ini. 🍃");
+                    setMascotBubble("Luangkan waktu sejenak untuk menenangkan pikiran. Tulis apa yang paling melegakan hari ini.");
                   } else if (language === 'es') {
-                    setMascotBubble("Encuentra una postura cómoda, relaja tus hombros, respira profundo... y exhala suavemente. Ahora escribe tus pensamientos con calma. 🍃");
+                    setMascotBubble("Tómate un breve momento para calmar la mente. Escribe qué te ha dado tranquilidad hoy.");
                   } else if (language === 'de') {
-                    setMascotBubble("Setz dich bequem hin, entspanne deine Schultern, atme tief ein... und langsam aus. Jetzt halte deine Gedanken fest. 🍃");
+                    setMascotBubble("Nimm dir einen Moment für innere Ruhe. Notiere, was dir heute gutgetan hat.");
                   } else if (language === 'ar') {
-                    setMascotBubble("اجلس في مكان هادئ ومريح، أرخِ كتفيك، وتنفس بعمق... ثم اكتب مشاعرك بهدوء. 🍃");
+                    setMascotBubble("خذ لحظة هادئة لترتيب أفكارك. اكتب ما تشعر بالامتنان تجاهه اليوم.");
                   } else {
-                    setMascotBubble("Find a cozy sit, relax your shoulders, breathe in... and let it out. Now let's paint your emotions on this digital canvas. 🍃");
+                    setMascotBubble("Take a brief pause to center yourself. Note down what brought peace to your day.");
                   }
                 }}
-                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-white/5 rounded-lg text-[10px] uppercase font-bold transition-all flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-slate-100 border border-white/10 rounded-lg text-[10px] uppercase font-bold transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <Smile className="w-3 h-3 text-emerald-400" />
-                {language === 'id' ? 'Menenangkan' : language === 'es' ? 'Calmarse' : language === 'de' ? 'Beruhigen' : language === 'ar' ? 'هدوء' : 'Calm Down'}
+                <Compass className="w-3.5 h-3.5 text-emerald-400" />
+                {language === 'id' ? 'Refleksi Singkat' : language === 'es' ? 'Reflexión' : language === 'de' ? 'Reflexion' : language === 'ar' ? 'تأمل' : 'Pause & Reflect'}
               </button>
               <button 
                 type="button"
                 onClick={() => {
                   setMascotMood('thinking');
-                  const quotes = language === 'id' 
+                  const prompts = language === 'id' 
                     ? [
-                        "Pencapaian kecil setiap hari akan menumpuk menjadi kesuksesan besar!",
-                        "Kamu tidak perlu sempurna untuk menjadi luar biasa.",
-                        "Setiap emosi penting. Cemas, gundah, atau gembira adalah bagian dari kepingan hidupmu."
+                        "Apa 1 keputusan terbaik yang kamu buat hari ini?",
+                        "Apa tantangan terbesar yang berhasil kamu selesaikan?",
+                        "Hal apa yang ingin kamu tingkatkan besok?"
                       ]
                     : language === 'es'
                     ? [
-                        "¡Los pequeños logros diarios se acumulan en grandes éxitos!",
-                        "No necesitas ser perfecto para ser increíble.",
-                        "Cada emoción importa. La ansiedad, la calma o la alegría forman parte de tu camino."
+                        "¿Cuál fue la mejor decisión que tomaste hoy?",
+                        "¿Qué obstáculo lograste superar?",
+                        "¿Qué aspecto te gustaría mejorar mañana?"
                       ]
                     : language === 'de'
                     ? [
-                        "Kleine tägliche Erfolge führen zu großen Ergebnissen!",
-                        "Du musst nicht perfekt sein, um großartig zu sein.",
-                        "Jedes Gefühl ist wertvoll und gehört zu deiner Reise."
+                        "Was war deine beste Entscheidung heute?",
+                        "Welche Herausforderung hast du gemeistert?",
+                        "Was möchtest du morgen verbessern?"
                       ]
                     : language === 'ar'
                     ? [
-                        "الإنجازات اليومية الصغيرة تتراكم لتصنع نجاحات عظيمة!",
-                        "لست بحاجة لأن تكون مثاليًا لتكون مميزًا ورائعًا.",
-                        "كل شعور يمر بك ذو قيمة وهو جزء من رحلتك الفريدة."
+                        "ما هو أفضل قرار اتخذته اليوم؟",
+                        "ما هو التحدي الذي تمكنت من تجاوزه؟",
+                        "ما الذي تود تحسينه يوم غد؟"
                       ]
                     : [
-                        "Small daily actions compound into spectacular outcomes!",
-                        "You don't need to be flawless to be absolutely marvelous.",
-                        "Every emotion matters. Anxious, tired, or ecstatic—it's part of your unique journey."
+                        "What was the single best decision you made today?",
+                        "What key obstacle did you navigate through?",
+                        "What is one thing you want to improve tomorrow?"
                       ];
-                  setMascotBubble(`💡 Flowy: "${quotes[Math.floor(Math.random() * quotes.length)]}"`);
+                  setMascotBubble(`Prompt: "${prompts[Math.floor(Math.random() * prompts.length)]}"`);
                 }}
-                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-white/5 rounded-lg text-[10px] uppercase font-bold transition-all flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-slate-100 border border-white/10 rounded-lg text-[10px] uppercase font-bold transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <Sparkles className="w-3 h-3 text-indigo-400" />
-                {language === 'id' ? 'Tips Pikiran' : language === 'es' ? 'Consejos' : language === 'de' ? 'Tipps' : language === 'ar' ? 'نصائح' : 'Mind Tips'}
+                <Lightbulb className="w-3.5 h-3.5 text-accent" />
+                {language === 'id' ? 'Ide Menulis' : language === 'es' ? 'Ideas' : language === 'de' ? 'Ideen' : language === 'ar' ? 'أفكار' : 'Writing Prompts'}
               </button>
             </div>
 
@@ -478,7 +481,7 @@ export default function JournalPage() {
         <div className="bg-[#0b0c10] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-xl">
           <div className="flex justify-between items-center mb-4">
             <h4 className="text-xs font-bold text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
-              <HelpCircle className="w-4 h-4 text-violet-400" />
+              <HelpCircle className="w-4 h-4 text-accent" />
               {language === 'id' ? 'Ide Refleksi Harian' : language === 'es' ? 'Idea de Reflexión Diaria' : language === 'de' ? 'Tägliche Reflexionsidee' : language === 'ar' ? 'فكرة تأمل يومية' : 'Reflection Prompt Idea'}
             </h4>
             <button 
@@ -498,7 +501,7 @@ export default function JournalPage() {
           <button 
             type="button"
             onClick={usePromptInJournal}
-            className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all tracking-wide shadow-md shadow-violet-950/50 cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white font-bold py-2 px-4 rounded-xl text-xs transition-all tracking-wide shadow-glow-accent cursor-pointer"
           >
             <PenTool className="w-4 h-4" />
             {language === 'id' ? 'Ketik Dengan Ide Ini' : language === 'es' ? 'Escribir con esta idea' : language === 'de' ? 'Mit dieser Idee schreiben' : language === 'ar' ? 'الكتابة باستخدام هذا السؤال' : 'Write with This Idea'}
@@ -513,7 +516,7 @@ export default function JournalPage() {
         {/* Main Jurnal Entry Editor Form */}
         <div className="bg-[#0b0c10] border border-white/5 rounded-2xl p-6 shadow-xl relative">
           <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2 mb-2">
-            <BookOpen className="text-violet-400 w-5 h-5" />
+            <BookOpen className="text-accent w-5 h-5" />
             {language === 'id' ? 'Tulis Refleksi Harianmu' : language === 'es' ? 'Escribe tu Reflexión Diaria' : language === 'de' ? 'Tägliche Reflexion verfassen' : language === 'ar' ? 'اكتب تأملك اليومي' : 'Write Daily Reflection'}
           </h2>
           <p className="text-[12px] text-slate-400 mb-6 font-mono">
@@ -531,7 +534,7 @@ export default function JournalPage() {
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder={language === 'id' ? 'Contoh: Hari yang Super Produktif! 🚀' : language === 'es' ? 'Ejemplo: ¡Un día súper productivo! 🚀' : language === 'de' ? 'z.B.: Ein super produktiver Tag! 🚀' : language === 'ar' ? 'مثال: يوم عالي الإنتاجية! 🚀' : 'e.g., A Super Productive Mindset! 🚀'}
-                className="w-full bg-[#11131c] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-violet-500/50 transition-all font-medium"
+                className="w-full bg-[#11131c] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-accent transition-all font-medium"
               />
             </div>
 
@@ -591,14 +594,14 @@ export default function JournalPage() {
                 placeholder={language === 'id' ? 'Mulai mengetik perasaanmu, hambatan keuangan, target habits, pencapaian harimu...' : language === 'es' ? 'Comienza a escribir sobre tus sentimientos, metas, hábitos o logros...' : language === 'de' ? 'Schreibe über deine Gefühle, Gewohnheiten, Finanzen und Erfolge...' : language === 'ar' ? 'ابدأ في تدوين مشاعرك وأهدافك وإنجازاتك اليومية...' : 'Start reflecting on your achievements, goals, habits, or mental breakthroughs...'}
                 rows={5}
                 required
-                className="w-full bg-[#11131c] border border-white/5 rounded-xl p-4 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-violet-500/50 transition-all leading-relaxed font-normal resize-y min-h-[140px]"
+                className="w-full bg-[#11131c] border border-white/5 rounded-xl p-4 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-accent transition-all leading-relaxed font-normal resize-y min-h-[140px]"
               />
             </div>
 
             {/* Bottom Form Actions */}
             <div className="flex justify-between items-center pt-2">
               <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
-                <Calendar className="w-3.5 h-3.5 text-violet-400" />
+                <Calendar className="w-3.5 h-3.5 text-accent" />
                 <span className="font-mono">{new Date().toISOString().split('T')[0]}</span>
               </div>
 
@@ -607,11 +610,11 @@ export default function JournalPage() {
                 disabled={!content.trim()}
                 className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-lg ${
                   content.trim() 
-                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:scale-[1.02] active:scale-[0.98] shadow-violet-950/45 cursor-pointer' 
+                    ? 'bg-accent hover:bg-accent-hover text-white hover:scale-[1.02] active:scale-[0.98] shadow-glow-accent cursor-pointer' 
                     : 'bg-slate-900 border border-white/5 text-slate-600 cursor-not-allowed'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5 stroke-[2.5]" />
+                <BookOpen className="w-3.5 h-3.5 stroke-[2.5]" />
                 {language === 'id' ? 'Arsipkan Journal' : language === 'es' ? 'Guardar Diario' : language === 'de' ? 'Eintrag speichern' : language === 'ar' ? 'حفظ اليومية' : 'Archive Entry'}
               </button>
             </div>
@@ -626,7 +629,7 @@ export default function JournalPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                <Clock className="text-violet-400 w-5 h-5 animate-pulse" />
+                <Clock className="text-accent w-5 h-5 animate-pulse" />
                 {language === 'id' ? 'Arsip Jurnal Refleksi' : language === 'es' ? 'Historial de Reflexiones' : language === 'de' ? 'Reflexionsverlauf' : language === 'ar' ? 'أرشيف اليوميات والتأمل' : 'Reflections Archive History'}
               </h3>
               <p className="text-[11px] text-[#62666d]">
@@ -641,11 +644,11 @@ export default function JournalPage() {
               <div className="relative max-w-xs w-full">
                 <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-500" />
                 <input 
-                  type="text"
+                  type="text" 
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder={language === 'id' ? 'Cari jurnal...' : language === 'es' ? 'Buscar en el diario...' : language === 'de' ? 'Suchen...' : language === 'ar' ? 'بحث في اليوميات...' : 'Search reflections...'}
-                  className="w-full bg-[#11131c] border border-white/5 rounded-xl pl-8 pr-3 py-2 text-[11px] text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-violet-500/30 transition-all"
+                  className="w-full bg-[#11131c] border border-white/5 rounded-xl pl-8 pr-3 py-2 text-[11px] text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-accent transition-all"
                 />
               </div>
 
@@ -654,7 +657,7 @@ export default function JournalPage() {
                 <select
                   value={filterMood}
                   onChange={e => setFilterMood(e.target.value)}
-                  className="bg-[#11131c] border border-white/5 rounded-xl px-3 py-2 text-[11.5px] font-semibold text-slate-300 focus:outline-none focus:border-violet-500/30 transition-all cursor-pointer"
+                  className="bg-[#11131c] border border-white/5 rounded-xl px-3 py-2 text-[11.5px] font-semibold text-slate-300 focus:outline-none focus:border-accent transition-all cursor-pointer"
                 >
                   <option value="all">🧘🏽‍♂️ {language === 'id' ? 'Semua Mood' : language === 'es' ? 'Todos los Estados' : language === 'de' ? 'Alle Stimmungen' : language === 'ar' ? 'كل الحالات' : 'All Moods'}</option>
                   {MOODS.map(m => (
@@ -671,7 +674,7 @@ export default function JournalPage() {
           {/* List display */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-violet-500/20 border-t-violet-500 rounded-full animate-spin mb-2" />
+              <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin mb-2" />
               <p className="text-[11px] font-mono text-slate-500">{language === 'id' ? 'Menyinkronkan perjalanan jurnal...' : language === 'es' ? 'Sincronizando diario...' : 'Syncing journal logs...'}</p>
             </div>
           ) : filteredEntries.length === 0 ? (
@@ -694,7 +697,7 @@ export default function JournalPage() {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="bg-[#11131c]/60 hover:bg-[#11131c]/100 border border-white/5 hover:border-violet-500/10 p-4 rounded-xl transition-all relative group"
+                      className="bg-[#11131c]/60 hover:bg-[#11131c]/100 border border-white/5 hover:border-accent/20 p-4 rounded-xl transition-all relative group"
                     >
                       {/* Top Bar inside card */}
                       <div className="flex justify-between items-start mb-2.5">
@@ -720,7 +723,7 @@ export default function JournalPage() {
                       </div>
 
                       {/* Main Journal content */}
-                      <h4 className="text-xs font-bold text-slate-200 mb-1.5 group-hover:text-violet-400 transition-colors">
+                      <h4 className="text-xs font-bold text-slate-200 mb-1.5 group-hover:text-accent transition-colors">
                         {entry.title}
                       </h4>
                       <p className="text-[11.5px] text-slate-300 leading-relaxed whitespace-pre-line font-normal break-words">

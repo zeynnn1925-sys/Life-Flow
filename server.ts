@@ -1,35 +1,12 @@
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
-import * as admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
 import firebaseConfig from './firebase-applet-config.json' assert { type: 'json' };
 import { advisorRouter } from './server/routes/advisorRoute';
-
-// Lazy initialization of Firebase Admin
-let adminApp: admin.app.App | null = null;
-
-function getFirebaseAdmin() {
-  if (!adminApp) {
-    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-    if (!serviceAccountKey) {
-      console.warn('FIREBASE_SERVICE_ACCOUNT_KEY is not set. Firebase Admin SDK will not be initialized.');
-      return null;
-    }
-    try {
-      const serviceAccount = JSON.parse(serviceAccountKey);
-      adminApp = admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-      });
-      console.log('Firebase Admin initialized successfully.');
-    } catch (error) {
-      console.error('Failed to initialize Firebase Admin:', error);
-      return null;
-    }
-  }
-  return adminApp;
-}
+import { productivityRouter } from './server/routes/productivityRoute';
+import { getFirebaseAdmin, admin } from './server/firebaseAdmin';
 
 async function startServer() {
   const app = express();
@@ -37,7 +14,7 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Auth Middleware
+  // Strict Auth Middleware (for protected administrative endpoints)
   const authenticate = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
@@ -48,9 +25,8 @@ async function startServer() {
     const firebaseAdmin = getFirebaseAdmin();
     
     if (!firebaseAdmin) {
-      // In development, if Firebase key is missing, we might want to bypass or show clear error
       if (process.env.NODE_ENV !== 'production') {
-        console.warn('Firebase Admin not initialized, skipping authentication check');
+        console.warn('Firebase Admin not initialized, using dev fallback authentication');
         (req as any).user = { uid: 'dev-user', email: 'dev@example.com' };
         return next();
       }
@@ -67,13 +43,35 @@ async function startServer() {
     }
   };
 
+  // Permissive Auth Middleware (for user-facing features like AI advisor to support logged in and guest modes)
+  const optionalAuthenticate = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const idToken = authHeader.split('Bearer ')[1];
+      const firebaseAdmin = getFirebaseAdmin();
+      if (firebaseAdmin) {
+        try {
+          const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+          (req as any).user = decodedToken;
+          return next();
+        } catch (error: any) {
+          console.warn('Optional auth token could not be verified, continuing with guest profile:', error?.message);
+        }
+      }
+    }
+    (req as any).user = { uid: 'guest-user', email: 'guest@lifeflow.app' };
+    next();
+  };
+
   // API Routes
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', adminInitialized: !!getFirebaseAdmin() });
   });
 
   // AI Advisor Router with auth & verified server context
-  app.use('/api/advisor', authenticate, advisorRouter);
+  app.use('/api/advisor', optionalAuthenticate, advisorRouter);
+  app.use('/api/gemini/productivity-plan', productivityRouter);
+  app.use('/api/productivity-plan', productivityRouter);
 
   // Client-safe Gemini API endpoints
   let geminiClient: any = null;
@@ -268,14 +266,14 @@ async function startServer() {
     } catch (error: any) {
       console.error('Gemini generate-insight error (falling back to static list):', error);
       const fallbackId = [
-        "Fokus pada kemajuan hari ini, sekecil apapun itu. Alur kerja yang konsisten mengalahkan lonjakan motivasi yang sesaat.",
-        "Kelola energi Anda dengan bijak, bukan hanya waktu Anda. Mulailah hari dengan prioritas keuangan dan tugas yang paling berdampak.",
-        "Setiap kebiasaan kecil yang kita bangun hari ini adalah investasi berharga untuk masa depan keuangan dan kesejahteraan kita."
+        "Fokus pada penyelesaian tugas prioritas pertama dan catat pengeluaran harian Anda sedini mungkin.",
+        "Arus kas yang sehat dibangun dari kebiasaan mencatat transaksi secara teratur setiap hari.",
+        "Setiap progres kecil pada target bulanan membawa Anda lebih dekat pada stabilitas finansial."
       ];
       const fallbackEn = [
-        "Focus on today's progress, no matter how small. A consistent workflow beats a short burst of motivation.",
-        "Manage your energy, not just your time. Start your day with high-impact financial and personal goals.",
-        "Every small habit you build today is a valuable investment in your future financial freedom and wellbeing."
+        "Focus on finishing your highest-priority task first and log daily transactions early.",
+        "Healthy cash flow is built through consistent daily tracking and conscious spending habits.",
+        "Every small progress towards your monthly target brings you closer to long-term financial stability."
       ];
       const list = language === 'id' ? fallbackId : fallbackEn;
       const randomInsight = list[Math.floor(Math.random() * list.length)];

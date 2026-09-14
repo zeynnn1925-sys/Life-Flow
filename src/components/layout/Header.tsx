@@ -8,7 +8,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { View } from '../../types';
 import { Language } from '../../translations';
-import { SyncStatusIndicator } from '../SyncStatusIndicator';
 import { PWAInstallButton } from '../PWAInstallButton';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 
@@ -50,11 +49,6 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
         >
           <MenuIcon size={16} />
         </button>
-
-        {/* Sync Status Badge */}
-        <div className="hidden md:block">
-          <SyncStatusIndicator compact />
-        </div>
       </div>
 
       {/* Middle Section - Clock */}
@@ -66,11 +60,6 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
       <div className="flex items-center gap-1.5 sm:gap-3">
         {/* PWA Install Button */}
         <PWAInstallButton />
-
-        {/* Sync indicator for small screens */}
-        <div className="md:hidden">
-          <SyncStatusIndicator compact />
-        </div>
 
         {/* Language Selector Dropdown */}
         <LanguageSwitcher />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { PieChart, Loader2, AlertCircle, ArrowUpRight } from 'lucide-react';
 import { Transaction, Category } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import ReactMarkdown from 'react-markdown';
@@ -83,7 +83,7 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
         <div className="flex-1">
           <h3 className="text-heading-sm font-bold flex items-center gap-2 text-ink uppercase tracking-tight">
-            <Sparkles className="w-5 h-5 text-accent shrink-0" />
+            <PieChart className="w-5 h-5 text-accent shrink-0" />
             {language === 'id' ? 'Penasihat AI 50/30/20' : '50/30/20 AI Advisor'}
           </h3>
           <p className="text-body-sm text-ink-tertiary mt-1.5 leading-relaxed">
@@ -104,7 +104,7 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
+              <ArrowUpRight className="w-4 h-4" />
               {language === 'id' ? 'Minta Saran AI' : 'Get AI Advice'}
             </>
           )}
@@ -124,8 +124,8 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
           animate={{ opacity: 1 }}
           className="bg-surface-2 border border-hairline p-6 rounded-md relative"
         >
-          <div className="absolute top-4 right-4 opacity-5">
-            <Sparkles size={48} />
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-accent/10 text-accent text-[11px] font-mono font-semibold uppercase tracking-wider mb-4 border border-accent/20">
+            AI Financial Advice
           </div>
           <div className="markdown-body text-ink prose prose-sm max-w-none prose-headings:text-ink prose-p:text-ink-subtle prose-strong:text-ink prose-li:text-ink-subtle">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{advice}</ReactMarkdown>

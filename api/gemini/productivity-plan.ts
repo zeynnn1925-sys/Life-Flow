@@ -1,20 +1,25 @@
-import { DailyQuote, AIProductivityPlan } from "../types";
-import quotesData from '../data/quotes.json';
+import { GoogleGenAI } from '@google/genai';
 
-export async function generateDailyQuote(): Promise<DailyQuote> {
-  const randomIndex = Math.floor(Math.random() * quotesData.length);
-  const quote = quotesData[randomIndex];
-  
-  return {
-    id: Math.random().toString(36).substr(2, 9),
-    text: quote.text,
-    author: quote.author,
-    field: "1001 Motivational Quotes for Success",
-    date: new Date().toISOString().split('T')[0]
-  };
+let geminiClient: any = null;
+function getGeminiClient() {
+  if (!geminiClient) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY environment variable is required');
+    }
+    geminiClient = new GoogleGenAI({
+      apiKey: apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build-productivity-vercel',
+        }
+      }
+    });
+  }
+  return geminiClient;
 }
 
-const getLocalFallbackPlan = (isId: boolean) => [
+const getFallbackPlan = (isId: boolean) => [
   {
     title: isId ? "Review & Perencanaan Pagi" : "Morning Planning & Review",
     startTime: "08:00",
@@ -62,57 +67,31 @@ const getLocalFallbackPlan = (isId: boolean) => [
   }
 ];
 
-export async function generateAIProductivityPlan(date: string, language: string = 'en'): Promise<AIProductivityPlan> {
+export default async function handler(req: any, res: any) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { date, language } = req.body || {};
   const isId = language === 'id';
-  const endpoints = ['/api/gemini/productivity-plan', '/api/productivity-plan'];
-  
-  let responseData: any = null;
 
-  for (const endpoint of endpoints) {
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ date, language }),
-      });
+  try {
+    const ai = getGeminiClient();
+    const langPrompt = isId ? 'in Indonesian' : 'in English';
+    const planPrompt = `Create a highly productive daily schedule for ${date || new Date().toISOString().split('T')[0]} ${langPrompt}. 
+    Return strictly a JSON array of 4-5 items with keys: title, startTime, endTime, challenge, fieldToStudy, toolsNeeded (string array), targetPercentage (number).`;
 
-      if (response.ok) {
-        responseData = await response.json();
-        if (responseData?.text) break;
+    const result = await ai.models.generateContent({
+      model: 'gemini-3.6-flash',
+      contents: planPrompt,
+      config: {
+        responseMimeType: "application/json"
       }
-    } catch (err) {
-      console.warn(`Attempt on ${endpoint} failed, trying next option...`, err);
-    }
+    });
+
+    return res.status(200).json({ text: result.text });
+  } catch (err: any) {
+    console.error('Vercel serverless productivity-plan error:', err?.message || err);
+    return res.status(200).json({ text: JSON.stringify(getFallbackPlan(isId)) });
   }
-
-  if (responseData?.text) {
-    try {
-      const rawParsed = typeof responseData.text === 'string' ? JSON.parse(responseData.text) : responseData.text;
-      const items = (Array.isArray(rawParsed) ? rawParsed : []).map((item: any) => ({
-        ...item,
-        id: Math.random().toString(36).substr(2, 9),
-        completed: false
-      }));
-
-      if (items.length > 0) {
-        return { date, items };
-      }
-    } catch (err) {
-      console.warn("Parsing AI productivity response failed, using smart fallback", err);
-    }
-  }
-
-  // Graceful fallback plan
-  const items = getLocalFallbackPlan(isId).map((item: any) => ({
-    ...item,
-    id: Math.random().toString(36).substr(2, 9),
-    completed: false
-  }));
-
-  return {
-    date,
-    items
-  };
 }

@@ -4,7 +4,6 @@ import {
   TrendingUp, 
   Calendar, 
   Target as TargetIcon, 
-  Sparkles, 
   Wallet, 
   ChevronRight,
   Play,
@@ -361,22 +360,29 @@ export default function DashboardPage({
 
     } catch (err: any) {
       console.warn("Failed to stream AI insight (gracefully falling back):", err);
-      // Fallback
+      // Fallback tailored to actual budget and productivity status
+      const topCat = topExpenseCategory ? topExpenseCategory.category : null;
       const idInsights = [
-        "Fokus pada kemajuan hari ini, sekecil apapun itu. Alur kerja yang konsisten mengalahkan lonjakan motivasi yang sesaat.",
-        "Kelola energi Anda dengan bijak, bukan hanya waktu Anda. Mulailah hari dengan prioritas keuangan dan tugas yang paling berdampak.",
-        "Keseimbangan finansial dan produktivitas harian berjalan beriringan. Mulai catat transaksi Anda hari ini untuk kedamaian pikiran.",
-        "Mencapai target harian Anda dimulai dari satu langkah kecil. Selesaikan tugas prioritas pertama Anda sekarang juga.",
-        "Ingatlah untuk mengambil napas dalam-dalam dan beristirahat secara teratur. Aliran hidup yang sehat adalah komitmen maraton.",
-        "Kebiasaan kecil yang dilakukan dengan konsisten setiap hari akan membuahkan perubahan finansial dan karir yang luar biasa."
+        thisMonthExpense > thisMonthIncome && thisMonthIncome > 0
+          ? `Pengeluaran bulan ini (Rp ${thisMonthExpense.toLocaleString('id-ID')}) melampaui pemasukan; evaluasi pengeluaran ${topCat || 'terbesar'} Anda.`
+          : `Arus kas bulan ini dalam batas aman. Alokasikan sisa dana ke target tabungan prioritas Anda.`,
+        topCat
+          ? `Kategori ${topCat} menyerap porsi terbesar pengeluaran Anda. Pantau batas anggaran sebelum akhir pekan.`
+          : `Catat setiap pengeluaran kecil hari ini agar evaluasi anggaran mingguan tetap akurat.`,
+        targets.length > 0
+          ? `Ada ${targets.length} target aktif berjalan. Selesaikan tugas atau alokasi kecil hari ini untuk menjaga momentum.`
+          : `Tentukan minimal 1 target finansial atau kebiasaan baru bulan ini untuk memandu prioritas Anda.`
       ];
       const enInsights = [
-        "Focus on today's progress, no matter how small. A consistent workflow beats short bursts of sudden motivation.",
-        "Manage your energy status, not just your clock. Tackle the most impactful financial and habit goals first today.",
-        "Financial clarity and daily peace of mind go hand in hand. Track your spending habits early to secure your peace.",
-        "Ambitious target completion begins with small daily habits. Smash your highest priority task first today.",
-        "Remember to take intentional breathing breaks. A clean, optimized cosmic state is built on sustainable efforts.",
-        "Small daily routines compound into massive breakthroughs over time. Stay focused on your targets and flow!"
+        thisMonthExpense > thisMonthIncome && thisMonthIncome > 0
+          ? `Current expenses (Rp ${thisMonthExpense.toLocaleString('en-US')}) exceed income; review your ${topCat || 'top'} spending category.`
+          : `Your cash flow is currently balanced. Consider allocating surplus to priority savings goals.`,
+        topCat
+          ? `${topCat} represents your highest expense category. Monitor discretionary limits closely.`
+          : `Consistent daily transaction tracking ensures your weekly budget review stays accurate.`,
+        targets.length > 0
+          ? `You have ${targets.length} active targets. Check off today's milestones to maintain steady momentum.`
+          : `Define at least 1 key financial or habit goal this month to guide your daily priorities.`
       ];
       const list = language === 'id' ? idInsights : enInsights;
       const randomInsight = list[Math.floor(Math.random() * list.length)];
@@ -684,7 +690,7 @@ export default function DashboardPage({
                     return (
                       <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 border border-white/5 text-[11px]">
                         <span className="text-zinc-300 font-medium truncate flex items-center gap-1.5">
-                          <span>{item.icon || '✨'}</span>
+                          <span>{item.icon || '⚡'}</span>
                           <span className="truncate">{item.title}</span>
                         </span>
                         {isCompleted ? (
@@ -718,8 +724,11 @@ export default function DashboardPage({
               </div>
               <div className="h-px bg-white/5" />
 
-              <div className="h-[140px] w-full mt-2">
-                <ResponsiveContainer width="100%" height="100%">
+              <div 
+                className="w-full min-w-0 mt-2" 
+                style={{ height: 140, minHeight: 140 }}
+              >
+                <ResponsiveContainer width="100%" height={140} minWidth={100} minHeight={140} debounce={50}>
                   <BarChart data={last7Days} margin={{ top: 5, right: 0, left: -24, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#A1A1AA', fontSize: 9 }} />
@@ -854,8 +863,7 @@ export default function DashboardPage({
             <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-4 flex flex-col gap-3 relative overflow-hidden">
               <div className="flex items-center justify-between">
                 <span className="text-[13px] font-bold text-zinc-300 flex items-center gap-1.5 select-none">
-                  {/* TODO: replace with 3D icon */}
-                  ✨ {language === 'id' ? 'Inspirasi Harian' : 'Daily Inspiration'}
+                  {language === 'id' ? 'Inspirasi Harian' : 'Daily Inspiration'}
                 </span>
                 <button
                   onClick={handleRefreshQuote}
@@ -927,7 +935,7 @@ export default function DashboardPage({
                   onClick={() => setActiveView('ai_planner')}
                   className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 hover:bg-[#1f1f1f]/80 border border-white/5 backdrop-blur-sm hover:border-orange-500/25 transition-all text-left cursor-pointer group"
                 >
-                  <span className="text-[11px] text-zinc-300 group-hover:text-zinc-100 font-semibold truncate">✨ AI Plan</span>
+                  <span className="text-[11px] text-zinc-300 group-hover:text-zinc-100 font-semibold truncate">AI Plan</span>
                   <ArrowRight size={10} className="text-zinc-500 group-hover:text-orange-500 transition-colors shrink-0 ml-1" />
                 </button>
                 <button 
@@ -1021,7 +1029,7 @@ export default function DashboardPage({
                 return (
                   <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 border border-white/5 text-[10px]">
                     <span className="text-zinc-300 truncate font-medium">
-                      {item.icon || '✨'} {item.title}
+                      {item.icon || '⚡'} {item.title}
                     </span>
                     <span>{isCompleted ? '✅' : '○'}</span>
                   </div>
@@ -1070,14 +1078,14 @@ export default function DashboardPage({
               <button onClick={() => setActiveView('schedule')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">✅ Tugas <ArrowRight size={10} /></button>
               <button onClick={() => setActiveView('habits')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">🔥 Habit <ArrowRight size={10} /></button>
               <button onClick={() => setActiveView('targets')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">🎯 Target <ArrowRight size={10} /></button>
-              <button onClick={() => setActiveView('ai_planner')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">✨ AI Plan <ArrowRight size={10} /></button>
+              <button onClick={() => setActiveView('ai_planner')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">AI Plan <ArrowRight size={10} /></button>
               <button onClick={() => setActiveView('journal')} className="h-9 px-2 flex items-center justify-between rounded-lg bg-[#1f1f1f]/50 border border-white/5 backdrop-blur-sm active:bg-[#1f1f1f]/80 text-[11px] text-zinc-300 font-semibold cursor-pointer">📖 Jurnal <ArrowRight size={10} /></button>
             </div>
           </div>
 
           {/* M7. Daily Quote */}
           <div className="bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-[12px] p-3 flex flex-col gap-2">
-            <span className="text-[12px] font-bold text-zinc-300">✨ Daily Inspiration</span>
+            <span className="text-[12px] font-bold text-zinc-300">{language === 'id' ? 'Inspirasi Harian' : 'Daily Inspiration'}</span>
             <div className="h-px bg-white/5" />
             {dailyQuote ? (
               <p className="text-[11px] leading-relaxed text-zinc-200 italic text-left">

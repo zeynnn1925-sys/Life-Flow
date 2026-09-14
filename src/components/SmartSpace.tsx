@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
-  Sparkles, 
   Volume2, 
   VolumeX, 
   Play, 
@@ -332,15 +331,12 @@ Date: ${new Date().toLocaleDateString('en-US')}
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-violet-600/10 flex items-center justify-center border border-violet-500/20">
-            <BrainCircuit size={22} className="text-violet-400" />
+          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20">
+            <BrainCircuit size={22} className="text-accent" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2">
               LifeFlow AI Space
-              <span className="text-[10px] bg-violet-500/20 text-violet-400 uppercase tracking-widest px-2 py-0.5 rounded-full font-bold border border-violet-500/15">
-                INTEGRATED
-              </span>
             </h1>
             <p className="text-xs text-slate-400">
               {language === 'es' 
@@ -361,9 +357,9 @@ Date: ${new Date().toLocaleDateString('en-US')}
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 px-3 py-2 bg-[#12141c] border border-violet-500/25 rounded-xl text-xs"
+            className="flex items-center gap-3 px-3 py-2 bg-[#12141c] border border-accent/25 rounded-xl text-xs"
           >
-            <Volume2 className="text-violet-400 animate-pulse w-4 h-4" />
+            <Volume2 className="text-accent animate-pulse w-4 h-4" />
             <span className="text-[11px] text-slate-300 font-mono">
               Synth: {noisePreset.toUpperCase()}
             </span>
@@ -374,7 +370,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
               step="0.05"
               value={volume}
               onChange={handleLevelChange}
-              className="w-16 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500"
+              className="w-16 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-accent"
             />
           </motion.div>
         )}
@@ -395,7 +391,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                 isSelected 
-                  ? 'bg-violet-600 text-white shadow-md' 
+                  ? 'bg-accent text-white shadow-glow-accent' 
                   : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
               }`}
             >
@@ -415,7 +411,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
             <div className="lg:col-span-7 flex flex-col gap-6 order-2 lg:order-1">
               <div>
                 <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                  <Compass className="text-violet-400 w-5 h-5" />
+                  <Compass className="text-accent w-5 h-5" />
                   {language === 'es' ? 'Cámara de Enfoque Pomodoro' : language === 'id' ? 'Fokus Cerdas Pomodoro' : 'Aesthetic Smart Pomodoro Chamber'}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
@@ -429,14 +425,14 @@ Date: ${new Date().toLocaleDateString('en-US')}
 
               {/* Linked Task Selector */}
               <div className="bg-slate-950/80 p-4 border border-white/5 rounded-xl flex flex-col gap-3">
-                <label className="text-[11px] font-bold text-violet-400 uppercase tracking-widest flex items-center gap-2">
+                <label className="text-[11px] font-bold text-accent uppercase tracking-widest flex items-center gap-2">
                   <Target size={12} />
                   {language === 'es' ? 'Vincular Tarea del Horario' : language === 'id' ? 'Hubungkan Agenda Tugas' : 'Link Active Daily Task'}
                 </label>
                 <select
                   value={selectedTaskId}
                   onChange={(e) => setSelectedTaskId(e.target.value)}
-                  className="bg-slate-900 border border-white/10 rounded-lg p-2 text-xs text-slate-300 focus:outline-none focus:border-violet-500"
+                  className="bg-slate-900 border border-white/10 rounded-lg p-2 text-xs text-slate-300 focus:outline-none focus:border-accent"
                 >
                   <option value="">
                     {language === 'es' ? '-- Seleccionar Tarea para Enfocarte --' : language === 'id' ? '-- Pilih Tugas untuk Difokuskan --' : '-- Choose Task to Focus On --'}
@@ -457,7 +453,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
 
               {/* Procedural Preset Audio Board */}
               <div className="flex flex-col gap-3">
-                <label className="text-[11px] font-bold text-violet-400 uppercase tracking-widest flex items-center gap-2">
+                <label className="text-[11px] font-bold text-accent uppercase tracking-widest flex items-center gap-2">
                   <Volume2 size={12} />
                   {language === 'es' ? "Paisajes Sonoros de Concentración (En Vivo)" : language === 'id' ? "Aliran Audio Soundscape (Klik Untuk Aktifkan)" : "Choose Procedural Focus Soundscape (Plays live!)"}
                 </label>
@@ -475,13 +471,13 @@ Date: ${new Date().toLocaleDateString('en-US')}
                         onClick={() => handleNoisePlayToggle(preset.id)}
                         className={`p-3 rounded-lg border text-left flex flex-col gap-1 transition-all cursor-pointer ${
                           activeNoise 
-                            ? 'bg-violet-600/20 border-violet-500 text-violet-300 shadow-md scale-[1.02]' 
+                            ? 'bg-accent/15 border-accent text-accent shadow-md scale-[1.02]' 
                             : 'bg-[#12141c] border-white/5 hover:border-slate-700 text-slate-400'
                         }`}
                       >
                         <span className="text-xs font-bold text-slate-200">{preset.name}</span>
                         <span className="text-[10px] opacity-75 font-mono">{preset.desc}</span>
-                        <span className={`text-[9px] font-bold uppercase mt-1 tracking-widest self-end ${activeNoise ? 'text-violet-400 animate-pulse' : 'text-slate-600'}`}>
+                        <span className={`text-[9px] font-bold uppercase mt-1 tracking-widest self-end ${activeNoise ? 'text-accent animate-pulse' : 'text-slate-600'}`}>
                           {activeNoise ? (language === 'es' ? '● ACTIVO' : language === 'id' ? '● AKTIF' : '● ACTIVE') : (language === 'es' ? 'APAGADO' : language === 'id' ? 'MATI' : 'OFF')}
                         </span>
                       </button>
@@ -498,26 +494,26 @@ Date: ${new Date().toLocaleDateString('en-US')}
               <div className="flex gap-1 bg-slate-900 p-1 rounded-lg border border-white/5 mb-6 text-[10px]">
                 <button 
                   onClick={() => selectPomoMode('focus')}
-                  className={`px-3 py-1 rounded-md transition-all font-bold uppercase tracking-wider ${pomoMode === 'focus' ? 'bg-violet-500 text-white' : 'text-slate-400'}`}
+                  className={`px-3 py-1 rounded-md transition-all font-bold uppercase tracking-wider ${pomoMode === 'focus' ? 'bg-accent text-white shadow-glow-accent' : 'text-slate-400'}`}
                 >
                   {language === 'es' ? 'Enfoque (25m)' : 'Focus (25m)'}
                 </button>
                 <button 
                   onClick={() => selectPomoMode('short_break')}
-                  className={`px-3 py-1 rounded-md transition-all font-bold uppercase tracking-wider ${pomoMode === 'short_break' ? 'bg-violet-500 text-white' : 'text-slate-400'}`}
+                  className={`px-3 py-1 rounded-md transition-all font-bold uppercase tracking-wider ${pomoMode === 'short_break' ? 'bg-accent text-white shadow-glow-accent' : 'text-slate-400'}`}
                 >
                   {language === 'es' ? 'Pausa (5m)' : 'Break (5m)'}
                 </button>
                 <button 
                   onClick={() => selectPomoMode('long_break')}
-                  className={`px-3 py-1 rounded-md transition-all font-bold uppercase tracking-wider ${pomoMode === 'long_break' ? 'bg-violet-500 text-white' : 'text-slate-400'}`}
+                  className={`px-3 py-1 rounded-md transition-all font-bold uppercase tracking-wider ${pomoMode === 'long_break' ? 'bg-accent text-white shadow-glow-accent' : 'text-slate-400'}`}
                 >
                   {language === 'es' ? 'Pausa Larga (15m)' : 'Long Break (15m)'}
                 </button>
               </div>
 
               {/* Clock face */}
-              <div className="relative w-44 h-44 rounded-full border-2 border-dashed border-violet-500/20 flex flex-col items-center justify-center my-4 overflow-hidden bg-slate-950/40">
+              <div className="relative w-44 h-44 rounded-full border-2 border-dashed border-accent/20 flex flex-col items-center justify-center my-4 overflow-hidden bg-slate-950/40">
                 {pomoActive && (
                   <motion.div
                     animate={{
@@ -529,11 +525,11 @@ Date: ${new Date().toLocaleDateString('en-US')}
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="absolute inset-4 rounded-full bg-violet-500/10 blur-xl pointer-events-none"
+                    className="absolute inset-4 rounded-full bg-accent/10 blur-xl pointer-events-none"
                   />
                 )}
 
-                <span className="text-[13px] font-mono tracking-widest text-violet-400 font-bold uppercase mb-1">
+                <span className="text-[13px] font-mono tracking-widest text-accent font-bold uppercase mb-1">
                   {pomoMode.replace('_', ' ').toUpperCase()}
                 </span>
                 <span className="text-4xl font-extrabold text-slate-100 font-mono tracking-tighter">
@@ -546,7 +542,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -5 }}
-                    className="text-[10px] font-bold text-violet-300 uppercase tracking-widest mt-2"
+                    className="text-[10px] font-bold text-accent uppercase tracking-widest mt-2"
                   >
                     💆 {breathingText}
                   </motion.span>
@@ -577,12 +573,12 @@ Date: ${new Date().toLocaleDateString('en-US')}
                   onClick={() => setIsFloating(!isFloating)}
                   className={`w-12 h-12 border rounded-full flex items-center justify-center transition-all cursor-pointer ${
                     isFloating
-                      ? 'bg-violet-600 border-violet-500 text-white hover:bg-violet-500 hover:shadow-md'
+                      ? 'bg-accent border-accent text-white hover:bg-accent-hover shadow-glow-accent'
                       : 'bg-slate-900 border-white/5 hover:border-slate-700 text-slate-300'
                   }`}
                   title={language === 'es' ? "Flotar temporizador" : "Float Timer on Screen"}
                 >
-                  <Pin size={16} className={isFloating ? "rotate-45 text-violet-200 animate-pulse" : ""} />
+                  <Pin size={16} className={isFloating ? "rotate-45 text-white animate-pulse" : ""} />
                 </button>
               </div>
 
@@ -636,7 +632,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
                   {language === 'es' ? 'Pronóstico Actual' : 'Current Forecast'}
                 </span>
                 <h4 className="text-base font-bold text-slate-200 mt-1 mb-4 flex items-center gap-1.5">
-                  <MapPin size={14} className="text-violet-400" />
+                  <MapPin size={14} className="text-accent" />
                   {selectedCity}
                 </h4>
 
@@ -657,15 +653,15 @@ Date: ${new Date().toLocaleDateString('en-US')}
 
               {/* Coach Advisory */}
               <div className="md:col-span-8 flex flex-col gap-4">
-                <div className="bg-gradient-to-r from-violet-600/10 to-transparent p-5 border border-violet-500/20 rounded-2xl">
-                  <label className="text-[11px] font-bold text-violet-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Sparkles size={12} className="animate-bounce" />
+                <div className="bg-[#11131c] p-5 border border-white/5 rounded-2xl">
+                  <label className="text-[11px] font-bold text-accent uppercase tracking-widest flex items-center gap-1.5">
+                    <CloudSun size={13} />
                     AI Habit Planner Recommendations
                   </label>
                   
                   {isSyncingWeatherPlan ? (
                     <div className="py-8 flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-violet-500/30 border-t-violet-400 rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
                     </div>
                   ) : (
                     <p className="text-xs text-slate-200 leading-relaxed mt-3 italic">
@@ -751,8 +747,8 @@ Date: ${new Date().toLocaleDateString('en-US')}
                         style={{
                           left: `${node.x - 70}px`,
                           top: `${node.y - 50}px`,
-                          backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.15)' : 'rgba(15, 17, 26, 0.9)',
-                          borderColor: isSelected ? '#a78bfa' : 'rgba(255,255,255,0.08)',
+                          backgroundColor: isSelected ? 'rgba(255, 85, 0, 0.15)' : 'rgba(15, 17, 26, 0.9)',
+                          borderColor: isSelected ? '#FF5500' : 'rgba(255,255,255,0.08)',
                         }}
                       >
                         <div 
@@ -769,7 +765,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
 
               {/* AI Coaching Bubble Panel */}
               <div className="md:w-72 bg-slate-900/60 border border-white/5 p-4 rounded-xl flex flex-col gap-3 shrink-0">
-                <span className="text-[11px] font-bold text-violet-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-accent uppercase tracking-widest flex items-center gap-1.5">
                   <BrainCircuit size={12} />
                   AI Lifestyle Connection
                 </span>
@@ -783,7 +779,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
                       "{nodes.find(n => n.id === selectedNode)?.desc}"
                     </p>
                     <div className="border-t border-white/5 pt-2 mt-1">
-                      <p className="text-[11px] text-violet-300 leading-relaxed">
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
                         {selectedNode === 'spend_coffee' 
                           ? (language === 'es' ? 'Los altos gastos en café boutique indican fatiga y búsqueda de gratificación rápida.' : language === 'id' ? 'Belanja kafe instan tinggi mengindikasikan lonjakan korelasi tingkat kelelahan mental atau kebosanan rutinitas pagi.' : 'High boutique caffeine spends indicate micro-stress fatigue cycles, pushing you into immediate instant-gratification spending.')
                           : selectedNode === 'focus_completed'
@@ -807,7 +803,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
               {nodeConnections.map(conn => (
                 <div key={conn.labelId} className="bg-[#11131c] p-4 border border-white/5 rounded-xl flex flex-col gap-2">
-                  <h5 className="text-xs font-bold text-violet-400 flex items-center gap-2">
+                  <h5 className="text-xs font-bold text-accent flex items-center gap-2">
                     <Zap size={12} className="text-yellow-400" />
                     {conn.title}
                   </h5>
@@ -852,13 +848,13 @@ Date: ${new Date().toLocaleDateString('en-US')}
                   <button
                     onClick={generateWeeklyWrap}
                     disabled={isGeneratingWrap}
-                    className="w-full h-11 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full h-11 bg-accent hover:bg-accent-hover text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-glow-accent shrink-0 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {isGeneratingWrap ? (
                       <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        <Sparkles size={14} />
+                        <FileText size={14} />
                         {language === 'es' ? "Generar Resumen" : language === 'id' ? "Kompilasi Laporan" : "Compile Weekly Wrap"}
                       </>
                     )}
@@ -889,7 +885,7 @@ Date: ${new Date().toLocaleDateString('en-US')}
 
                       <button
                         onClick={handleGmailDraft}
-                        className="text-xs text-violet-400 hover:text-violet-300 font-bold flex items-center gap-1.5 focus:outline-none"
+                        className="text-xs text-accent hover:opacity-80 font-bold flex items-center gap-1.5 focus:outline-none"
                       >
                         <Mail size={13} />
                         {language === 'es' ? "Borrador en Gmail" : language === 'id' ? "Salurkan ke Gmail" : "Draft in Gmail"}

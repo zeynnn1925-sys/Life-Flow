@@ -105,8 +105,8 @@ export default function FinancialVisualization() {
             </h3>
             <Calendar className="w-5 h-5 text-ink-tertiary/40" />
           </div>
-          <div className="h-[260px] sm:h-[320px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="w-full min-w-0 h-[260px] sm:h-[320px]" style={{ minHeight: 260 }}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={260} minWidth={100} debounce={50}>
               <BarChart data={monthlyExpensesData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-hairline)" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-ink-tertiary)', fontSize: 10, fontWeight: 700 }} />
@@ -138,8 +138,8 @@ export default function FinancialVisualization() {
             </h3>
             <TrendingDown className="w-5 h-5 text-ink-tertiary/40" />
           </div>
-          <div className="h-[260px] sm:h-[320px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="w-full min-w-0 h-[260px] sm:h-[320px]" style={{ minHeight: 260 }}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={260} minWidth={100} debounce={50}>
               <PieChart>
                 <Pie
                   data={categoryData}

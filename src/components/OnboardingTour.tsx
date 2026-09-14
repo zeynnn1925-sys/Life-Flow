@@ -25,101 +25,101 @@ interface TourStep {
 const TOUR_STEPS: TourStep[] = [
   {
     view: 'dashboard',
-    titleId: "👋 Halo Zeynnn! Selamat Datang!",
-    titleEn: "👋 Welcome Zeynnn!",
-    textId: "Aku Flo, peri pelindung kesadaran mental dan kedamaianmu! Senang sekali bisa bertemu denganmu. Ayo, aku temani jalan-jalan singkat untuk mencicipi semua fitur ajaib di Life Flow! 🌸✨",
-    textEn: "I'm Flo, your personal mindfulness and peace guardian! So happy to meet you. Permit me to show you around all the magical capabilities of Life Flow! 🌸✨",
-    expression: "(o^◇^o)✨",
+    titleId: "Selamat Datang di LifeFlow",
+    titleEn: "Welcome to LifeFlow",
+    textId: "LifeFlow mengintegrasikan pencatatan keuangan pribadi, pelacakan target kebiasaan harian, dan perencanaan produktivitas dalam satu workspace terpadu.",
+    textEn: "LifeFlow integrates personal finance tracking, daily habit targets, and productivity planning into one cohesive workspace.",
+    expression: "01",
     position: 'center'
   },
   {
     view: 'dashboard',
-    titleId: "📊 Dashboard Utama",
-    titleEn: "📊 Core Dashboard",
-    textId: "Ini adalah panel pusat kedamaianmu. Kamu bisa mengintip ringkasan finansial, sisa saldo, persentase proyek selesai, serta kutipan inspirasi harian yang menyegarkan jiwa. 🌟",
-    textEn: "This is your mindfulness control center. Peek at your balance sheet, completed daily checklists, goal progressions, and daily uplifting quotes to fuel your day! 🌟",
-    expression: "(◕‿◕✿)🍃",
+    titleId: "Dasbor Ringkasan",
+    titleEn: "Core Dashboard",
+    textId: "Pantau ringkasan saldo keuangan, metrik pengeluaran 7 hari terakhir, kemajuan target aktif, dan rekomendasi aksi harian Anda.",
+    textEn: "Monitor balance summaries, 7-day expense trends, active target progress, and daily action recommendations.",
+    expression: "02",
     position: 'middle'
   },
   {
     view: 'finance',
-    titleId: "💰 Dompet & Pengeluaran",
-    titleEn: "💰 Wallet & Expenses",
-    textId: "Pantau setiap rupiah/dolar yang kamu miliki di Tracker Keuangan! Di sini kamu bisa mencatatkan pendapatan, beban pengeluaran, menyinkronkan data langsung ke Google Sheets, atau mengimpor file! 💸",
-    textEn: "Track all your coins and cash flow inside the Financial Tracker! Easily list your dynamic income and utilities, sync directly to Google Sheets database, or upload invoices! 💸",
-    expression: "(•◡•)💭",
+    titleId: "Pencatatan Keuangan",
+    titleEn: "Financial Tracker",
+    textId: "Catat pemasukan dan pengeluaran secara rinci menurut dompet dan kategori. Dilengkapi dukungan sinkronisasi Google Sheets dan ekspor/impor data.",
+    textEn: "Record income and expenses categorized by account and type. Features Google Sheets synchronization and data import/export.",
+    expression: "03",
     position: 'middle'
   },
   {
     view: 'budgets',
-    titleId: "📈 Anggaran & Rencana Tabungan",
-    titleEn: "📈 Budgets & Savings Goal",
-    textId: "Jangan biarkan uangmu menguap begitu saja! Di menu Budgets & Savings, kamu bisa menjatah batas pengeluaran kategori bulanan dan membuat target tabungan mimpi dengan diagram progres yang asri! 🚀",
-    textEn: "Don't let your funds vanish into thin air! In the Budgets page, you can assign category limits and define dream savings goals adorned with responsive visual elements! 🚀",
-    expression: "(✿◠‿◠)🏆",
+    titleId: "Anggaran & Tabungan",
+    titleEn: "Budgets & Savings",
+    textId: "Tetapkan batas pengeluaran bulanan per kategori dan pantau alokasi target tabungan untuk menjaga kedisiplinan finansial.",
+    textEn: "Set monthly category spending limits and track savings target allocations to maintain financial discipline.",
+    expression: "04",
     position: 'middle'
   },
   {
     view: 'visualization',
-    titleId: "📊 Analisis & Diagram d3",
-    titleEn: "📊 Analytics & d3 Diagnostics",
-    textId: "Mari melihat kemajuan finansialmu dipajang secara interaktif! Dengan visualisasi diagram d3 profesional, kamu bisa membaca tren arus kas secara instan dan cermat. 📈🔍",
-    textEn: "Admire your money progress beautifully rendered! Embedded with customizable, responsive d3 visual components, you can decipher cash dynamics with extreme precision. 📈🔍",
-    expression: "(o^◇^o)✨",
+    titleId: "Visualisasi & Analitik",
+    titleEn: "Visualizations & Analytics",
+    textId: "Analisis tren pengeluaran bulanan, proporsi kategori pengeluaran, dan perbandingan arus kas melalui grafik interaktif.",
+    textEn: "Analyze monthly spending trends, category proportions, and cash flow dynamics through interactive charts.",
+    expression: "05",
     position: 'middle'
   },
   {
     view: 'schedule',
-    titleId: "📅 Agenda & Kalender Harian",
-    titleEn: "📅 Daily Planner & Calendars",
-    textId: "Atur agenda harianmu agar terstruktur rapi! Kamu bisa menjadwalkan tugas harian, memantau agenda mendatang, dan menyelesaikan checkpoint aktivitasmu kapan saja secara instan! 🕒",
-    textEn: "Plan your day with zero friction! You can schedule chores, list your upcoming checklists, and tick off your completed items in a single view! 🕒",
-    expression: "(•◡•)💭",
+    titleId: "Jadwal & Agenda Harian",
+    titleEn: "Daily Schedule & Tasks",
+    textId: "Susun agenda harian dengan checklist terstruktur agar prioritas kerja dan kegiatan penting Anda tercapai tepat waktu.",
+    textEn: "Organize daily agendas with structured checklists to ensure key priorities and tasks are completed on schedule.",
+    expression: "06",
     position: 'middle'
   },
   {
     view: 'habits',
-    titleId: "⚡ Habit Tracker (Kebiasaan Baik)",
-    titleEn: "⚡ Intentional Habit Tracker",
-    textId: "Rutinitas kecil akan melahirkan buah besar. Catat kebiasaan olahragamu, minum air, atau meditasi di sini. Jaga rantai streak harianmu agar tidak putus ya! 🔥🥛",
-    textEn: "Incredible lives are stacked on micro habits! Log your daily exercises, reading time, or meditation. Keep your heat streak burning bright! 🔥🥛",
-    expression: "(✿◠‿◠)🏆",
+    titleId: "Pelacak Kebiasaan",
+    titleEn: "Habit Tracker",
+    textId: "Bangun konsistensi harian dengan mencatat kebiasaan positif dan melacak catatan streak pencapaian Anda secara berkala.",
+    textEn: "Build daily consistency by logging positive habits and tracking your completion streaks over time.",
+    expression: "07",
     position: 'middle'
   },
   {
     view: 'ai_planner',
-    titleId: "🤖 Perencana Bertenaga AI",
-    titleEn: "🤖 Smart AI Study Planner",
-    textId: "Lelah mengatur jadwal sendiri? Biarkan asisten kecerdasan AI kami merumuskan rincian belajar dan prioritas belanjamu secara presisi dalam hitungan detik! ⚡🏎️",
-    textEn: "Exhausted from compiling calendars manually? Let our intelligent AI parse your parameters and generate personalized Study & Budget goals instantly! ⚡🏎️",
-    expression: "(•◡•)💭",
+    titleId: "Perencana Produktivitas AI",
+    titleEn: "AI Productivity Planner",
+    textId: "Gunakan AI untuk merancang rekomendasi jadwal fokus harian dan target belajar terstruktur sesuai kebutuhan hari Anda.",
+    textEn: "Use AI to formulate daily focused schedules and structured study targets aligned with your day's priorities.",
+    expression: "08",
     position: 'middle'
   },
   {
     view: 'smart_space',
-    titleId: "🎧 AI Smart Space & Pomodoro",
-    titleEn: "🎧 AI Smart Focus Room",
-    textId: "Ruang fokus terbaik! Pasang earphone-mu, nyalakan visualizer bernapas, dan nikmati musik sintesis binaural beats yang melahirkan ketenangan mendalam untuk sesi belajarmu. 🧘🏽‍♂️⏳",
-    textEn: "The ultimate focus sanctuary! Pop in your earphones, initiate our deep-breathing visualizer, and let procedurally synthesized binaural ambient loops elevate your focus. 🧘🏽‍♂️⏳",
-    expression: "(◕‿◕✿)🍃",
+    titleId: "Ruang Fokus & Pomodoro",
+    titleEn: "Focus Space & Pomodoro",
+    textId: "Tingkatkan konsentrasi kerja dengan timer Pomodoro, audio fokus ambient, serta panduan teknik pernapasan.",
+    textEn: "Elevate your deep work sessions with a Pomodoro timer, ambient focus soundscapes, and guided breathing exercises.",
+    expression: "09",
     position: 'middle'
   },
   {
     view: 'journal',
-    titleId: "📝 JURNAL REFLEKSI BARU!",
-    titleEn: "📝 EXPERIMENT DISCOVERY!",
-    textId: "✨ FITUR BARU KITA! Di sini kamu bisa mencurahkan emosi, melampiaskan kegundahan, dan merangkum harimu. Aku akan menemanimu di halaman ini memberikan prompt kejutan seru setiap hari! Serta tersimpan di cloud Firebase! 📓🦄",
-    textEn: "✨ NEW HIGHLIGHT! This is your mental sanctuary. Reflect on your thoughts, select energetic mood emojis, and get customized ideas from me. Upgraded with persistent cloud databases! 📓🦄",
-    expression: "🏆(✿◠‿◠)🏆",
+    titleId: "Jurnal Refleksi Harian",
+    titleEn: "Daily Journal",
+    textId: "Tulis refleksi harian, pantau suasana hati (mood), dan simpan catatan berharga Anda secara aman di cloud Firestore.",
+    textEn: "Write daily reflections, log mood trends, and store meaningful personal notes securely in Firestore cloud storage.",
+    expression: "10",
     position: 'middle'
   },
   {
     view: 'dashboard',
-    titleId: "✨ Ayo Berprogres Bersama!",
-    titleEn: "✨ Ready for Lift-off!",
-    textId: "Yuraaa! Perjalanan perkenalan kita sudah selesai. Kini kamu siap menata hidup, keuangan, dan kedamaian pikiran. Luapkan keluh kesahmu denganku di lembar Jurnal kapan pun ya! Selamat mencoba! 🎉🚀",
-    textEn: "Hurrah! Our introductory stroll is complete. Next, align your finances, complete tasks, and log experiences. I'll always be waiting in your Daily Journal room! 🚀🎉",
-    expression: "(o^◇^o)✨",
+    titleId: "Workspace Siap Digunakan",
+    titleEn: "Ready to Begin",
+    textId: "Semua modul telah siap digunakan. Anda dapat langsung memulai dengan mencatat transaksi pertama atau menentukan target harian.",
+    textEn: "All modules are configured and ready. Start by logging your first transaction or defining your targets for the day.",
+    expression: "✓",
     position: 'center'
   }
 ];
@@ -205,9 +205,8 @@ export default function OnboardingTour({ user, activeView, setActiveView, isOpen
 
           {/* Core Layout Header */}
           <div className="flex justify-between items-center mb-5 border-b border-white/5 pb-3">
-            <span className="text-[10px] font-black tracking-widest text-[#7c3aed] uppercase flex items-center gap-1.5 px-3 py-1 bg-violet-950/40 border border-violet-500/10 rounded-full">
-              <Sparkles className="w-3 h-3 text-violet-400" />
-              {language === 'id' ? `FITUR ${currentStep} DARI ${total - 1}` : `FEATURE ${currentStep} OF ${total - 1}`}
+            <span className="text-[10px] font-bold tracking-widest text-violet-400 uppercase flex items-center gap-1.5 px-3 py-1 bg-violet-950/40 border border-violet-500/20 rounded-full">
+              {language === 'id' ? `LANGKAH ${currentStep + 1} DARI ${total}` : `STEP ${currentStep + 1} OF ${total}`}
             </span>
             <button 
               onClick={handleSkip}
@@ -218,30 +217,18 @@ export default function OnboardingTour({ user, activeView, setActiveView, isOpen
             </button>
           </div>
 
-          {/* Animated mascot character illustration */}
+          {/* Clean Step Identifier */}
           <div className="flex items-center gap-4 mb-4">
-            <motion.div
-              animate={{ 
-                y: [0, -6, 0],
-                rotate: [0, 1.5, -1.5, 0]
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: 'easeInOut'
-              }}
-              className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-violet-500/20 to-indigo-500/20 border-2 border-violet-500/40 flex items-center justify-center text-xl font-bold shrink-0 shadow-lg relative cursor-pointer"
-            >
-              <span className="drop-shadow tracking-tighter select-none">{step.expression}</span>
-              <div className="absolute -top-1 -right-1 bg-yellow-400 w-2 h-2 rounded-full animate-ping" />
-            </motion.div>
+            <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-violet-500/30 flex items-center justify-center font-mono font-bold text-violet-400 text-lg shrink-0 shadow-sm select-none">
+              {step.expression}
+            </div>
 
             <div>
               <h4 className="text-sm font-black text-[#f7f8f8] tracking-tight">
                 {processedTitle}
               </h4>
-              <p className="text-[11px] text-[#62666d] uppercase font-mono tracking-wider font-semibold">
-                Flo Companion
+              <p className="text-[11px] text-slate-400 uppercase font-mono tracking-wider font-semibold">
+                LifeFlow Guide
               </p>
             </div>
           </div>

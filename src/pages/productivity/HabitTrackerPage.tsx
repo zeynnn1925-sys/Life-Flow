@@ -15,7 +15,7 @@ import {
   TrendingUp,
   Brain,
   History,
-  Sparkles as SparklesIcon,
+  Lightbulb,
   Target as TargetIcon,
   CheckSquare,
   Square,
@@ -39,7 +39,6 @@ import { useData } from '../../contexts/DataContext';
 import { Target } from '../../types';
 import { AddHabitModal } from '../../components/habits/AddHabitModal';
 import { Habit } from '../../types/habits';
-import { Sparkles } from '../../components/ui/sparkles';
 import { ExportProductivityReportButton } from '../../components/ExportReportButtons';
 
 export default function HabitTrackerPage() {
@@ -203,19 +202,8 @@ export default function HabitTrackerPage() {
             <span className="text-eyebrow text-accent font-black uppercase tracking-[0.2em]">Productivity</span>
           </div>
           
-          <div className="h-[12rem] w-full bg-canvas flex flex-col items-center justify-center overflow-hidden rounded-md relative z-0">
-            <div className="w-full absolute inset-0 z-0">
-              <Sparkles
-                id="habit-sparkles"
-                background="transparent"
-                minSize={0.6}
-                maxSize={1.4}
-                particleDensity={100}
-                className="w-full h-full"
-                particleColor="#494FDF"
-              />
-            </div>
-            <h1 className="text-display-lg md:text-display-xl font-black text-ink tracking-tight uppercase leading-none relative z-20">
+          <div className="py-4">
+            <h1 className="text-display-lg md:text-display-xl font-black text-ink tracking-tight uppercase leading-none">
               Habit Tracker
             </h1>
           </div>
@@ -373,7 +361,7 @@ export default function HabitTrackerPage() {
             </div>
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-4">
-                <SparklesIcon className="w-5 h-5 text-accent" />
+                <Lightbulb className="w-5 h-5 text-accent" />
                 <h4 className="text-eyebrow font-black uppercase tracking-[0.2em]">{t('proTip')}</h4>
               </div>
               <p className="text-body-sm text-white/70 leading-loose font-medium italic">

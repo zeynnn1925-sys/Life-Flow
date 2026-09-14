@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Edit2, X, Target as TargetIcon, Flame, Heart, Briefcase, User, PieChart as PieIcon, BarChart3, TrendingUp, Sparkles, Compass, Check, Loader2, ExternalLink, Search, Filter, HelpCircle, Table, Kanban, LayoutGrid, CheckSquare, Square, ArrowRight, Coins, DollarSign } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Target as TargetIcon, Flame, Heart, Briefcase, User, PieChart as PieIcon, BarChart3, TrendingUp, Compass, Check, Loader2, ExternalLink, Search, Filter, HelpCircle, Table, Kanban, LayoutGrid, CheckSquare, Square, ArrowRight, Coins, DollarSign } from 'lucide-react';
 import { Target } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { ConfirmationModal } from './ConfirmationModal';
@@ -420,7 +420,7 @@ export default function DailyTargets() {
       case 'work': return <Briefcase className="w-5 h-5" />;
       case 'finance': return <TrendingUp className="w-5 h-5" />;
       case 'personal': return <User className="w-5 h-5" />;
-      default: return <Sparkles className="w-5 h-5" />;
+      default: return <TargetIcon className="w-5 h-5" />;
     }
   };
 
@@ -672,7 +672,6 @@ export default function DailyTargets() {
                         <div>
                           <h2 className="text-heading-sm font-black text-ink flex items-center gap-2">
                             {language === 'id' ? 'Workspace Target Harian' : 'Daily Targets Workspace'}
-                            <span className="text-xs bg-accent/15 text-accent px-2.5 py-0.5 rounded font-mono font-bold tracking-wider">Notion v2.0</span>
                           </h2>
                           <p className="text-body-xs text-ink-tertiary max-w-2xl mt-1 leading-relaxed font-sans">
                             {language === 'id' 
@@ -696,7 +695,7 @@ export default function DailyTargets() {
                       {/* Notion Quick Templates Row */}
                       <div className="border-t border-hairline pt-3.5 mt-2 flex flex-wrap items-center gap-2 text-xs">
                         <span className="text-ink-tertiary font-bold flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5 text-accent" />
+                          <TargetIcon className="w-3.5 h-3.5 text-accent" />
                           {language === 'id' ? 'Templat Instan:' : 'Quick Templates:'}
                         </span>
                         
@@ -1184,8 +1183,8 @@ export default function DailyTargets() {
                     <TrendingUp className="w-6 h-6 text-accent" />
                     {t('overallProgress')}
                   </h3>
-                  <div className="h-[320px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <div className="w-full min-w-0" style={{ height: 320, minHeight: 320 }}>
+                    <ResponsiveContainer width="100%" height={320} minHeight={320} minWidth={100} debounce={50}>
                       <BarChart data={chartData} layout="vertical" margin={{ left: 20, right: 30 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="var(--color-hairline)" />
                         <XAxis type="number" hide domain={[0, 100]} />
@@ -1241,8 +1240,8 @@ export default function DailyTargets() {
                       <PieIcon className="w-5 h-5 text-accent" />
                       {t('statusDistribution')}
                     </h3>
-                    <div className="h-[220px]">
-                      <ResponsiveContainer width="100%" height="100%">
+                    <div className="w-full min-w-0" style={{ height: 220, minHeight: 220 }}>
+                      <ResponsiveContainer width="100%" height={220} minHeight={220} minWidth={100} debounce={50}>
                         <PieChart>
                           <Pie
                             data={pieData}
@@ -1309,18 +1308,17 @@ export default function DailyTargets() {
                 className="space-y-6"
               >
                 {/* AI Generator Hero Card */}
-                <div className="bg-gradient-to-r from-accent/20 to-accent-blue/10 p-6 rounded-lg shadow-card border border-accent/20 overflow-hidden relative group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                <div className="bg-surface-1 p-6 rounded-lg shadow-card border border-hairline overflow-hidden relative group">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-2">
                       <h3 className="text-heading-sm font-black text-ink flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-                        {language === 'id' ? 'Rekomendasi Tantangan AI' : 'AI-Powered Custom Challenges'}
+                        <TargetIcon className="w-5 h-5 text-accent" />
+                        {language === 'id' ? 'Rekomendasi Tantangan Target' : 'Personalized Target Challenges'}
                       </h3>
                       <p className="text-body-sm text-ink-subtle max-w-[480px]">
                         {language === 'id' 
-                          ? 'Dapatkan 3 target personal khusus yang dirancang pintar oleh Gemini AI sesuai dengan gaya hidup produktif Anda.'
-                          : 'Receive 3 highly personalized, smart targets generated on-the-fly by Gemini AI based on your productivity goals.'}
+                          ? 'Dapatkan 3 target personal khusus yang dirancang sesuai dengan gaya hidup produktif Anda.'
+                          : 'Receive 3 highly personalized, smart targets generated based on your productivity goals.'}
                       </p>
                     </div>
                     <button
@@ -1335,8 +1333,8 @@ export default function DailyTargets() {
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-5 h-5" />
-                          {language === 'id' ? 'Generate Target Kustom' : 'Generate Custom Targets'}
+                          <Plus className="w-5 h-5" />
+                          {language === 'id' ? 'Buat Target Rekomendasi' : 'Generate Challenges'}
                         </>
                       )}
                     </button>
@@ -1456,18 +1454,17 @@ export default function DailyTargets() {
                 className="space-y-6"
               >
                 {/* AI Career Classifier Banner */}
-                <div className="bg-gradient-to-r from-accent/20 to-accent-blue/15 p-6 rounded-lg border border-accent/30 overflow-hidden relative group shadow-card">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-accent/10 rounded-full -mr-20 -mt-20 blur-3xl animate-pulse" />
+                <div className="bg-surface-1 p-6 rounded-lg border border-hairline shadow-card relative group">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-2">
                       <h3 className="text-heading-sm font-black text-ink flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-                        {language === 'id' ? 'Klasifikasi Karir Cerdas Gemini AI' : 'Gemini AI Intelligent Career Classification'}
+                        <Briefcase className="w-5 h-5 text-accent" />
+                        {language === 'id' ? 'Klasifikasi Karir & Industri' : 'Career & Industry Classification'}
                       </h3>
                       <p className="text-body-sm text-ink-subtle max-w-[550px]">
                         {language === 'id'
-                          ? 'Minta Gemini AI menganalisis secara mendalam 40+ situs karir terkemuka di atas. AI akan mengklasifikasikan sektor industri secara spesifik, menganalisis prospek karir, dan membuat target lamaran harian khusus.'
-                          : 'Ask Gemini AI to deeply analyze 40+ leading career portals listed below. The AI will classify specific industrial sectors, highlight career prospects, and craft tailored application targets for you.'}
+                          ? 'Analisis secara mendalam 40+ situs karir terkemuka di atas. Klasifikasikan sektor industri secara spesifik, pelajari prospek karir, dan tetapkan target lamaran harian khusus.'
+                          : 'Analyze 40+ leading career portals listed below. Classify specific industrial sectors, examine career prospects, and craft tailored application targets.'}
                       </p>
                       
                       {Object.keys(classifiedJobs).length > 0 && (
@@ -1475,8 +1472,8 @@ export default function DailyTargets() {
                           <Check className="w-4 h-4" />
                           <span>
                             {language === 'id' 
-                              ? `AI Berhasil Mengklasifikasikan ${Object.keys(classifiedJobs).length} Perusahaan!` 
-                              : `AI Successfully Classified ${Object.keys(classifiedJobs).length} Companies!`}
+                              ? `Berhasil Mengklasifikasikan ${Object.keys(classifiedJobs).length} Perusahaan!` 
+                              : `Successfully Classified ${Object.keys(classifiedJobs).length} Companies!`}
                           </span>
                         </div>
                       )}
@@ -1495,8 +1492,8 @@ export default function DailyTargets() {
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-5 h-5" />
-                          {language === 'id' ? 'Klasifikasikan Dengan AI' : 'Classify with AI'}
+                          <Briefcase className="w-5 h-5" />
+                          {language === 'id' ? 'Klasifikasikan Karir' : 'Classify Careers'}
                         </>
                       )}
                     </button>
@@ -1567,7 +1564,11 @@ export default function DailyTargets() {
                               <div>
                                 <h4 className="text-body-sm font-black text-ink uppercase tracking-tight group-hover:text-accent transition-colors flex items-center gap-2">
                                   {lnk.name}
-                                  {aiJob && <Sparkles className="w-3.5 h-3.5 text-accent animate-pulse" />}
+                                  {aiJob && (
+                                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-surface-2 border border-hairline text-ink-subtle">
+                                      AI
+                                    </span>
+                                  )}
                                 </h4>
                                 <span className="text-[10px] text-ink-tertiary font-bold uppercase tracking-wider">{sectorDisplay}</span>
                               </div>
