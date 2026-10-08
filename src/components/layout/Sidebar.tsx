@@ -92,7 +92,7 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
     <div className="h-full flex flex-col overflow-hidden bg-canvas">
       {/* Logo Section */}
       <div className="h-[48px] px-3 flex items-center gap-[10px] border-b border-hairline shrink-0">
-        <Logo className="h-6 w-auto" />
+        <Logo className="w-6 h-6" />
         {!isCollapsed && (
           <span className="text-[13px] font-bold text-ink tracking-tight">LIFE FLOW</span>
         )}

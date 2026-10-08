@@ -5,9 +5,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Logo } from './Logo';
 import { AboutDeveloperModal } from './AboutDeveloperModal';
-import { FaceRecognition } from './FaceRecognition';
 import { AuroraBackground } from './ui/aurora-background';
 import { Spotlight } from './ui/spotlight';
+
+const FaceRecognition = React.lazy(() => import('./FaceRecognition').then(m => ({ default: m.FaceRecognition })));
 
 export default function Login() {
   const { signInWithGoogle, signInWithGithub, signInWithEmail, signUpWithEmail, signInWithFace, signInAnonymouslyUser } = useAuth();
@@ -234,11 +235,13 @@ export default function Login() {
                     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className="mb-8"
                   >
-                    <FaceRecognition 
-                      mode={faceMode}
-                      onSuccess={handleFaceSuccess}
-                      onCancel={() => setShowFaceRecognition(false)}
-                    />
+                    <React.Suspense fallback={<div className="p-8 text-center text-xs text-ink-subtle">Memuat kamera...</div>}>
+                      <FaceRecognition 
+                        mode={faceMode}
+                        onSuccess={handleFaceSuccess}
+                        onCancel={() => setShowFaceRecognition(false)}
+                      />
+                    </React.Suspense>
                   </motion.div>
                 ) : (
                   <motion.div

@@ -10,17 +10,19 @@ import { View } from '../../types';
 import { Language } from '../../translations';
 import { PWAInstallButton } from '../PWAInstallButton';
 import { LanguageSwitcher } from '../LanguageSwitcher';
+import { NotificationDropdown } from './NotificationDropdown';
 
 interface HeaderProps {
   activeView: View;
   onMenuToggle: () => void;
+  onNavigate?: (view: View) => void;
 }
 
-export default function Header({ activeView, onMenuToggle }: HeaderProps) {
+export default function Header({ activeView, onMenuToggle, onNavigate }: HeaderProps) {
   const { user } = useAuth();
   const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-  const { notifications: inAppNotifications } = useNotifications();
+  const { unreadCount } = useNotifications();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
 
@@ -76,14 +78,26 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
         {/* Notifications */}
         <div className="relative">
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
+            id="bell-notification-btn"
+            type="button"
+            onClick={() => setShowNotifications((prev) => !prev)}
             className="p-2 text-ink-subtle hover:text-ink hover:bg-surface-2 rounded-md relative transition-colors"
+            aria-label="Toggle notifications"
+            aria-expanded={showNotifications}
           >
             <Bell size={16} />
-            {inAppNotifications.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-surface-1" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-accent text-white text-[9px] font-mono font-bold rounded-full flex items-center justify-center border border-surface-1 shadow-sm">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
             )}
           </button>
+
+          <NotificationDropdown
+            isOpen={showNotifications}
+            onClose={() => setShowNotifications(false)}
+            onNavigate={onNavigate}
+          />
         </div>
 
         {/* User Profile */}

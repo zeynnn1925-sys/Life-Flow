@@ -164,10 +164,10 @@ export default function DashboardPage({
   };
 
   // CARD 1 — Balance & Month calculations
-  const currentBalance = transactions.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
-  const thisMonthTransactions = transactions.filter(t => t.date.slice(0, 7) === currentMonthStr);
-  const thisMonthIncome = thisMonthTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-  const thisMonthExpense = thisMonthTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+  const currentBalance = (transactions || []).reduce((acc, t) => t && t.type === 'income' ? acc + (Number(t.amount) || 0) : acc - (Number(t.amount) || 0), 0);
+  const thisMonthTransactions = (transactions || []).filter(t => t && typeof t.date === 'string' && t.date.slice(0, 7) === currentMonthStr);
+  const thisMonthIncome = thisMonthTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+  const thisMonthExpense = thisMonthTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
 
   const thisMonthNet = thisMonthIncome - thisMonthExpense;
   const balanceTrend = thisMonthNet >= 0 
@@ -218,9 +218,9 @@ export default function DashboardPage({
     const dateStr = d.toLocaleDateString('en-CA');
     const dayLabel = d.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { weekday: 'short' });
     
-    const dayTransactions = transactions.filter(t => t.date === dateStr);
-    const income = dayTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-    const expense = dayTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+    const dayTransactions = (transactions || []).filter(t => t && t.date === dateStr);
+    const income = dayTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+    const expense = dayTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     
     return {
       name: dayLabel,
@@ -629,8 +629,8 @@ export default function DashboardPage({
                     {language === 'id' ? 'Tidak ada transaksi' : 'No recent transactions'}
                   </p>
                 ) : (
-                  [...transactions]
-                    .sort((a,b) => b.date.localeCompare(a.date))
+                  [...(transactions || [])]
+                    .sort((a,b) => ((b && b.date) || '').localeCompare((a && a.date) || ''))
                     .slice(0,3)
                     .map((item) => (
                       <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 text-[11px] border border-white/5">

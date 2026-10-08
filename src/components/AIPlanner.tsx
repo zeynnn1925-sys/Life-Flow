@@ -5,11 +5,13 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { DailyQuote, AIProductivityPlan, AIPlanItem } from '../types';
 import { generateDailyQuote, generateAIProductivityPlan } from '../services/aiProductivityService';
 import { useData } from '../contexts/DataContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import { BackgroundBeams } from './ui/background-beams';
 
 export default function AIPlanner() {
   const { t, language } = useLanguage();
   const { dailyQuote, aiPlan, saveDailyQuote, saveAIPlan } = useData();
+  const { addNotification } = useNotifications();
   const [loadingQuote, setLoadingQuote] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +45,14 @@ export default function AIPlanner() {
     try {
       const newPlan = await generateAIProductivityPlan(today, language);
       await saveAIPlan(newPlan);
+      await addNotification({
+        title: language === 'id' ? '✨ Rencana AI Harian Siap' : '✨ Daily AI Plan Ready',
+        message: language === 'id'
+          ? `AI telah menyusun ${newPlan.items.length} agenda produktif untuk harimu.`
+          : `AI has curated ${newPlan.items.length} focus items for your day.`,
+        type: 'ai_insight',
+        link: 'ai_planner',
+      });
     } catch (err) {
       console.error(err);
       setError('Failed to load plan');

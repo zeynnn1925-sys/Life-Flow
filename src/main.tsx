@@ -3,6 +3,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 import { LanguageProvider } from './contexts/LanguageContext.tsx';
 import { AuthProvider } from './contexts/AuthContext.tsx';
 import { DataProvider } from './contexts/DataContext.tsx';
@@ -15,18 +16,20 @@ registerServiceWorker();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <LanguageProvider>
-        <DataProvider>
-          <PomodoroProvider>
-            <ThemeProvider>
-              <NotificationProvider>
-                <App />
-              </NotificationProvider>
-            </ThemeProvider>
-          </PomodoroProvider>
-        </DataProvider>
-      </LanguageProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <LanguageProvider>
+          <DataProvider>
+            <PomodoroProvider>
+              <ThemeProvider>
+                <NotificationProvider>
+                  <App />
+                </NotificationProvider>
+              </ThemeProvider>
+            </PomodoroProvider>
+          </DataProvider>
+        </LanguageProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );

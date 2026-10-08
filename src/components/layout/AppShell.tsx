@@ -95,6 +95,7 @@ export default function AppShell({
           <Header
             activeView={activeView}
             onMenuToggle={() => setIsSidebarCollapsed(p => !p)}
+            onNavigate={setActiveView}
           />
         </header>
 

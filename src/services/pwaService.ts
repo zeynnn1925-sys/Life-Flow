@@ -6,18 +6,26 @@ export function registerServiceWorker() {
     return;
   }
 
-  const updateSW = registerSW({
-    onNeedRefresh() {
-      console.log('[PWA] New content available, updating service worker...');
-      updateSW(true);
-    },
-    onOfflineReady() {
-      console.log('[PWA] Application is offline-ready with local asset and data caching.');
-    },
-    onRegisterError(error) {
-      console.warn('[PWA] Service Worker registration failed:', error);
-    },
-  });
+  try {
+    const updateSW = registerSW({
+      onNeedRefresh() {
+        console.log('[PWA] New content available, updating service worker...');
+        try {
+          updateSW(true);
+        } catch {
+          // ignore
+        }
+      },
+      onOfflineReady() {
+        console.log('[PWA] Application is offline-ready with local asset and data caching.');
+      },
+      onRegisterError(error) {
+        console.warn('[PWA] Service Worker registration failed:', error);
+      },
+    });
+  } catch (err) {
+    console.debug('[PWA] Service Worker initialization handled:', err);
+  }
 
   // Background Sync registration
   window.addEventListener('online', () => {

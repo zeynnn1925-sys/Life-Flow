@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Brain, Send } from 'lucide-react';
 import { Habit } from '../../types/habits';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 interface AIHabitCoachProps {
   habits: Habit[];
@@ -11,6 +12,7 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [advice, setAdvice] = useState<string | null>(null);
+  const { addNotification } = useNotifications();
 
   const getCoachAdvice = async () => {
     setLoading(true);
@@ -28,7 +30,16 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
       }
 
       const data = await response.json();
-      setAdvice(data.text || "Belum ada pola yang cukup buat dianalisis. Coba lagi setelah checkin beberapa hari.");
+      const text = data.text || "Belum ada pola yang cukup buat dianalisis. Coba lagi setelah checkin beberapa hari.";
+      setAdvice(text);
+      if (data.text) {
+        await addNotification({
+          title: '🧠 Evaluasi AI Habit Coach',
+          message: 'AI Habit Coach telah menganalisis pola kebiasaanmu dan memberikan saran terbaru.',
+          type: 'ai_insight',
+          link: 'habits',
+        });
+      }
     } catch (error) {
       console.error("AI Habit Coach Error:", error);
       setAdvice("Lagi gak bisa connect. Coba lagi bentar lagi.");

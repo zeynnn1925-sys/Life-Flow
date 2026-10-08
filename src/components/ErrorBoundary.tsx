@@ -1,8 +1,9 @@
 import React, { ErrorInfo, ReactNode } from 'react';
-import { AlertCircle, RefreshCcw } from 'lucide-react';
+import { AlertCircle, RefreshCcw, Home } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface State {
@@ -24,43 +25,76 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
+  public handleReset = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
+  public handleReload = () => {
+    try {
+      window.location.reload();
+    } catch {
+      this.handleReset();
+    }
+  };
+
   public render(): ReactNode {
-    const { children } = this.props;
+    const { children, fallback } = this.props;
     if (this.state.hasError) {
-      let errorMessage = this.state.error?.message || 'An unexpected error occurred.';
+      if (fallback) return fallback;
+
+      let errorMessage = this.state.error?.message || 'Terjadi kesalahan sistem yang tidak terduga.';
       try {
-        const parsedError = JSON.parse(errorMessage);
-        if (parsedError && parsedError.error) {
-          errorMessage = parsedError.error;
+        const parsed = JSON.parse(errorMessage);
+        if (parsed?.error) {
+          errorMessage = parsed.error;
         }
-      } catch (e) {
-        // Not a JSON string, use as is
+      } catch {
+        // Not a JSON string
       }
 
       return (
-        <div className="min-h-[400px] flex flex-col items-center justify-center p-8 text-center bg-surface-1 rounded-lg border border-hairline shadow-card">
-          <div className="w-16 h-16 bg-danger/10 rounded-xl flex items-center justify-center text-danger mb-6 shadow-sm border border-danger/20">
-            <AlertCircle className="w-8 h-8" />
+        <div className="min-h-screen w-full bg-canvas text-ink flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-surface-1 border border-hairline rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-2xl bg-danger/10 text-danger border border-danger/20 flex items-center justify-center mb-5">
+              <AlertCircle className="w-7 h-7" />
+            </div>
+
+            <h2 className="text-lg font-bold text-ink tracking-tight mb-2">
+              Terjadi Kendala Memuat Layar
+            </h2>
+
+            <p className="text-xs text-ink-subtle leading-relaxed mb-4 max-w-sm">
+              Aplikasi mendeteksi kendala pada antarmuka. Tenang, data keuangan dan catatan Anda tetap aman di cloud.
+            </p>
+
+            <div className="w-full bg-surface-2 border border-hairline rounded-lg p-3 mb-6 text-left overflow-x-auto max-h-32">
+              <code className="text-[11px] text-danger font-mono font-medium break-all whitespace-pre-wrap">
+                {errorMessage}
+              </code>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+              <button
+                type="button"
+                onClick={this.handleReload}
+                className="flex-1 h-10 px-4 bg-accent text-white rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors flex items-center justify-center gap-2 shadow-sm"
+              >
+                <RefreshCcw className="w-3.5 h-3.5" />
+                <span>Muat Ulang Halaman</span>
+              </button>
+              <button
+                type="button"
+                onClick={this.handleReset}
+                className="h-10 px-4 bg-surface-2 text-ink hover:bg-surface-3 border border-hairline rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>Coba Lagi</span>
+              </button>
+            </div>
           </div>
-          <h2 className="text-display-sm font-black text-ink tracking-tight uppercase mb-2">Something went wrong</h2>
-          <p className="text-body-sm text-ink-subtle mb-8 max-w-md font-medium">
-            The application encountered an unexpected error. Don't worry, your data is safe.
-          </p>
-          <div className="bg-surface-2 p-6 rounded-md border border-hairline mb-8 w-full max-w-lg overflow-auto text-left shadow-inner">
-            <code className="text-xs text-danger font-mono font-bold leading-relaxed">
-              {errorMessage}
-            </code>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="flex items-center gap-3 px-8 h-14 bg-accent text-white rounded-pill font-black text-button uppercase tracking-widest hover:bg-accent-hover transition-all shadow-glow-accent active:scale-95"
-          >
-            <RefreshCcw className="w-5 h-5" />
-            Reload Application
-          </button>
         </div>
       );
     }
@@ -68,3 +102,5 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return children;
   }
 }
+
+export default ErrorBoundary;

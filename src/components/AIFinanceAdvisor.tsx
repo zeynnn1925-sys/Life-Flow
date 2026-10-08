@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { PieChart, Loader2, AlertCircle, ArrowUpRight } from 'lucide-react';
 import { Transaction, Category } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { BackgroundBeams } from './ui/background-beams';
@@ -14,6 +15,7 @@ interface AIFinanceAdvisorProps {
 
 export default function AIFinanceAdvisor({ transactions, categories }: AIFinanceAdvisorProps) {
   const { t, language } = useLanguage();
+  const { addNotification } = useNotifications();
   const [loading, setLoading] = useState(false);
   const [advice, setAdvice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +62,16 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
       }
 
       const data = await response.json();
-      setAdvice(data.text || "No advice generated.");
+      const generatedText = data.text || "No advice generated.";
+      setAdvice(generatedText);
+      await addNotification({
+        title: language === 'id' ? '💡 Saran Finansial AI Siap' : '💡 AI Financial Advice Ready',
+        message: language === 'id' 
+          ? 'Evaluasi anggaran 50/30/20 dan rekomendasi keuanganmu telah selesai disusun.' 
+          : 'Your 50/30/20 budget evaluation and financial suggestions are ready.',
+        type: 'ai_insight',
+        link: 'finance',
+      });
     } catch (err: any) {
       console.error("AI Advisor Error:", err);
       setError(err.message || "Failed to generate advice. Please try again.");

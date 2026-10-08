@@ -89,9 +89,13 @@ export default function App() {
   // Auto start onboarding tour for new users on successful login/load
   useEffect(() => {
     if (user && !loading) {
-      const completed = localStorage.getItem('lifeflow_onboarding_completed');
-      if (!completed) {
-        setIsOnboardingOpen(true);
+      try {
+        const completed = typeof window !== 'undefined' ? localStorage.getItem('lifeflow_onboarding_completed') : 'true';
+        if (!completed) {
+          setIsOnboardingOpen(true);
+        }
+      } catch (err) {
+        console.debug('LocalStorage check skipped:', err);
       }
     }
   }, [user, loading]);
@@ -223,18 +227,21 @@ export default function App() {
   const weeklyChartData = useMemo(() => {
     const data = [];
     const today = new Date();
+    const safeTasks = Array.isArray(tasks) ? tasks : [];
+    const safeTx = Array.isArray(transactions) ? transactions : [];
+
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
       const displayDate = d.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { weekday: 'short' });
       
-      const dayTasks = tasks.filter(t => t.date === dateStr);
-      const completed = dayTasks.filter(t => t.completed).length;
+      const dayTasks = safeTasks.filter(t => t && t.date === dateStr);
+      const completed = dayTasks.filter(t => t && t.completed).length;
       
-      const dayExpenses = transactions
-        .filter(t => t.date === dateStr && t.type === 'expense')
-        .reduce((acc, t) => acc + t.amount, 0);
+      const dayExpenses = safeTx
+        .filter(t => t && t.date === dateStr && t.type === 'expense')
+        .reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
 
       data.push({
         name: displayDate,
@@ -248,21 +255,34 @@ export default function App() {
 
   // Helper to get summary data for dashboard
   const getSummary = useMemo(() => {
-    const balance = transactions.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
-    const completedTasks = tasks.filter(t => t.completed).length;
-    const avgTargetProgress = targets.length > 0 
-      ? targets.reduce((acc, t) => acc + (t.currentValue / t.targetValue), 0) / targets.length 
+    const safeTx = Array.isArray(transactions) ? transactions : [];
+    const safeTasks = Array.isArray(tasks) ? tasks : [];
+    const safeTargets = Array.isArray(targets) ? targets : [];
+
+    const balance = safeTx.reduce((acc, t) => t && t.type === 'income' ? acc + (Number(t.amount) || 0) : acc - (Number(t.amount) || 0), 0);
+    const completedTasks = safeTasks.filter(t => t && t.completed).length;
+    const avgTargetProgress = safeTargets.length > 0 
+      ? safeTargets.reduce((acc, t) => acc + (t && t.targetValue > 0 ? ((Number(t.currentValue) || 0) / Number(t.targetValue)) : 0), 0) / safeTargets.length 
       : 0;
 
-    return { balance, completedTasks, totalTasks: tasks.length, targetProgress: avgTargetProgress * 100 };
+    return { 
+      balance, 
+      completedTasks, 
+      totalTasks: safeTasks.length, 
+      targetProgress: Math.min(100, Math.max(0, (isNaN(avgTargetProgress) ? 0 : avgTargetProgress) * 100)) 
+    };
   }, [transactions, tasks, targets]);
 
   const summary = getSummary;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-canvas flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-4">
+        <Logo className="w-14 h-14 mb-4 animate-pulse" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-4 h-4 border-2 border-primary/25 border-t-primary rounded-full animate-spin" />
+          <span className="text-xs font-semibold text-ink-subtle tracking-wide uppercase">LifeFlow</span>
+        </div>
       </div>
     );
   }
@@ -305,6 +325,7 @@ export default function App() {
           </div>
         </div>
       );
+      case 'savings':
       case 'budgets': return (
         <div className="relative p-4 lg:p-8 min-h-[calc(100vh-4rem-5rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden lg:rounded-3xl">
           <div 
@@ -472,15 +493,21 @@ export default function App() {
       >
         {renderView()}
       </AppShell>
-      <FloatingPomodoro activeView={activeView} setActiveView={setActiveView} />
-      <AdvisorChat />
-      <OnboardingTour
-        user={user}
-        activeView={activeView}
-        setActiveView={setActiveView}
-        isOpen={isOnboardingOpen}
-        onClose={() => setIsOnboardingOpen(false)}
-      />
+      <ErrorBoundary>
+        <FloatingPomodoro activeView={activeView} setActiveView={setActiveView} />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <AdvisorChat />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <OnboardingTour
+          user={user}
+          activeView={activeView}
+          setActiveView={setActiveView}
+          isOpen={isOnboardingOpen}
+          onClose={() => setIsOnboardingOpen(false)}
+        />
+      </ErrorBoundary>
     </>
   );
 }

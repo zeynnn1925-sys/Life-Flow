@@ -47,47 +47,83 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
+const getSafeStorage = (key: string): string | null => {
+  try {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const setSafeStorage = (key: string, value: string): void => {
+  try {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+};
+
+const removeSafeStorage = (key: string): void => {
+  try {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [googleSheetsAccessToken, setGoogleSheetsAccessToken] = useState<string | null>(localStorage.getItem('google_sheets_token'));
-  const [isSheetsConnected, setIsSheetsConnected] = useState<boolean>(!!localStorage.getItem('google_sheets_token'));
+  const [googleSheetsAccessToken, setGoogleSheetsAccessToken] = useState<string | null>(getSafeStorage('google_sheets_token'));
+  const [isSheetsConnected, setIsSheetsConnected] = useState<boolean>(!!getSafeStorage('google_sheets_token'));
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
-        try {
-          let defaultDisplayName = 'User';
-          let defaultEmail = 'user@lifeflow.app';
-
-          if (user.isAnonymous) {
-            defaultDisplayName = 'Guest User';
-            defaultEmail = 'guest@lifeflow.app';
-          } else if (user.email === 'face-login@lifeflow.app') {
-            defaultDisplayName = 'Face User';
-            defaultEmail = 'face-login@lifeflow.app';
-          } else {
-            defaultDisplayName = user.displayName || user.email?.split('@')[0] || 'User';
-            defaultEmail = user.email || 'user@lifeflow.app';
-          }
-
-          await setDoc(doc(db, 'users', user.uid), {
-            uid: user.uid,
-            email: user.email || defaultEmail,
-            displayName: user.displayName || defaultDisplayName,
-            photoURL: user.photoURL,
-            lastLogin: new Date().toISOString(),
-            isAnonymous: user.isAnonymous
-          }, { merge: true });
-        } catch (error) {
-          console.error("Error saving user to Firestore:", error);
-        }
-      }
+    // Safety fallback timer to prevent infinite loading screen
+    const safetyTimer = setTimeout(() => {
       setLoading(false);
+    }, 4000);
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      clearTimeout(safetyTimer);
+      setUser(user);
+      setLoading(false);
+
+      if (user) {
+        let defaultDisplayName = 'User';
+        let defaultEmail = 'user@lifeflow.app';
+
+        if (user.isAnonymous) {
+          defaultDisplayName = 'Guest User';
+          defaultEmail = 'guest@lifeflow.app';
+        } else if (user.email === 'face-login@lifeflow.app') {
+          defaultDisplayName = 'Face User';
+          defaultEmail = 'face-login@lifeflow.app';
+        } else {
+          defaultDisplayName = user.displayName || user.email?.split('@')[0] || 'User';
+          defaultEmail = user.email || 'user@lifeflow.app';
+        }
+
+        // Run user profile update asynchronously in background
+        setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          email: user.email || defaultEmail,
+          displayName: user.displayName || defaultDisplayName,
+          photoURL: user.photoURL,
+          lastLogin: new Date().toISOString(),
+          isAnonymous: user.isAnonymous
+        }, { merge: true }).catch((error) => {
+          console.debug("Background user doc save:", error);
+        });
+      }
     });
 
-    return unsubscribe;
+    return () => {
+      clearTimeout(safetyTimer);
+      unsubscribe();
+    };
   }, []);
 
   const handleAuthError = (error: any, providerName: string) => {

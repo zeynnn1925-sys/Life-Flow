@@ -40,11 +40,13 @@ import { Target } from '../../types';
 import { AddHabitModal } from '../../components/habits/AddHabitModal';
 import { Habit } from '../../types/habits';
 import { ExportProductivityReportButton } from '../../components/ExportReportButtons';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 export default function HabitTrackerPage() {
   const { t, language } = useLanguage();
   const { activeHabits, getHabitLogToday, getHabitStatus, saveHabit, deleteHabit, logHabit, skipHabit } = useHabits();
   const { habitLogs, saveTransaction, categories, targets } = useData();
+  const { addNotification } = useNotifications();
   const [viewMode, setViewMode] = useState<'grid' | 'weekly'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -118,6 +120,16 @@ export default function HabitTrackerPage() {
   const handleIncrementCount = async (habit: Habit, incrementVal: number = 1) => {
     try {
       await logHabit(habit.id, incrementVal, logNoteText, selectedMood);
+      const nextStreak = (habit.currentStreak || 0) + 1;
+      const milestones = [7, 30, 100, 365];
+      if (milestones.includes(nextStreak)) {
+        addNotification({
+          title: `🏆 Milestone Streak: ${habit.title}!`,
+          message: `Luar biasa! Kamu berhasil mempertahankan streak ${nextStreak} hari untuk kebiasaan "${habit.title}".`,
+          type: 'achievement',
+          link: 'habits',
+        });
+      }
     } catch (error) {
       console.error('Failed to log habit count:', error);
     }
