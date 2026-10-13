@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Safety fallback timer to prevent infinite loading screen
     const safetyTimer = setTimeout(() => {
       setLoading(false);
-    }, 4000);
+    }, 1500);
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       clearTimeout(safetyTimer);

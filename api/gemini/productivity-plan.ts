@@ -82,7 +82,7 @@ export default async function handler(req: any, res: any) {
     Return strictly a JSON array of 4-5 items with keys: title, startTime, endTime, challenge, fieldToStudy, toolsNeeded (string array), targetPercentage (number).`;
 
     const result = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+      model: 'gemini-3.8-flash',
       contents: planPrompt,
       config: {
         responseMimeType: "application/json"

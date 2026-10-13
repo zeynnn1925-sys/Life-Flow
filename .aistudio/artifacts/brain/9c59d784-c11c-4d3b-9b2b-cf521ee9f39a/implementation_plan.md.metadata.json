@@ -1,0 +1,6 @@
+{
+  "summary": "Pembaruan rancangan ekspor spreadsheet ke standar Data Analyst/Data Engineer: format tabel terstandarisasi, pemisahan tipe data angka murni agar formula Excel berfungsi, blok ringkasan KPI eksekutif, pencegahan distorsi karakter dengan UTF-8 BOM, serta opsi ekspor spesifik per modul atau lembar konsolidasi profesional.",
+  "updatedAt": "2026-10-13T08:57:35.996678209Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

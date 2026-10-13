@@ -41,8 +41,13 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
         });
       }
     } catch (error) {
-      console.error("AI Habit Coach Error:", error);
-      setAdvice("Lagi gak bisa connect. Coba lagi bentar lagi.");
+      console.warn("AI Habit Coach network fallback:", error);
+      const fallbackTips = [
+        "Fokus pada konsistensi 1 kebiasaan prioritas hari ini. Rutinitas kecil yang konsisten lebih berharga daripada intensitas sesaat.",
+        "Gunakan teknik habit stacking: gabungkan kebiasaan baru ini tepat setelah rutinitas yang sudah otomatis Anda lakukan.",
+        "Jangan biarkan kebiasaan terlewat dua hari berturut-turut untuk menjaga momentum streak Anda."
+      ];
+      setAdvice(fallbackTips[Math.floor(Math.random() * fallbackTips.length)]);
     } finally {
       setLoading(false);
     }

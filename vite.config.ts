@@ -12,7 +12,23 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'logo.png', 'apple-touch-icon.png', 'icon.svg', 'icons/*.png'],
+        includeAssets: [
+          'favicon.ico',
+          'favicon-16x16.png',
+          'favicon-32x32.png',
+          'favicon-48x48.png',
+          'Icon.png',
+          'icon.png',
+          'logo.png',
+          'LOGO CUY.png',
+          'apple-touch-icon.png',
+          'apple-touch-icon-180x180.png',
+          'apple-touch-icon-167x167.png',
+          'apple-touch-icon-152x152.png',
+          'apple-touch-icon-120x120.png',
+          'icon.svg',
+          'icons/*.png',
+        ],
         manifest: {
           id: '/',
           name: 'LifeFlow: Personal Finance & Productivity',
@@ -25,8 +41,50 @@ export default defineConfig(({mode}) => {
           scope: '/',
           icons: [
             {
+              src: '/pwa-48x48.png',
+              sizes: '48x48',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-72x72.png',
+              sizes: '72x72',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-96x96.png',
+              sizes: '96x96',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-128x128.png',
+              sizes: '128x128',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-144x144.png',
+              sizes: '144x144',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-152x152.png',
+              sizes: '152x152',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
               src: '/pwa-192x192.png',
               sizes: '192x192',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-384x384.png',
+              sizes: '384x384',
               type: 'image/png',
               purpose: 'any',
             },
@@ -35,6 +93,18 @@ export default defineConfig(({mode}) => {
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any',
+            },
+            {
+              src: '/Icon.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-maskable-192x192.png',
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'maskable',
             },
             {
               src: '/pwa-maskable-512x512.png',
@@ -79,8 +149,7 @@ export default defineConfig(({mode}) => {
           ],
         },
         devOptions: {
-          enabled: true,
-          type: 'module',
+          enabled: false,
         },
       }),
     ],
@@ -97,7 +166,7 @@ export default defineConfig(({mode}) => {
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
+      hmr: false,
     },
   };
 });

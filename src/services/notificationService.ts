@@ -38,7 +38,8 @@ export function sendBrowserNotification(title: string, options: {
 
   const notif = new Notification(title, {
     body: options.body,
-    icon: options.icon ?? '/favicon.ico',
+    icon: options.icon ?? '/pwa-192x192.png',
+    badge: '/pwa-96x96.png',
     tag: options.tag ?? title,
     requireInteraction: options.requireInteraction ?? false,
     data: options.data,

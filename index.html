@@ -10,12 +10,107 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="LifeFlow" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="icon" type="image/png" href="/pwa-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/Icon.png" />
+    <link rel="alternate icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+      // Gracefully handle Vite HMR in cloud preview container where HMR WebSocket port is not exposed
+      (function() {
+        var RealWebSocket = window.WebSocket;
+        if (!RealWebSocket) return;
+
+        function MockViteHmrWebSocket(url, protocols) {
+          var emitter = new EventTarget();
+          var mock = {
+            url: String(url),
+            readyState: 1, // OPEN
+            CONNECTING: 0,
+            OPEN: 1,
+            CLOSING: 2,
+            CLOSED: 3,
+            protocol: 'vite-hmr',
+            extensions: '',
+            bufferedAmount: 0,
+            binaryType: 'blob',
+            onopen: null,
+            onclose: null,
+            onerror: null,
+            onmessage: null,
+            send: function() {},
+            close: function() {
+              mock.readyState = 3;
+              var ev = new CloseEvent('close', { wasClean: true, code: 1000, reason: 'Closed' });
+              if (mock.onclose) mock.onclose(ev);
+              emitter.dispatchEvent(ev);
+            },
+            addEventListener: function(type, listener, options) {
+              emitter.addEventListener(type, listener, options);
+            },
+            removeEventListener: function(type, listener, options) {
+              emitter.removeEventListener(type, listener, options);
+            },
+            dispatchEvent: function(event) {
+              return emitter.dispatchEvent(event);
+            }
+          };
+
+          setTimeout(function() {
+            if (mock.readyState === 1) {
+              var ev = new Event('open');
+              if (mock.onopen) mock.onopen(ev);
+              emitter.dispatchEvent(ev);
+            }
+          }, 0);
+
+          return mock;
+        }
+
+        window.WebSocket = function(url, protocols) {
+          var isViteHmr = false;
+          if (protocols === 'vite-hmr') isViteHmr = true;
+          else if (Array.isArray(protocols) && protocols.indexOf('vite-hmr') !== -1) isViteHmr = true;
+          else if (typeof url === 'string' && (url.indexOf('token=') !== -1 || url.indexOf('24678') !== -1)) isViteHmr = true;
+
+          if (isViteHmr) {
+            return MockViteHmrWebSocket(url, protocols);
+          }
+          return new RealWebSocket(url, protocols);
+        };
+
+        window.WebSocket.prototype = RealWebSocket.prototype;
+        window.WebSocket.CONNECTING = 0;
+        window.WebSocket.OPEN = 1;
+        window.WebSocket.CLOSING = 2;
+        window.WebSocket.CLOSED = 3;
+
+        // Also suppress any unhandled WebSocket rejection if triggered from outside
+        window.addEventListener('error', function(event) {
+          var msg = (event && (event.message || '')) + '';
+          var file = (event && (event.filename || '')) + '';
+          if (msg.indexOf('WebSocket') !== -1 || file.indexOf('@vite/client') !== -1) {
+            event.stopImmediatePropagation && event.stopImmediatePropagation();
+            event.preventDefault && event.preventDefault();
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = (event && event.reason && (event.reason.message || event.reason.stack || event.reason)) + '';
+          if (reason.indexOf('WebSocket') !== -1) {
+            event.stopImmediatePropagation && event.stopImmediatePropagation();
+            event.preventDefault && event.preventDefault();
+          }
+        }, true);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -118,37 +118,68 @@ async function handleProductivityPlan(req: Request, res: Response) {
     };
 
     const ai = getGeminiClient();
-    const primary = 'gemini-3.6-flash';
+    const primary = 'gemini-3.8-flash';
     const fallback = 'gemini-3.1-flash-lite';
 
+    const isQuotaError = (err: any) => {
+      const msg = String(err?.message || '').toLowerCase();
+      const status = String(err?.status || '').toLowerCase();
+      const code = err?.code;
+      return (
+        code === 429 ||
+        status.includes('resource_exhausted') ||
+        msg.includes('429') ||
+        msg.includes('quota') ||
+        msg.includes('rate-limit') ||
+        msg.includes('limit: 5')
+      );
+    };
+
+    const withTimeout = <T>(promise: Promise<T>, timeoutMs: number, operationName: string): Promise<T> => {
+      return Promise.race([
+        promise,
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout: ${operationName} exceeded ${timeoutMs}ms`)), timeoutMs)
+        ),
+      ]);
+    };
+
     let result = null;
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        result = await ai.models.generateContent({
+    try {
+      result = await withTimeout(
+        ai.models.generateContent({
           model: primary,
           contents: planPrompt,
           config: planConfig,
-        });
-        break;
-      } catch (err: any) {
-        if (attempt < 2) {
-          await delay(400);
-          continue;
-        }
-        console.warn(`[ProductivityPlan] Primary model ${primary} failed, trying ${fallback}:`, err?.message);
-        break;
-      }
+        }),
+        7000,
+        `productivity-plan primary (${primary})`
+      );
+    } catch (err: any) {
+      console.info(`[ProductivityPlan] Primary model ${primary} busy or quota limit reached. Using fallback ${fallback}.`);
     }
 
     if (!result) {
-      result = await ai.models.generateContent({
-        model: fallback,
-        contents: planPrompt,
-        config: planConfig,
-      });
+      try {
+        result = await withTimeout(
+          ai.models.generateContent({
+            model: fallback,
+            contents: planPrompt,
+            config: planConfig,
+          }),
+          6000,
+          `productivity-plan fallback (${fallback})`
+        );
+      } catch (fbErr: any) {
+        console.warn(`[ProductivityPlan] Fallback ${fallback} unavailable. Using smart local plan generator. Reason:`, fbErr?.message || fbErr);
+      }
     }
 
-    return res.json({ text: result.text });
+    if (result?.text) {
+      return res.json({ text: result.text });
+    }
+    const fallbackList = getFallbackPlan(isId);
+    return res.json({ text: JSON.stringify(fallbackList) });
   } catch (error: any) {
     console.error('Gemini productivity-plan error (gracefully falling back):', error?.message || error);
     const fallbackList = getFallbackPlan(isId);

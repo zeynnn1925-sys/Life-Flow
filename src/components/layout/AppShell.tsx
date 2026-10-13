@@ -48,9 +48,8 @@ export default function AppShell({
           overflowX: 'hidden',
           transition: 'width 300ms ease',
           borderRight: '1px solid var(--color-hairline)',
-          display: 'none',           
         }}
-        className="lg:!flex lg:flex-col animate-fade-in"
+        className="hidden lg:flex lg:flex-col animate-fade-in"
       >
         <Sidebar
           activeView={activeView}

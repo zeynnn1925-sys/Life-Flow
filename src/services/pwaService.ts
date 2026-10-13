@@ -6,6 +6,32 @@ export function registerServiceWorker() {
     return;
   }
 
+  if (import.meta.env.DEV) {
+    // In dev mode, unregister any lingering service workers from dev-dist to prevent caching conflicts and blank screens
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.unregister().then((success) => {
+          if (success) {
+            console.log('[PWA] Unregistered development service worker:', registration.scope);
+          }
+        });
+      }
+    }).catch((err) => {
+      console.debug('[PWA] Error checking service worker registrations:', err);
+    });
+
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        for (const name of names) {
+          caches.delete(name);
+        }
+      }).catch((err) => {
+        console.debug('[PWA] Error clearing cache keys:', err);
+      });
+    }
+    return;
+  }
+
   try {
     const updateSW = registerSW({
       onNeedRefresh() {

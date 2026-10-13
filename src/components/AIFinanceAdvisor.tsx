@@ -73,8 +73,17 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
         link: 'finance',
       });
     } catch (err: any) {
-      console.error("AI Advisor Error:", err);
-      setError(err.message || "Failed to generate advice. Please try again.");
+      console.warn("AI Advisor network fallback:", err);
+      const fallbackAdvice = language === 'id'
+        ? `Panduan Alokasi Anggaran 50/30/20:
+• Prioritaskan 50% pendapatan untuk Kebutuhan Pokok (Sewa/Cicilan, Makanan, Tagihan).
+• Batasi maksimal 30% untuk Keinginan (Hiburan, Kuliner di Luar).
+• Sisihkan minimal 20% langsung ke Tabungan & Dana Darurat di awal bulan untuk mengamankan arus kas Anda.`
+        : `50/30/20 Budgeting Rule Guidelines:
+• Allocate 50% of your income towards Needs (Rent, Groceries, Utilities).
+• Keep Wants capped at 30% (Dining out, Entertainment, Hobbies).
+• Save at least 20% right at the beginning of the month for investments and emergency reserves.`;
+      setAdvice(fallbackAdvice);
     } finally {
       setLoading(false);
     }

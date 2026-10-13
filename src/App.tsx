@@ -172,7 +172,8 @@ export default function App() {
       const today = now.toISOString().split('T')[0];
       
       // 1. Check Tasks
-      const todaysTasks = tasks.filter(t => t.date === today && !t.completed);
+      const safeTasks = Array.isArray(tasks) ? tasks : [];
+      const todaysTasks = safeTasks.filter(t => t && t.date === today && !t.completed);
       if (todaysTasks.length > 0) {
         newNotifications.push({
           id: 'tasks_today',
@@ -184,7 +185,8 @@ export default function App() {
       }
 
       // 2. Check Targets
-      const nearCompletionTargets = targets.filter(t => (t.currentValue / t.targetValue) >= 0.8 && t.currentValue < t.targetValue);
+      const safeTargets = Array.isArray(targets) ? targets : [];
+      const nearCompletionTargets = safeTargets.filter(t => t && t.targetValue > 0 && ((Number(t.currentValue) || 0) / Number(t.targetValue)) >= 0.8 && (Number(t.currentValue) || 0) < Number(t.targetValue));
       if (nearCompletionTargets.length > 0) {
         newNotifications.push({
           id: 'targets_near',
@@ -196,8 +198,9 @@ export default function App() {
       }
 
       // 3. Check Achievements
-      const recentAchievements = unlockedAchievements.filter(a => {
-        if (!a.unlockedAt) return false;
+      const safeAchievements = Array.isArray(unlockedAchievements) ? unlockedAchievements : [];
+      const recentAchievements = safeAchievements.filter(a => {
+        if (!a || !a.unlockedAt) return false;
         const unlockDate = new Date(a.unlockedAt);
         // Unlocked in the last 24 hours
         return (now.getTime() - unlockDate.getTime()) < 24 * 60 * 60 * 1000;
@@ -288,7 +291,11 @@ export default function App() {
   }
 
   if (!user) {
-    return <Login />;
+    return (
+      <ErrorBoundary>
+        <Login />
+      </ErrorBoundary>
+    );
   }
 
   const renderView = () => {

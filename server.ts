@@ -105,77 +105,87 @@ async function startServer() {
 
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+  const isQuotaError = (err: any) => {
+    const msg = String(err?.message || '').toLowerCase();
+    const status = String(err?.status || '').toLowerCase();
+    const code = err?.code;
+    return (
+      code === 429 ||
+      status.includes('resource_exhausted') ||
+      msg.includes('429') ||
+      msg.includes('quota') ||
+      msg.includes('limit: 5') ||
+      msg.includes('rate-limit') ||
+      msg.includes('resource_exhausted')
+    );
+  };
+
+  const isTemporaryServerError = (err: any) => {
+    const msg = String(err?.message || '').toLowerCase();
+    const status = String(err?.status || '').toLowerCase();
+    const code = err?.code;
+    return (
+      code === 503 ||
+      status.includes('unavailable') ||
+      msg.includes('503') ||
+      msg.includes('demand') ||
+      msg.includes('unavailable') ||
+      msg.includes('overloaded') ||
+      msg.includes('busy')
+    );
+  };
+
+  const withTimeout = <T = any>(promise: Promise<T>, timeoutMs: number, operationName: string): Promise<T> => {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error(`Timeout: ${operationName} exceeded ${timeoutMs}ms`)), timeoutMs)
+      ),
+    ]);
+  };
+
   async function callGeminiWithFallback(params: {
     contents: any;
     config?: any;
     primaryModel?: string;
     fallbackModel?: string;
     endpointLabel: string;
-  }) {
+  }): Promise<any> {
     const ai = getGeminiClient();
-    const primary = params.primaryModel || "gemini-3.6-flash";
+    const primary = params.primaryModel || "gemini-3.8-flash";
     const fallback = params.fallbackModel || "gemini-3.1-flash-lite";
     const label = params.endpointLabel;
 
-    const isTemporaryError = (err: any) => {
-      const msg = String(err?.message || '').toLowerCase();
-      const status = String(err?.status || '').toLowerCase();
-      const code = err?.code;
-      return (
-        code === 503 ||
-        code === 429 ||
-        status.includes('unavailable') ||
-        status.includes('resource_exhausted') ||
-        msg.includes('503') ||
-        msg.includes('429') ||
-        msg.includes('demand') ||
-        msg.includes('quota') ||
-        msg.includes('limit') ||
-        msg.includes('unavailable') ||
-        msg.includes('busy')
-      );
-    };
-
-    // 1. Try Primary Model (up to 2 attempts for transient errors)
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        return await ai.models.generateContent({
+    // 1. Try Primary Model (gemini-3.8-flash)
+    try {
+      return await withTimeout(
+        ai.models.generateContent({
           model: primary,
           contents: params.contents,
           config: params.config,
-        });
-      } catch (err: any) {
-        const isTransient = isTemporaryError(err);
-        if (isTransient && attempt < 2) {
-          console.warn(`[Gemini - ${label}] Primary model ${primary} failed (transient error, attempt ${attempt}/2). Retrying in 500ms...`);
-          await delay(500);
-          continue;
-        }
-        console.warn(`[Gemini - ${label}] Primary model ${primary} failed completely. Switching to fallback ${fallback}. Error: ${err?.message || err}`);
-        break;
-      }
+        }),
+        7000,
+        `${label} primary (${primary})`
+      );
+    } catch (err: any) {
+      console.info(`[Gemini - ${label}] Primary model ${primary} busy or unavailable. Seamlessly using fallback ${fallback}.`);
     }
 
-    // 2. Try Fallback Model (up to 2 attempts for transient errors)
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        return await ai.models.generateContent({
+    // 2. Try Fallback Model (gemini-3.1-flash-lite)
+    try {
+      return await withTimeout(
+        ai.models.generateContent({
           model: fallback,
           contents: params.contents,
           config: params.config,
-        });
-      } catch (err: any) {
-        const isTransient = isTemporaryError(err);
-        if (isTransient && attempt < 2) {
-          console.warn(`[Gemini - ${label}] Fallback model ${fallback} failed (transient error, attempt ${attempt}/2). Retrying in 500ms...`);
-          await delay(500);
-          continue;
-        }
-        console.error(`[Gemini - ${label}] Fallback model ${fallback} also failed. Propagating error to static fallback handler.`);
-        throw err;
-      }
+        }),
+        6000,
+        `${label} fallback (${fallback})`
+      );
+    } catch (err: any) {
+      console.info(`[Gemini - ${label}] Fallback model ${fallback} unavailable. Propagating to local generator.`);
+      throw err;
     }
-    throw new Error(`[Gemini - ${label}] Unknown error occurred during fallback chain.`);
   }
 
   async function callGeminiStreamWithFallback(params: {
@@ -184,71 +194,42 @@ async function startServer() {
     primaryModel?: string;
     fallbackModel?: string;
     endpointLabel: string;
-  }) {
+  }): Promise<any> {
     const ai = getGeminiClient();
-    const primary = params.primaryModel || "gemini-3.6-flash";
+    const primary = params.primaryModel || "gemini-3.8-flash";
     const fallback = params.fallbackModel || "gemini-3.1-flash-lite";
     const label = params.endpointLabel;
 
-    const isTemporaryError = (err: any) => {
-      const msg = String(err?.message || '').toLowerCase();
-      const status = String(err?.status || '').toLowerCase();
-      const code = err?.code;
-      return (
-        code === 503 ||
-        code === 429 ||
-        status.includes('unavailable') ||
-        status.includes('resource_exhausted') ||
-        msg.includes('503') ||
-        msg.includes('429') ||
-        msg.includes('demand') ||
-        msg.includes('quota') ||
-        msg.includes('limit') ||
-        msg.includes('unavailable') ||
-        msg.includes('busy')
-      );
-    };
-
-    // 1. Try Primary Model (up to 2 attempts for transient errors)
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        return await ai.models.generateContentStream({
+    // 1. Try Primary Model (gemini-3.8-flash)
+    try {
+      return await withTimeout(
+        ai.models.generateContentStream({
           model: primary,
           contents: params.contents,
           config: params.config,
-        });
-      } catch (err: any) {
-        const isTransient = isTemporaryError(err);
-        if (isTransient && attempt < 2) {
-          console.warn(`[GeminiStream - ${label}] Primary model ${primary} failed (transient error, attempt ${attempt}/2). Retrying in 500ms...`);
-          await delay(500);
-          continue;
-        }
-        console.warn(`[GeminiStream - ${label}] Primary model ${primary} failed completely. Switching to fallback ${fallback}. Error: ${err?.message || err}`);
-        break;
-      }
+        }),
+        7000,
+        `${label} stream primary (${primary})`
+      );
+    } catch (err: any) {
+      console.info(`[GeminiStream - ${label}] Primary model ${primary} busy or unavailable. Seamlessly using fallback ${fallback}.`);
     }
 
-    // 2. Try Fallback Model (up to 2 attempts for transient errors)
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        return await ai.models.generateContentStream({
+    // 2. Try Fallback Model (gemini-3.1-flash-lite)
+    try {
+      return await withTimeout(
+        ai.models.generateContentStream({
           model: fallback,
           contents: params.contents,
           config: params.config,
-        });
-      } catch (err: any) {
-        const isTransient = isTemporaryError(err);
-        if (isTransient && attempt < 2) {
-          console.warn(`[GeminiStream - ${label}] Fallback model ${fallback} failed (transient error, attempt ${attempt}/2). Retrying in 500ms...`);
-          await delay(500);
-          continue;
-        }
-        console.error(`[GeminiStream - ${label}] Fallback model ${fallback} also failed. Propagating error to static fallback handler.`);
-        throw err;
-      }
+        }),
+        6000,
+        `${label} stream fallback (${fallback})`
+      );
+    } catch (err: any) {
+      console.info(`[GeminiStream - ${label}] Fallback model ${fallback} unavailable. Moving to local generator.`);
+      throw err;
     }
-    throw new Error(`[GeminiStream - ${label}] Unknown error occurred during fallback chain.`);
   }
 
   app.post('/api/gemini/generate-insight', async (req, res) => {
@@ -386,17 +367,25 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
         endpointLabel: 'generate-insight-stream',
       });
 
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Transfer-Encoding', 'chunked');
-
-      for await (const chunk of responseStream) {
-        if (chunk.text) {
-          res.write(chunk.text);
-        }
+      if (!res.headersSent) {
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
       }
-      res.end();
+
+      try {
+        for await (const chunk of responseStream) {
+          if (chunk.text) {
+            res.write(chunk.text);
+          }
+        }
+        res.end();
+      } catch (streamIterErr) {
+        console.info('Insight stream chunk error, completing with dynamic fallback.');
+        const fallbackInsight = generateDynamicInsight();
+        await streamFallback(fallbackInsight);
+      }
     } catch (error: any) {
-      console.error('Gemini generate-insight-stream error, running dynamic fallback insight:', error);
+      console.info('Serving dynamic local insight due to model capacity.');
       const fallbackInsight = generateDynamicInsight();
       await streamFallback(fallbackInsight);
     }
@@ -863,7 +852,7 @@ Provide 1 short, actionable, and extremely sharp financial advice based on the d
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, hmr: false },
       appType: 'spa',
     });
     app.use(vite.middlewares);

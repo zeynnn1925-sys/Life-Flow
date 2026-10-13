@@ -37,6 +37,19 @@ async function callAdvisorGeminiWithFallback(params: {
   const primary = params.primaryModel || 'gemini-3.8-flash';
   const fallback = params.fallbackModel || 'gemini-3.1-flash-lite';
 
+  const isQuotaError = (err: any) => {
+    const msg = String(err?.message || '').toLowerCase();
+    const status = String(err?.status || '').toLowerCase();
+    const code = err?.code;
+    return (
+      code === 429 ||
+      status.includes('resource_exhausted') ||
+      msg.includes('429') ||
+      msg.includes('quota') ||
+      msg.includes('rate-limit')
+    );
+  };
+
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       return await ai.models.generateContent({
@@ -45,6 +58,10 @@ async function callAdvisorGeminiWithFallback(params: {
         config: params.config,
       });
     } catch (err: any) {
+      if (isQuotaError(err)) {
+        console.warn(`[Advisor Gemini] Primary ${primary} quota reached. Instantly switching to ${fallback}.`);
+        break;
+      }
       if (attempt < 2) {
         await delay(400);
         continue;

@@ -205,11 +205,12 @@ export const AdvisorChat: React.FC = () => {
           type="button"
           onClick={() => setIsOpen(true)}
           aria-label={t('open_advisor', 'LifeFlow AI Advisor')}
-          className="fixed bottom-6 end-6 z-50 flex items-center gap-2.5 px-4 py-3 bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-full shadow-2xl hover:shadow-amber-500/25 transition-all duration-300 hover:scale-105 group border border-amber-400/30 backdrop-blur-md"
+          style={{ backgroundColor: '#e31049' }}
+          className="fixed bottom-6 end-6 z-50 flex items-center gap-2.5 px-4 py-3 bg-[#e31049] hover:bg-[#c80e3f] text-white rounded-full shadow-2xl hover:shadow-[#e31049]/25 transition-all duration-300 hover:scale-105 group border border-white/20 backdrop-blur-md"
         >
           <div className="relative flex items-center justify-center">
             <Bot className="w-5 h-5 transition-transform group-hover:rotate-12" />
-            <span className="absolute -top-1 -end-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-amber-600 rounded-full animate-pulse" />
+            <span className="absolute -top-1 -end-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#e31049] rounded-full animate-pulse" />
           </div>
           <span className="font-semibold text-xs tracking-wide hidden sm:inline">
             {t('open_advisor', 'LifeFlow AI Advisor')}

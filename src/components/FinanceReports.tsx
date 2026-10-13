@@ -13,6 +13,7 @@ import { useAuth } from '../contexts/AuthContext';
 import AIFinanceAdvisor from './AIFinanceAdvisor';
 import { exportTransactions } from '../services/exportService';
 import { exportFinanceToGoogleSheets } from '../services/googleSheetsService';
+import { PeriodicExportModal } from './PeriodicExportModal';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -37,6 +38,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function FinanceReports() {
   const { language, t } = useLanguage();
   const { transactions, categories } = useData();
+  const [isPeriodicModalOpen, setIsPeriodicModalOpen] = useState(false);
   const { 
     user, 
     googleSheetsAccessToken, 
@@ -345,6 +347,17 @@ export default function FinanceReports() {
             <Filter className="w-4 h-4" />
             <span>{t('filterByCategory').split(' ')[0]}</span>
             {showFilters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setIsPeriodicModalOpen(true)}
+            className="flex items-center gap-2 px-5 h-10 bg-emerald-500/10 border border-emerald-500/30 rounded-md text-eyebrow font-bold text-emerald-400 hover:bg-emerald-500/20 transition-all shadow-sm uppercase tracking-widest cursor-pointer"
+            title={language === 'id' ? 'Ekspor Laporan Spreadsheet Berkala (Data Analyst Ready)' : 'Periodic Spreadsheet Export'}
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+            <span>{language === 'id' ? 'Spreadsheet Berkala' : 'Periodic Sheet'}</span>
           </motion.button>
 
           <motion.button
@@ -923,6 +936,12 @@ export default function FinanceReports() {
           </table>
         </div>
       </motion.div>
+
+      <PeriodicExportModal
+        isOpen={isPeriodicModalOpen}
+        onClose={() => setIsPeriodicModalOpen(false)}
+        defaultModule="finance"
+      />
     </motion.div>
   );
 }

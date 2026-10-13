@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   TrendingUp, 
@@ -32,6 +32,7 @@ import { View } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useData } from '../../contexts/DataContext';
 import { generateDailyQuote } from '../../services/aiProductivityService';
+import { TopSpendingCategories } from '../../components/dashboard/TopSpendingCategories';
 // @ts-ignore
 import dashboardHeroBg from '../../Smart Budgeting Strategies_ Save Money and Build Financial Freedom 502030🍹_.jpg';
 
@@ -85,6 +86,7 @@ export default function DashboardPage({
   const { language } = useLanguage();
   const { 
     transactions, 
+    categories,
     tasks, 
     habits, 
     habitLogs, 
@@ -107,6 +109,7 @@ export default function DashboardPage({
   const [loadingInsight, setLoadingInsight] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
+  const [financeTab, setFinanceTab] = useState<'categories' | 'recent'>('categories');
 
   // Greet details
   const displayName = user?.displayName?.split(' ')[0] || (language === 'id' ? 'Sahabat' : 'Friend');
@@ -132,6 +135,58 @@ export default function DashboardPage({
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  // Dynamic moving phrases (Sapaan, Motivasi, Tips Harian) — clean typography without badges
+  const welcomePhrases = useMemo(() => {
+    if (language === 'id') {
+      const list = [
+        `Hai ${displayName}! Siap menata hari dan produktif bersama LifeFlow? ✨`,
+        `Motivasi: "Konsistensi kecil setiap hari menciptakan lompatan hasil yang luar biasa." 🚀`,
+        `Tips Harian: Selesaikan prioritas utama di pagi hari saat fokus mental masih prima. 💡`,
+        `Motivasi: "Fokuslah pada kemajuan hari ini, bukan mengejar kesempurnaan sesaat." 🌱`,
+        `Tips Harian: Istirahatkan mata selama 20 detik setiap 20 menit menatap layar. 🌿`,
+        `Motivasi: "Disiplin adalah jembatan nyata antara impian dan pencapaianmu." 🔥`,
+        `Tips Harian: Catat pengeluaran secara teratur agar kendali finansial tetap terjaga. 📊`,
+        `Motivasi: "Setiap langkah kecil membawamu lebih dekat ke impian besarmu." 🌟`,
+        `Tips Harian: Minum segelas air putih sebelum memulai sesi fokus kerjamu. 💧`,
+        `Tips Harian: Luangkan 5 menit sebelum istirahat malam untuk mereview hari dan bersyukur. 🌙`
+      ];
+      if (dailyQuote?.text) {
+        list.splice(2, 0, `Motivasi: "${dailyQuote.text}"${dailyQuote.author ? ` — ${dailyQuote.author}` : ''} ✨`);
+      }
+      return list;
+    } else {
+      const list = [
+        `Hey ${displayName}! Ready to own your day and flow productively? ✨`,
+        `Motivation: "Small daily consistencies build extraordinary breakthroughs." 🚀`,
+        `Daily Tip: Tackle your top priority first thing in the morning when mental energy peaks. 💡`,
+        `Motivation: "Focus on today's forward progress, not fleeting perfection." 🌱`,
+        `Daily Tip: Rest your eyes for 20 seconds every 20 minutes of screen time. 🌿`,
+        `Motivation: "Discipline is the real bridge between goals and achievement." 🔥`,
+        `Daily Tip: Log expenses right away to keep your personal finances effortless and clear. 📊`,
+        `Motivation: "Every intentional small step brings you closer to your grand vision." 🌟`,
+        `Daily Tip: Drink a glass of water before starting your deep work session. 💧`,
+        `Daily Tip: Take 5 quiet minutes tonight to reflect on wins and plan tomorrow smoothly. 🌙`
+      ];
+      if (dailyQuote?.text) {
+        list.splice(2, 0, `Motivation: "${dailyQuote.text}"${dailyQuote.author ? ` — ${dailyQuote.author}` : ''} ✨`);
+      }
+      return list;
+    }
+  }, [language, displayName, dailyQuote?.text, dailyQuote?.author]);
+
+  const [phraseIndex, setPhraseIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPhraseIndex(prev => (prev + 1) % welcomePhrases.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [welcomePhrases.length]);
+
+  const handleNextPhrase = () => {
+    setPhraseIndex(prev => (prev + 1) % welcomePhrases.length);
   };
 
   // Robot Phrases
@@ -261,9 +316,6 @@ export default function DashboardPage({
 
   const generateAIInsight = async (isManual = false) => {
     if (isManual && cooldownRemaining > 0) {
-      alert(language === 'id' 
-        ? `Tolong tunggu ${cooldownRemaining} detik sebelum me-refresh kembali.` 
-        : `Please wait ${cooldownRemaining} seconds before refreshing again.`);
       return;
     }
 
@@ -438,16 +490,40 @@ export default function DashboardPage({
             1. WELCOME HEADER (Responsive: adapts beautifully for screen)
             ============================================================ */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#141414]/75 backdrop-blur-md border border-white/5 p-4 rounded-xl">
-          <div className="flex flex-col text-left">
-            <span className="text-[10px] text-orange-500 font-extrabold tracking-[0.2em] uppercase mb-0.5">
-              {t('dashboard') || 'DASHBOARD'}
-            </span>
-            <h1 className="text-[20px] lg:text-[22px] font-bold text-white tracking-tight leading-tight">
-              {language === 'id' ? `Selamat Datang Kembali, ${displayName}` : `Welcome back, ${displayName}`}
+          <div className="flex flex-col text-left flex-1 min-w-0 pr-2">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-[10px] text-orange-500 font-extrabold tracking-[0.2em] uppercase">
+                {t('dashboard') || 'DASHBOARD'}
+              </span>
+              <span className="text-zinc-600 text-[10px]">•</span>
+              <span className="text-[11px] text-zinc-400 font-medium">
+                {getTodayDateString()}
+              </span>
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+              {t('welcome_back') || 'Welcome Back'}, {displayName}
             </h1>
-            <p className="text-[11px] text-zinc-300 font-semibold mt-0.5">
-              {getTodayDateString()}
-            </p>
+
+            {/* Tulisan Bergerak (Animasi teks dinamis: Sapaan, Motivasi, Tips Harian - Tanpa Badge) */}
+            <div 
+              className="mt-1 h-5 sm:h-6 overflow-hidden flex items-center cursor-pointer group"
+              onClick={handleNextPhrase}
+              title={language === 'id' ? 'Klik untuk membaca berikutnya' : 'Click to cycle message'}
+            >
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={phraseIndex}
+                  initial={{ opacity: 0, y: 10, filter: 'blur(2px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -10, filter: 'blur(2px)' }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  className="text-xs sm:text-[13px] text-zinc-300 group-hover:text-white transition-colors font-medium truncate select-none flex items-center gap-1.5"
+                >
+                  <span className="truncate">{welcomePhrases[phraseIndex % welcomePhrases.length]}</span>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
           
           <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
@@ -458,7 +534,8 @@ export default function DashboardPage({
             </div>
             <button 
               onClick={() => setActiveView('finance')}
-              className="h-8 py-1 px-3 text-xs rounded-lg bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-orange-500/10 cursor-pointer"
+              style={{ backgroundColor: '#ff0051' }}
+              className="h-8 py-1 px-3 text-xs rounded-lg bg-[#ff0051] hover:bg-[#e60049] active:scale-95 text-white font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-[#ff0051]/10 cursor-pointer"
             >
               <Plus size={13} className="stroke-[2.5px]" />
               <span>{language === 'id' ? 'Entri Baru' : 'New Entry'}</span>
@@ -620,29 +697,76 @@ export default function DashboardPage({
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5 mt-1">
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
-                  {language === 'id' ? 'Aktivitas Terakhir' : 'Recent Activities'}
-                </span>
-                {transactions.length === 0 ? (
-                  <p className="text-[11px] text-zinc-400 italic py-2 text-center">
-                    {language === 'id' ? 'Tidak ada transaksi' : 'No recent transactions'}
-                  </p>
+              {/* Dynamic Financial Awareness: Top Spending Categories vs Recent Activities */}
+              <div className="flex flex-col gap-2 mt-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => setFinanceTab('categories')}
+                      className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all cursor-pointer ${
+                        financeTab === 'categories'
+                          ? 'bg-orange-500 text-white shadow-sm'
+                          : 'text-zinc-400 hover:text-zinc-200'
+                      }`}
+                    >
+                      {language === 'id' ? 'Kategori Teratas' : 'Top Categories'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFinanceTab('recent')}
+                      className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all cursor-pointer ${
+                        financeTab === 'recent'
+                          ? 'bg-orange-500 text-white shadow-sm'
+                          : 'text-zinc-400 hover:text-zinc-200'
+                      }`}
+                    >
+                      {language === 'id' ? 'Aktivitas Terakhir' : 'Recent'}
+                    </button>
+                  </div>
+
+                  <span 
+                    onClick={() => setActiveView('visualization')}
+                    className="text-[9px] font-semibold text-zinc-400 hover:text-orange-400 transition-colors cursor-pointer flex items-center gap-0.5"
+                    title={language === 'id' ? 'Buka visualisasi kategori' : 'Open category visualization'}
+                  >
+                    {language === 'id' ? 'Analitik' : 'Analytics'} <ChevronRight size={10} />
+                  </span>
+                </div>
+
+                {financeTab === 'categories' ? (
+                  <TopSpendingCategories
+                    transactions={transactions || []}
+                    categories={categories || []}
+                    currentMonthStr={currentMonthStr}
+                    language={language}
+                    formatCurrency={formatCurrency}
+                    setActiveView={setActiveView}
+                    maxItems={4}
+                  />
                 ) : (
-                  [...(transactions || [])]
-                    .sort((a,b) => ((b && b.date) || '').localeCompare((a && a.date) || ''))
-                    .slice(0,3)
-                    .map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 text-[11px] border border-white/5">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.type === 'income' ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                          <span className="text-zinc-300 font-medium truncate">{item.description}</span>
-                        </div>
-                        <span className={`font-mono font-bold shrink-0 ${item.type === 'income' ? 'text-emerald-400' : 'text-zinc-300'}`}>
-                          {item.type === 'income' ? '+' : '-'}{item.amount.toLocaleString('id-ID')}
-                        </span>
-                      </div>
-                    ))
+                  <div className="flex flex-col gap-1.5">
+                    {transactions.length === 0 ? (
+                      <p className="text-[11px] text-zinc-400 italic py-2 text-center">
+                        {language === 'id' ? 'Tidak ada transaksi' : 'No recent transactions'}
+                      </p>
+                    ) : (
+                      [...(transactions || [])]
+                        .sort((a,b) => ((b && b.date) || '').localeCompare((a && a.date) || ''))
+                        .slice(0,3)
+                        .map((item) => (
+                          <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 text-[11px] border border-white/5">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.type === 'income' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                              <span className="text-zinc-300 font-medium truncate">{item.description}</span>
+                            </div>
+                            <span className={`font-mono font-bold shrink-0 ${item.type === 'income' ? 'text-emerald-400' : 'text-zinc-300'}`}>
+                              {item.type === 'income' ? '+' : '-'}{item.amount.toLocaleString('id-ID')}
+                            </span>
+                          </div>
+                        ))
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -991,6 +1115,78 @@ export default function DashboardPage({
                 <span className="text-[8px] font-bold text-zinc-400 uppercase block tracking-wider">Pengeluaran</span>
                 <span className="text-[10px] font-mono font-bold text-red-400 truncate block">{formatCurrency(thisMonthExpense)}</span>
               </div>
+            </div>
+
+            {/* Dynamic Financial Awareness: Top Spending Categories vs Recent Activities (Mobile) */}
+            <div className="flex flex-col gap-2 mt-0.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setFinanceTab('categories')}
+                    className={`px-2 py-0.5 text-[9px] font-semibold rounded-md transition-all cursor-pointer ${
+                      financeTab === 'categories'
+                        ? 'bg-orange-500 text-white shadow-sm'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    {language === 'id' ? 'Kategori Teratas' : 'Top Categories'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFinanceTab('recent')}
+                    className={`px-2 py-0.5 text-[9px] font-semibold rounded-md transition-all cursor-pointer ${
+                      financeTab === 'recent'
+                        ? 'bg-orange-500 text-white shadow-sm'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    {language === 'id' ? 'Aktivitas Terakhir' : 'Recent'}
+                  </button>
+                </div>
+
+                <span 
+                  onClick={() => setActiveView('visualization')}
+                  className="text-[9px] font-semibold text-zinc-400 hover:text-orange-400 transition-colors cursor-pointer flex items-center gap-0.5"
+                >
+                  {language === 'id' ? 'Analitik' : 'Analytics'} <ChevronRight size={10} />
+                </span>
+              </div>
+
+              {financeTab === 'categories' ? (
+                <TopSpendingCategories
+                  transactions={transactions || []}
+                  categories={categories || []}
+                  currentMonthStr={currentMonthStr}
+                  language={language}
+                  formatCurrency={formatCurrency}
+                  setActiveView={setActiveView}
+                  maxItems={3}
+                />
+              ) : (
+                <div className="flex flex-col gap-1">
+                  {transactions.length === 0 ? (
+                    <p className="text-[10px] text-zinc-400 italic py-2 text-center">
+                      {language === 'id' ? 'Tidak ada transaksi' : 'No recent transactions'}
+                    </p>
+                  ) : (
+                    [...(transactions || [])]
+                      .sort((a,b) => ((b && b.date) || '').localeCompare((a && a.date) || ''))
+                      .slice(0,3)
+                      .map((item) => (
+                        <div key={item.id} className="flex items-center justify-between p-1.5 rounded bg-white/5 text-[10px] border border-white/5">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.type === 'income' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            <span className="text-zinc-300 font-medium truncate">{item.description}</span>
+                          </div>
+                          <span className={`font-mono font-bold shrink-0 ${item.type === 'income' ? 'text-emerald-400' : 'text-zinc-300'}`}>
+                            {item.type === 'income' ? '+' : '-'}{item.amount.toLocaleString('id-ID')}
+                          </span>
+                        </div>
+                      ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
