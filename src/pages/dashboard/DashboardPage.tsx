@@ -17,7 +17,9 @@ import {
   Brain,
   Flame,
   ArrowRight,
-  Plus
+  Plus,
+  Search,
+  Sparkles
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -33,6 +35,16 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useData } from '../../contexts/DataContext';
 import { generateDailyQuote } from '../../services/aiProductivityService';
 import { TopSpendingCategories } from '../../components/dashboard/TopSpendingCategories';
+import { SpotlightCard } from '../../components/ui/SpotlightCard';
+import { ShinyText } from '../../components/ui/ShinyText';
+import { DecryptedText } from '../../components/ui/DecryptedText';
+import { AnimatedCounter } from '../../components/ui/AnimatedCounter';
+import { BorderBeam } from '../../components/ui/BorderBeam';
+import { RotatingText } from '../../components/ui/RotatingText';
+import { CountUp } from '../../components/ui/CountUp';
+import { Magnet } from '../../components/ui/Magnet';
+import { StarBorder } from '../../components/ui/StarBorder';
+import { Kbd } from '../../components/ui/Kbd';
 // @ts-ignore
 import dashboardHeroBg from '../../Smart Budgeting Strategies_ Save Money and Build Financial Freedom 502030🍹_.jpg';
 
@@ -492,9 +504,11 @@ export default function DashboardPage({
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#141414]/75 backdrop-blur-md border border-white/5 p-4 rounded-xl">
           <div className="flex flex-col text-left flex-1 min-w-0 pr-2">
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-[10px] text-orange-500 font-extrabold tracking-[0.2em] uppercase">
-                {t('dashboard') || 'DASHBOARD'}
-              </span>
+              <DecryptedText 
+                text={t('dashboard') || 'DASHBOARD'} 
+                animateOn="hover"
+                className="text-[10px] text-orange-500 font-extrabold tracking-[0.2em] uppercase"
+              />
               <span className="text-zinc-600 text-[10px]">•</span>
               <span className="text-[11px] text-zinc-400 font-medium">
                 {getTodayDateString()}
@@ -502,7 +516,8 @@ export default function DashboardPage({
             </div>
 
             <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-              {t('welcome_back') || 'Welcome Back'}, {displayName}
+              <span>{t('welcome_back') || 'Welcome Back'},</span>
+              <ShinyText speed={3.5}>{displayName}</ShinyText>
             </h1>
 
             {/* Tulisan Bergerak (Animasi teks dinamis: Sapaan, Motivasi, Tips Harian - Tanpa Badge) */}
@@ -526,25 +541,28 @@ export default function DashboardPage({
             </div>
           </div>
           
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
             <div className="flex flex-col items-end text-right">
               <span className="text-[12px] font-mono font-bold text-zinc-100 bg-black/40 backdrop-blur-sm border border-white/10 py-1 px-2.5 rounded-lg">
                 ⏱ {timeStr || '00:00'}
               </span>
             </div>
-            <button 
-              onClick={() => setActiveView('finance')}
-              style={{ backgroundColor: '#ff0051' }}
-              className="h-8 py-1 px-3 text-xs rounded-lg bg-[#ff0051] hover:bg-[#e60049] active:scale-95 text-white font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-[#ff0051]/10 cursor-pointer"
-            >
-              <Plus size={13} className="stroke-[2.5px]" />
-              <span>{language === 'id' ? 'Entri Baru' : 'New Entry'}</span>
-            </button>
+            
+            <Magnet strength={8}>
+              <button 
+                onClick={() => setActiveView('finance')}
+                style={{ backgroundColor: '#ff0051' }}
+                className="h-8 py-1 px-3 text-xs rounded-lg bg-[#ff0051] hover:bg-[#e60049] active:scale-95 text-white font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-[#ff0051]/20 cursor-pointer"
+              >
+                <Plus size={13} className="stroke-[2.5px]" />
+                <span>{language === 'id' ? 'Entri Baru' : 'New Entry'}</span>
+              </button>
+            </Magnet>
           </div>
         </header>
 
         {/* ============================================================
-            2. STAT STRIP (Flex-wrap / Flex-col on mobile, static grid on desktop)
+            2. STAT STRIP (React Bits SpotlightCard & AnimatedCounter)
             ============================================================ */}
         <motion.section 
           variants={containerVariants}
@@ -554,10 +572,10 @@ export default function DashboardPage({
         >
           
           {/* Card 1 — Balance */}
-          <motion.div 
-            variants={itemVariants}
+          <SpotlightCard 
+            spotlightColor="rgba(249, 115, 22, 0.18)"
             onClick={() => setActiveView('finance')}
-            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full p-4 cursor-pointer hover:border-orange-500/40 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
@@ -567,19 +585,19 @@ export default function DashboardPage({
             </div>
             <div>
               <div className="text-[15px] lg:text-[16px] font-mono font-bold text-zinc-100 truncate">
-                {formatCurrency(currentBalance)}
+                <AnimatedCounter value={currentBalance} formatter={(val) => formatCurrency(val)} />
               </div>
               <p className="text-[10px] text-zinc-300 font-semibold truncate mt-0.5">
                 {balanceTrend}
               </p>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Card 2 — Tasks Hari Ini */}
-          <motion.div 
-            variants={itemVariants}
+          <SpotlightCard 
+            spotlightColor="rgba(59, 130, 246, 0.18)"
             onClick={() => setActiveView('schedule')}
-            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full p-4 cursor-pointer hover:border-sky-500/40 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
@@ -589,19 +607,19 @@ export default function DashboardPage({
             </div>
             <div>
               <div className="text-[16px] font-mono font-bold text-zinc-100">
-                {completedTasksToday} <span className="text-zinc-500 font-normal">/</span> {totalTasksToday}
+                <AnimatedCounter value={completedTasksToday} /> <span className="text-zinc-500 font-normal">/</span> <AnimatedCounter value={totalTasksToday} />
               </div>
               <p className="text-[10px] text-zinc-300 font-semibold truncate mt-0.5">
                 {taskTrend}
               </p>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Card 3 — Habit Streak */}
-          <motion.div 
-            variants={itemVariants}
+          <SpotlightCard 
+            spotlightColor="rgba(245, 158, 11, 0.18)"
             onClick={() => setActiveView('habits')}
-            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full p-4 cursor-pointer hover:border-amber-500/40 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
@@ -611,19 +629,19 @@ export default function DashboardPage({
             </div>
             <div>
               <div className="text-[16px] font-mono font-bold text-zinc-100">
-                {longestStreak} {language === 'id' ? 'hari' : 'days'}
+                <AnimatedCounter value={longestStreak} /> {language === 'id' ? 'hari' : 'days'}
               </div>
               <p className="text-[10px] text-zinc-300 font-semibold truncate mt-0.5">
                 {habitTrend}
               </p>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Card 4 — Target Progress */}
-          <motion.div 
-            variants={itemVariants}
+          <SpotlightCard 
+            spotlightColor="rgba(16, 185, 129, 0.18)"
             onClick={() => setActiveView('targets')}
-            className="w-full sm:w-[calc(50%-7px)] lg:w-full bg-[#141414]/75 backdrop-blur-md border border-white/5 rounded-xl p-4 cursor-pointer hover:border-orange-500/30 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
+            className="w-full sm:w-[calc(50%-7px)] lg:w-full p-4 cursor-pointer hover:border-emerald-500/40 active:scale-[0.98] transition-all duration-150 select-none flex flex-col justify-between min-h-[104px]"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
@@ -633,13 +651,13 @@ export default function DashboardPage({
             </div>
             <div>
               <div className="text-[16px] font-mono font-bold text-zinc-100">
-                {onTrack} On Track
+                <AnimatedCounter value={onTrack} /> On Track
               </div>
               <p className="text-[10px] text-zinc-300 font-semibold truncate mt-0.5">
                 {targetTrend}
               </p>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
         </motion.section>
 
@@ -700,27 +718,41 @@ export default function DashboardPage({
               {/* Dynamic Financial Awareness: Top Spending Categories vs Recent Activities */}
               <div className="flex flex-col gap-2 mt-1">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/5">
+                  <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/5 relative">
                     <button
                       type="button"
                       onClick={() => setFinanceTab('categories')}
-                      className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all cursor-pointer ${
+                      className={`relative z-10 px-2 py-0.5 text-[10px] font-semibold rounded-md transition-colors cursor-pointer ${
                         financeTab === 'categories'
-                          ? 'bg-orange-500 text-white shadow-sm'
+                          ? 'text-white'
                           : 'text-zinc-400 hover:text-zinc-200'
                       }`}
                     >
+                      {financeTab === 'categories' && (
+                        <motion.span
+                          layoutId="desktop-finance-tab-pill"
+                          className="absolute inset-0 z-[-1] rounded-md bg-orange-500 shadow-sm"
+                          transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                        />
+                      )}
                       {language === 'id' ? 'Kategori Teratas' : 'Top Categories'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setFinanceTab('recent')}
-                      className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all cursor-pointer ${
+                      className={`relative z-10 px-2 py-0.5 text-[10px] font-semibold rounded-md transition-colors cursor-pointer ${
                         financeTab === 'recent'
-                          ? 'bg-orange-500 text-white shadow-sm'
+                          ? 'text-white'
                           : 'text-zinc-400 hover:text-zinc-200'
                       }`}
                     >
+                      {financeTab === 'recent' && (
+                        <motion.span
+                          layoutId="desktop-finance-tab-pill"
+                          className="absolute inset-0 z-[-1] rounded-md bg-orange-500 shadow-sm"
+                          transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                        />
+                      )}
                       {language === 'id' ? 'Aktivitas Terakhir' : 'Recent'}
                     </button>
                   </div>
@@ -1120,27 +1152,41 @@ export default function DashboardPage({
             {/* Dynamic Financial Awareness: Top Spending Categories vs Recent Activities (Mobile) */}
             <div className="flex flex-col gap-2 mt-0.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/5">
+                <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/5 relative">
                   <button
                     type="button"
                     onClick={() => setFinanceTab('categories')}
-                    className={`px-2 py-0.5 text-[9px] font-semibold rounded-md transition-all cursor-pointer ${
+                    className={`relative z-10 px-2 py-0.5 text-[9px] font-semibold rounded-md transition-colors cursor-pointer ${
                       financeTab === 'categories'
-                        ? 'bg-orange-500 text-white shadow-sm'
+                        ? 'text-white'
                         : 'text-zinc-400 hover:text-zinc-200'
                     }`}
                   >
+                    {financeTab === 'categories' && (
+                      <motion.span
+                        layoutId="mobile-finance-tab-pill"
+                        className="absolute inset-0 z-[-1] rounded-md bg-orange-500 shadow-sm"
+                        transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                      />
+                    )}
                     {language === 'id' ? 'Kategori Teratas' : 'Top Categories'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setFinanceTab('recent')}
-                    className={`px-2 py-0.5 text-[9px] font-semibold rounded-md transition-all cursor-pointer ${
+                    className={`relative z-10 px-2 py-0.5 text-[9px] font-semibold rounded-md transition-colors cursor-pointer ${
                       financeTab === 'recent'
-                        ? 'bg-orange-500 text-white shadow-sm'
+                        ? 'text-white'
                         : 'text-zinc-400 hover:text-zinc-200'
                     }`}
                   >
+                    {financeTab === 'recent' && (
+                      <motion.span
+                        layoutId="mobile-finance-tab-pill"
+                        className="absolute inset-0 z-[-1] rounded-md bg-orange-500 shadow-sm"
+                        transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                      />
+                    )}
                     {language === 'id' ? 'Aktivitas Terakhir' : 'Recent'}
                   </button>
                 </div>

@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import MobileNav from './MobileNav';
 import { View } from '../../types';
+import { CommandPalette } from '../ui/CommandPalette';
+import { KeyboardShortcutsModal } from '../ui/KeyboardShortcutsModal';
+import { useGlobalKeyboardShortcuts } from '../../hooks/useGlobalKeyboardShortcuts';
 
 // Placeholders for components not yet defined in the codebase
 const OfflineBanner = () => null;
-const CommandPalette = ({ setActiveView }: { setActiveView: (v: View) => void }) => null;
 const ToastContainer = () => null;
 
 interface AppShellProps {
@@ -26,6 +28,17 @@ export default function AppShell({
   isOnline = true,
   children
 }: AppShellProps) {
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
+
+  useGlobalKeyboardShortcuts({
+    activeView,
+    setActiveView,
+    onToggleCommandPalette: () => setIsCommandPaletteOpen(prev => !prev),
+    onOpenCommandPalette: () => setIsCommandPaletteOpen(true),
+    onOpenShortcutsHelp: () => setIsShortcutsModalOpen(true),
+  });
+
   return (
     <div
       style={{
@@ -95,6 +108,8 @@ export default function AppShell({
             activeView={activeView}
             onMenuToggle={() => setIsSidebarCollapsed(p => !p)}
             onNavigate={setActiveView}
+            onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+            onOpenShortcutsHelp={() => setIsShortcutsModalOpen(true)}
           />
         </header>
 
@@ -123,7 +138,21 @@ export default function AppShell({
       </div>
 
       {/* ── GLOBALS ── */}
-      <CommandPalette setActiveView={setActiveView} />
+      <CommandPalette 
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        setActiveView={setActiveView}
+        onOpenShortcutsHelp={() => {
+          setIsCommandPaletteOpen(false);
+          setIsShortcutsModalOpen(true);
+        }}
+      />
+
+      <KeyboardShortcutsModal
+        isOpen={isShortcutsModalOpen}
+        onClose={() => setIsShortcutsModalOpen(false)}
+      />
+
       <ToastContainer />
     </div>
   );

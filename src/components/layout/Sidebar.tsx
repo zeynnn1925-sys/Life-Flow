@@ -1,28 +1,30 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Wallet, 
-  Calendar, 
-  Target as TargetIcon, 
-  TrendingUp,
-  PieChart,
-  BarChart3,
+import React, { useState } from 'react';
+import {
+  SquaresFour,
+  Coins,
+  Wallet,
+  ChartPieSlice,
+  ChartLineUp,
+  CalendarBlank,
+  Repeat,
+  Sparkle,
+  Target,
+  Headphones,
+  BookOpenText,
+  Compass,
   Trophy,
-  Settings,
-  Zap,
-  Sparkles,
-  Globe,
-  LogOut,
-  BrainCircuit,
-  BookOpen,
-  HelpCircle
-} from 'lucide-react';
+  User,
+  Gear,
+  TerminalWindow,
+  SignOut,
+  IconProps
+} from '@phosphor-icons/react';
 import { Logo } from '../Logo';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { View } from '../../types';
 import { PWAInstallButton } from '../PWAInstallButton';
+import { AboutDeveloperModal } from '../AboutDeveloperModal';
 
 interface SidebarProps {
   activeView: View;
@@ -31,97 +33,190 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
-export default function Sidebar({ activeView, setActiveView, isCollapsed, onToggleCollapse }: SidebarProps) {
-  const { t, language, setLanguage } = useLanguage();
-  const { user, signOut } = useAuth(); // Assuming I need user info for bottom section
+interface NavItemConfig {
+  id: string;
+  label: string;
+  icon: React.ComponentType<IconProps>;
+}
+
+export default function Sidebar({ activeView, setActiveView, isCollapsed }: SidebarProps) {
+  const { t, language } = useLanguage();
+  const { user, signOut } = useAuth();
+  const [showAbout, setShowAbout] = useState(false);
 
   const navGroups = React.useMemo(() => [
     {
-      title: t('finance'),
+      title: t('finance') || 'Finance',
       items: [
-        { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
-        { id: 'finance', label: t('finance'), icon: Wallet },
-        { id: 'budgets', label: t('budgets') || 'Budgets & Savings', icon: TrendingUp },
-        { id: 'visualization', label: t('financialVisualization'), icon: BarChart3 },
-        { id: 'reports', label: t('analytics'), icon: PieChart },
-      ]
+        { id: 'dashboard', label: t('dashboard') || 'Dashboard', icon: SquaresFour },
+        { id: 'finance', label: t('finance') || 'Finance', icon: Coins },
+        { id: 'budgets', label: t('budgets') || 'Budgets & Savings', icon: Wallet },
+        { id: 'visualization', label: t('financialVisualization') || 'Financial Visualization', icon: ChartPieSlice },
+        { id: 'reports', label: t('analytics') || 'Analytics', icon: ChartLineUp },
+      ] as NavItemConfig[]
     },
     {
-      title: t('productivity'),
+      title: t('productivity') || 'Productivity',
       items: [
-        { id: 'schedule', label: t('schedule'), icon: Calendar },
-        { id: 'habits', label: t('habits') || 'Habit Tracker', icon: Zap },
-        { id: 'ai_planner', label: t('aiPlanner'), icon: Sparkles },
-        { id: 'targets', label: t('targets'), icon: TargetIcon },
-        { id: 'smart_space', label: t('smartSpace') || (language === 'es' ? 'Espacio Inteligente' : language === 'ar' ? 'المساحة الذكية' : language === 'de' ? 'Smart Space' : language === 'id' ? 'Ruang Pintar' : 'Smart Space'), icon: BrainCircuit },
-        { id: 'journal', label: t('journal') || (language === 'es' ? 'Diario y Reflexión' : language === 'ar' ? 'اليوميات والتأمل' : language === 'de' ? 'Journal & Reflexion' : language === 'id' ? 'Jurnal Refleksi' : 'Daily Journal'), icon: BookOpen },
-      ]
+        { id: 'schedule', label: t('schedule') || 'Schedule', icon: CalendarBlank },
+        { id: 'habits', label: t('habits') || 'Habit Tracker', icon: Repeat },
+        { id: 'ai_planner', label: t('aiPlanner') || 'AI Planner', icon: Sparkle },
+        { id: 'targets', label: t('targets') || 'Daily Targets', icon: Target },
+        { 
+          id: 'smart_space', 
+          label: t('smartSpace') || (language === 'es' ? 'Espacio Inteligente' : language === 'ar' ? 'المساحة الذكية' : language === 'de' ? 'Smart Space' : language === 'id' ? 'Ruang Pintar' : 'Smart Space'), 
+          icon: Headphones 
+        },
+        { 
+          id: 'journal', 
+          label: t('journal') || (language === 'es' ? 'Diario y Reflexión' : language === 'ar' ? 'اليوميات والتأمل' : language === 'de' ? 'Journal & Reflexion' : language === 'id' ? 'Jurnal Refleksi' : 'Daily Journal'), 
+          icon: BookOpenText 
+        },
+      ] as NavItemConfig[]
     },
     {
-      title: t('system'),
+      title: t('system') || 'System',
       items: [
-        { id: 'tour', label: language === 'es' ? 'Guía Interactiva' : language === 'ar' ? 'الجولة الإرشادية' : language === 'de' ? 'Interaktive Tour' : language === 'id' ? 'Tur Pemandu' : 'Interactive Tour', icon: HelpCircle },
-        { id: 'achievements', label: t('achievements'), icon: Trophy },
-        { id: 'account', label: t('userAccount') || 'Account', icon: Globe },
-        { id: 'settings', label: t('settings'), icon: Settings },
-      ]
+        { 
+          id: 'tour', 
+          label: language === 'es' ? 'Guía Interactiva' : language === 'ar' ? 'الجولة الإرشادية' : language === 'de' ? 'Interaktive Tour' : language === 'id' ? 'Tur Pemandu' : 'Interactive Tour', 
+          icon: Compass 
+        },
+        { id: 'achievements', label: t('achievements') || 'Achievements', icon: Trophy },
+        { id: 'account', label: t('userAccount') || 'Account', icon: User },
+        { id: 'settings', label: t('settings') || 'Settings', icon: Gear },
+      ] as NavItemConfig[]
     }
   ], [t, language]);
 
-  const profileSection = React.useMemo(() => (
-    <div className="flex items-center gap-2">
-      {user?.photoURL ? (
-        <img src={user.photoURL} alt="" className="w-6 h-6 rounded-full object-cover" referrerPolicy="no-referrer" />
-      ) : (
-        <div className="w-6 h-6 bg-[#5e6ad2] rounded-full flex items-center justify-center text-white font-bold text-[10px]">
-          {user?.displayName?.charAt(0) || 'U'}
-        </div>
-      )}
-      {!isCollapsed && (
-        <div className="flex flex-col min-w-0">
-          <span className="text-[11px] font-medium text-ink truncate leading-tight">
-            {user?.displayName || 'User'}
-          </span>
-          <span className="text-[9px] text-ink-subtle truncate leading-none">{user?.email}</span>
-        </div>
-      )}
-    </div>
-  ), [user, isCollapsed]);
+  const navShortcuts: Record<string, string> = {
+    dashboard: '⌥1',
+    finance: '⌥2',
+    schedule: '⌥3',
+    ai_planner: '⌥4',
+    habits: '⌥5',
+  };
+
+  const formatSentenceCase = (text: string) => {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-canvas">
-      {/* Logo Section */}
-      <div className="h-[48px] px-3 flex items-center gap-[10px] border-b border-hairline shrink-0">
-        <Logo className="w-6 h-6" />
+    <div 
+      className="lifeflow-sidebar h-full flex flex-col overflow-hidden bg-canvas select-none"
+      style={{ '--nav-accent': '#C8A27C' } as React.CSSProperties}
+    >
+      <style>{`
+        .lifeflow-sidebar {
+          --nav-accent: #C8A27C;
+        }
+        .lifeflow-sidebar .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 8px 12px;
+          border-radius: 10px;
+          color: rgba(255, 255, 255, .52);
+          transition: background .18s ease, color .18s ease;
+          height: 36px;
+          width: 100%;
+          border: none;
+          outline: none;
+          background: transparent;
+          cursor: pointer;
+          text-align: left;
+          box-shadow: none;
+        }
+        .lifeflow-sidebar .nav-item:hover {
+          background: rgba(255, 255, 255, .035);
+          color: rgba(255, 255, 255, .92);
+        }
+        .lifeflow-sidebar .nav-item.active {
+          background: rgba(255, 255, 255, .05);
+          color: rgba(255, 255, 255, .95);
+        }
+        .lifeflow-sidebar .nav-item.active svg {
+          color: var(--nav-accent);
+        }
+        .lifeflow-sidebar .nav-section-title {
+          font-size: 11.5px;
+          line-height: 1.2;
+          color: rgba(255, 255, 255, .32);
+          font-weight: 400;
+          letter-spacing: normal;
+          padding-left: 12px;
+          padding-right: 12px;
+          margin-bottom: 4px;
+        }
+        .lifeflow-sidebar .nav-shortcut {
+          opacity: 0;
+          transition: opacity .18s ease;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10.5px;
+          color: rgba(255, 255, 255, .92);
+          margin-left: auto;
+          flex-shrink: 0;
+        }
+        .lifeflow-sidebar .nav-item:hover .nav-shortcut {
+          opacity: 0.4;
+        }
+      `}</style>
+
+      {/* Header / Logo */}
+      <div className="h-[48px] px-3.5 flex items-center gap-2.5 border-b border-[rgba(255,255,255,0.06)] shrink-0">
+        <Logo className="w-5 h-5 rounded-md" />
         {!isCollapsed && (
-          <span className="text-[13px] font-bold text-ink tracking-tight">LIFE FLOW</span>
+          <span className="text-[13px] font-medium tracking-normal text-[rgba(255,255,255,0.88)]">
+            LifeFlow
+          </span>
         )}
       </div>
 
-      {/* Menu Section */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-4">
-        {navGroups.map((group) => (
-          <div key={group.title} className="space-y-1">
+      {/* Nav List */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2">
+        {navGroups.map((group, groupIndex) => (
+          <div 
+            key={group.title} 
+            className="space-y-[2px]"
+            style={{ marginTop: groupIndex === 0 ? '4px' : '20px' }}
+          >
             {!isCollapsed && (
-              <h3 className="px-2 text-[10px] font-semibold text-ink-subtle uppercase tracking-[0.5px] mt-[10px] mb-[3px]">
-                {group.title}
-              </h3>
+              <div className="nav-section-title">
+                {formatSentenceCase(group.title)}
+              </div>
             )}
-            <div className="space-y-1">
+
+            <div className="space-y-[2px]">
               {group.items.map((item) => {
                 const isActive = activeView === item.id;
+                const shortcutHint = navShortcuts[item.id];
+                const IconComponent = item.icon;
+
                 return (
                   <button
                     key={item.id}
                     onClick={() => setActiveView(item.id as View)}
-                    className={`w-full h-[30px] flex items-center gap-2 px-2 rounded-[6px] cursor-pointer transition-all duration-150 group ${
-                      isActive 
-                        ? 'bg-[#5e6ad2]/12 text-[#5e6ad2] font-medium border-l-2 border-[#5e6ad2]' 
-                        : 'text-ink-subtle hover:bg-surface-2 hover:text-ink'
-                    }`}
+                    title={shortcutHint ? `${item.label} (${shortcutHint})` : item.label}
+                    className={`nav-item ${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center !px-0' : ''}`}
                   >
-                    <item.icon size={14} className="shrink-0" />
-                    {!isCollapsed && <span className="text-[12px] truncate">{item.label}</span>}
+                    <IconComponent
+                      size={18}
+                      weight={isActive ? 'regular' : 'light'}
+                      className="shrink-0"
+                    />
+
+                    {!isCollapsed && (
+                      <span className="text-[12.5px] truncate font-normal">
+                        {item.label}
+                      </span>
+                    )}
+
+                    {!isCollapsed && shortcutHint && (
+                      <span className="nav-shortcut">
+                        {shortcutHint}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -130,19 +225,70 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed, onTogg
         ))}
       </div>
 
-      {/* Bottom Section */}
-      <div className="p-[10px] border-t border-hairline shrink-0 space-y-2">
+      {/* Bottom Footer Section */}
+      <div className="p-2 border-t border-[rgba(255,255,255,0.06)] shrink-0 space-y-1">
         {!isCollapsed && <PWAInstallButton variant="sidebar" />}
-        {profileSection}
-        
-          <button 
-            onClick={() => signOut()}
-            className="w-full flex items-center gap-2 px-2 py-1.5 text-[#e23b4a] hover:bg-[#e23b4a]/10 rounded-md transition-colors text-xs font-medium"
-          >
-            <LogOut size={14} />
-            {!isCollapsed && <span>{t('signOut') || 'Keluar'}</span>}
-          </button>
+
+        {/* Profile */}
+        <div className={`flex items-center gap-2.5 px-3 py-1.5 rounded-[10px] ${isCollapsed ? 'justify-center !px-0' : ''}`}>
+          {user?.photoURL ? (
+            <img
+              src={user.photoURL}
+              alt=""
+              className="w-5 h-5 rounded-full object-cover shrink-0"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div 
+              className="w-5 h-5 rounded-full flex items-center justify-center font-medium text-[9.5px] shrink-0"
+              style={{ background: 'rgba(200, 162, 124, 0.15)', color: '#C8A27C' }}
+            >
+              {user?.displayName?.charAt(0) || 'U'}
+            </div>
+          )}
+
+          {!isCollapsed && (
+            <div className="flex flex-col min-w-0">
+              <span className="text-[11.5px] font-normal text-[rgba(255,255,255,0.78)] truncate leading-tight">
+                {user?.displayName || 'User'}
+              </span>
+              <span className="text-[9.5px] text-[rgba(255,255,255,0.36)] truncate font-mono leading-none mt-0.5">
+                {user?.email}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* About Developer */}
+        <button
+          onClick={() => setShowAbout(true)}
+          className={`nav-item ${isCollapsed ? 'justify-center !px-0' : ''}`}
+          title={language === 'id' ? 'Tentang Pengembang' : 'About Developer'}
+        >
+          <TerminalWindow size={18} weight="light" className="shrink-0" />
+          {!isCollapsed && (
+            <span className="text-[12.5px] truncate font-normal">
+              {language === 'id' ? 'Tentang Pengembang' : 'About Developer'}
+            </span>
+          )}
+        </button>
+
+        {/* Sign Out */}
+        <button
+          onClick={() => signOut()}
+          className={`nav-item ${isCollapsed ? 'justify-center !px-0' : ''}`}
+          title={t('signOut') || 'Keluar'}
+        >
+          <SignOut size={18} weight="light" className="shrink-0" />
+          {!isCollapsed && (
+            <span className="text-[12.5px] truncate font-normal">
+              {t('signOut') || 'Keluar'}
+            </span>
+          )}
+        </button>
       </div>
+
+      <AboutDeveloperModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
     </div>
   );
 }

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Bell, Moon, Sun, Menu as MenuIcon, Globe } from 'lucide-react';
+import { Bell, Moon, Sun, Menu as MenuIcon, Globe, Search, Keyboard } from 'lucide-react';
 import { Logo } from '../Logo';
 import DigitalClock from '../DigitalClock';
-import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNotifications } from '../../contexts/NotificationContext';
@@ -11,15 +10,23 @@ import { Language } from '../../translations';
 import { PWAInstallButton } from '../PWAInstallButton';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import { NotificationDropdown } from './NotificationDropdown';
+import { Kbd } from '../ui/Kbd';
 
 interface HeaderProps {
   activeView: View;
   onMenuToggle: () => void;
   onNavigate?: (view: View) => void;
+  onOpenCommandPalette?: () => void;
+  onOpenShortcutsHelp?: () => void;
 }
 
-export default function Header({ activeView, onMenuToggle, onNavigate }: HeaderProps) {
-  const { user } = useAuth();
+export default function Header({ 
+  activeView, 
+  onMenuToggle, 
+  onNavigate,
+  onOpenCommandPalette,
+  onOpenShortcutsHelp 
+}: HeaderProps) {
   const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { unreadCount } = useNotifications();
@@ -53,13 +60,41 @@ export default function Header({ activeView, onMenuToggle, onNavigate }: HeaderP
         </button>
       </div>
 
-      {/* Middle Section - Clock */}
-      <div className="hidden sm:flex flex-1 justify-center text-[12px]">
+      {/* Middle Section - Clock & Command Palette Search */}
+      <div className="hidden sm:flex flex-1 items-center justify-center gap-3 text-[12px]">
         <DigitalClock />
+
+        {onOpenCommandPalette && (
+          <button
+            type="button"
+            onClick={onOpenCommandPalette}
+            className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-surface-2/70 hover:bg-surface-2 text-ink-subtle hover:text-ink text-xs border border-hairline transition-all cursor-pointer group"
+            title="Buka Command Palette (Cmd+K / Ctrl+K)"
+          >
+            <Search size={13} className="text-ink-subtle group-hover:text-accent transition-colors" />
+            <span className="text-[11px] font-medium text-ink-muted group-hover:text-ink">
+              {language === 'id' ? 'Cari perintah...' : 'Search commands...'}
+            </span>
+            <Kbd className="text-[9px] py-0 px-1 text-ink-subtle border-hairline">⌘K</Kbd>
+          </button>
+        )}
       </div>
 
       {/* Right Section */}
       <div className="flex items-center gap-1.5 sm:gap-3">
+        {/* Shortcuts Cheat Sheet Button */}
+        {onOpenShortcutsHelp && (
+          <button
+            type="button"
+            onClick={onOpenShortcutsHelp}
+            className="hidden sm:flex p-2 text-ink-subtle hover:text-ink hover:bg-surface-2 rounded-md transition-colors cursor-pointer"
+            title={language === 'id' ? 'Pintasan Keyboard (?)' : 'Keyboard Shortcuts (?)'}
+            aria-label="Keyboard Shortcuts"
+          >
+            <Keyboard size={16} />
+          </button>
+        )}
+
         {/* PWA Install Button */}
         <PWAInstallButton />
 
@@ -98,22 +133,6 @@ export default function Header({ activeView, onMenuToggle, onNavigate }: HeaderP
             onClose={() => setShowNotifications(false)}
             onNavigate={onNavigate}
           />
-        </div>
-
-        {/* User Profile */}
-        <div className="flex items-center gap-2 pl-2 border-l border-hairline">
-          {user?.photoURL ? (
-            <img
-              src={user.photoURL}
-              alt=""
-              className="w-7 h-7 rounded-full object-cover border border-hairline"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-white font-bold text-[11px]">
-              {user?.displayName?.charAt(0) || 'U'}
-            </div>
-          )}
         </div>
       </div>
     </div>

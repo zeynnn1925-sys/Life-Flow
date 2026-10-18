@@ -1,26 +1,36 @@
-import React from 'react';
-import { Trophy, Settings, Settings2, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trophy, Settings, Settings2, ChevronRight, Terminal } from 'lucide-react';
 import { View } from '../../types';
+import { AboutDeveloperModal } from '../../components/AboutDeveloperModal';
 
 interface SystemHubProps {
   setActiveView: (view: View) => void;
 }
 
 export default function SystemHubPage({ setActiveView }: SystemHubProps) {
+  const [showAbout, setShowAbout] = useState(false);
+
   const cards = [
     {
       id: 'achievements',
       icon: Trophy,
       title: "Achievements",
       description: "Lihat pencapaianmu",
-      view: 'achievements' as View
+      action: () => setActiveView('achievements' as View)
     },
     {
       id: 'settings',
       icon: Settings,
       title: "Settings",
       description: "Pengaturan & notifikasi",
-      view: 'settings' as View
+      action: () => setActiveView('settings' as View)
+    },
+    {
+      id: 'developer',
+      icon: Terminal,
+      title: "About Developer",
+      description: "Profil & visi Muhammad Faiz Dzahin",
+      action: () => setShowAbout(true)
     }
   ];
 
@@ -38,15 +48,15 @@ export default function SystemHubPage({ setActiveView }: SystemHubProps) {
       </div>
 
       {/* Grid Section */}
-      <div className="grid grid-cols-2 lg:grid-cols-2 gap-3 lg:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
         {cards.map((card) => (
           <button
             key={card.id}
-            onClick={() => setActiveView(card.view)}
-            className="bg-[#111318] border border-white/8 rounded-xl p-3 lg:p-6 cursor-pointer transition-all duration-150 hover:bg-[#1a1b22] hover:border-[#9ca3af]/30 active:scale-[0.98] flex flex-col gap-2 text-left group"
+            onClick={card.action}
+            className="bg-[#111318] border border-white/8 rounded-xl p-3 lg:p-6 cursor-pointer transition-all duration-150 hover:bg-[#1a1b22] hover:border-orange-500/30 active:scale-[0.98] flex flex-col gap-2 text-left group"
           >
-            <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-lg bg-[#9ca3af]/12 flex items-center justify-center transition-colors group-hover:bg-[#9ca3af]/20">
-              <card.icon size={18} className="text-[#9ca3af] lg:w-5 lg:h-5" />
+            <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-lg bg-orange-500/12 flex items-center justify-center transition-colors group-hover:bg-orange-500/20">
+              <card.icon size={18} className="text-orange-400 lg:w-5 lg:h-5" />
             </div>
             
             <div className="flex flex-col gap-1">
@@ -62,6 +72,8 @@ export default function SystemHubPage({ setActiveView }: SystemHubProps) {
           </button>
         ))}
       </div>
+
+      <AboutDeveloperModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
     </div>
   );
 }
