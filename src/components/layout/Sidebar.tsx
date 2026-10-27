@@ -6,8 +6,8 @@ import {
   ChartPieSlice,
   ChartLineUp,
   CalendarBlank,
+  CalendarCheck,
   Repeat,
-  Sparkle,
   Target,
   Headphones,
   BookOpenText,
@@ -60,7 +60,7 @@ export default function Sidebar({ activeView, setActiveView, isCollapsed }: Side
       items: [
         { id: 'schedule', label: t('schedule') || 'Schedule', icon: CalendarBlank },
         { id: 'habits', label: t('habits') || 'Habit Tracker', icon: Repeat },
-        { id: 'ai_planner', label: t('aiPlanner') || 'AI Planner', icon: Sparkle },
+        { id: 'ai_planner', label: t('aiPlanner') || 'Daily Plan', icon: CalendarCheck },
         { id: 'targets', label: t('targets') || 'Daily Targets', icon: Target },
         { 
           id: 'smart_space', 

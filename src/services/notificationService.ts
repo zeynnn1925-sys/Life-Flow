@@ -101,7 +101,7 @@ export function notifyTaskApproaching(task: Task, minutesLeft: number): void {
     
   const bodyText = `${task.title} ${timeText}${task.description ? `\nDeskripsi: ${task.description}` : ''}`;
 
-  sendBrowserNotification('⏰ Pengingat Jadwal — LifeFlow', {
+  sendBrowserNotification('Pengingat Jadwal · LifeFlow', {
     body: bodyText,
     tag: key,
     requireInteraction: true,
@@ -116,8 +116,8 @@ export function notifyUnfinishedTasks(tasks: Task[]): void {
   const unfinished = tasks.filter(t => t.date === today && !t.completed);
   if (unfinished.length === 0) return;
   if (!canSendNotification('task_reminder', 4 * 60 * 60 * 1000)) return;
-  sendBrowserNotification('📅 LifeFlow — Tugas Hari Ini', {
-    body: `${unfinished.length} tugas belum selesai!`,
+  sendBrowserNotification('Tugas Hari Ini · LifeFlow', {
+    body: `${unfinished.length} tugas belum selesai`,
     tag: 'task_reminder',
   });
   markNotificationSent('task_reminder');
@@ -133,8 +133,8 @@ export function notifyBillsDue(recurringTransactions: RecurringTransaction[]): v
   const due = recurringTransactions.filter(rt => rt.isBill && (rt.nextDueDate <= today || !rt.lastProcessedDate));
   if (due.length === 0) return;
   if (!canSendNotification('bill_reminder', 24 * 60 * 60 * 1000)) return;
-  sendBrowserNotification('💰 LifeFlow — Tagihan Jatuh Tempo', {
-    body: `${due.map(b => b.description).join(', ')} perlu dibayar!`,
+  sendBrowserNotification('Tagihan Jatuh Tempo · LifeFlow', {
+    body: `${due.map(b => b.description).join(', ')} perlu diselesaikan`,
     tag: 'bill_reminder',
     requireInteraction: true,
   });
@@ -145,8 +145,8 @@ export function notifyTargetProgress(targets: Target[]): void {
   const near = targets.filter(t => (t.currentValue / t.targetValue) >= 0.7 && t.currentValue < t.targetValue);
   if (near.length === 0) return;
   if (!canSendNotification('target_reminder', 12 * 60 * 60 * 1000)) return;
-  sendBrowserNotification('🎯 LifeFlow — Target Hampir Tercapai!', {
-    body: `"${near[0].title}" sudah ${Math.round((near[0].currentValue / near[0].targetValue) * 100)}%!`,
+  sendBrowserNotification('Target Mendekati Capaian · LifeFlow', {
+    body: `"${near[0].title}" sudah ${Math.round((near[0].currentValue / near[0].targetValue) * 100)}%`,
     tag: 'target_reminder',
   });
   markNotificationSent('target_reminder');
@@ -155,10 +155,10 @@ export function notifyTargetProgress(targets: Target[]): void {
 export function notifyHabitReminder(habit: Habit): void {
   const key = `habit_reminder_${habit.id}`;
   if (!canSendNotification(key, 20 * 60 * 60 * 1000)) return;
-  sendBrowserNotification(`${habit.icon} LifeFlow — Waktunya ${habit.title}!`, {
+  sendBrowserNotification(`Waktunya ${habit.title} · LifeFlow`, {
     body: habit.currentStreak > 0
-      ? `Jangan putus streak ${habit.currentStreak} harimu!`
-      : `Mulai kebiasaan baikmu hari ini.`,
+      ? `Jaga konsistensi streak ${habit.currentStreak} harimu.`
+      : `Lanjutkan komitmen kebiasaan hari ini.`,
     tag: key,
     data: { habitId: habit.id },
   });
@@ -169,8 +169,8 @@ export function notifyStreakWarning(habit: Habit): void {
   if (habit.currentStreak < 3) return;
   const key = `streak_warning_${habit.id}`;
   if (!canSendNotification(key, 20 * 60 * 60 * 1000)) return;
-  sendBrowserNotification(`⚠️ Streak ${habit.title} Terancam!`, {
-    body: `Streak ${habit.currentStreak} harimu hampir putus! Selesaikan sebelum tengah malam.`,
+  sendBrowserNotification(`Streak ${habit.title} Perlu Perhatian`, {
+    body: `Streak ${habit.currentStreak} harimu belum dicatat hari ini. Selesaikan sebelum hari berganti.`,
     tag: key,
     requireInteraction: true,
   });
@@ -178,8 +178,8 @@ export function notifyStreakWarning(habit: Habit): void {
 }
 
 export function notifyAchievementUnlocked(achievement: { title: string, points: number, id: string }): void {
-  sendBrowserNotification('🏆 Achievement Terbuka!', {
-    body: `"${achievement.title}" — +${achievement.points} poin!`,
+  sendBrowserNotification('Pencapaian Baru Terbuka', {
+    body: `"${achievement.title}" · +${achievement.points} poin`,
     tag: `achievement_${achievement.id}`,
   });
 }
@@ -187,8 +187,8 @@ export function notifyAchievementUnlocked(achievement: { title: string, points: 
 export function notifyBudgetOver(categoryName: string, pct: number): void {
   const key = `budget_over_${categoryName}`;
   if (!canSendNotification(key, 24 * 60 * 60 * 1000)) return;
-  sendBrowserNotification('🔴 LifeFlow — Budget Terlampaui!', {
-    body: `"${categoryName}" sudah ${Math.round(pct)}% dari budget bulan ini.`,
+  sendBrowserNotification('Alokasi Anggaran Terlampaui · LifeFlow', {
+    body: `"${categoryName}" mencapai ${Math.round(pct)}% dari alokasi bulan ini.`,
     tag: key,
   });
   markNotificationSent(key);

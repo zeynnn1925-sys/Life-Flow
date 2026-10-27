@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Brain, Send } from 'lucide-react';
+import { TrendUp, ArrowsClockwise } from '@phosphor-icons/react';
 import { Habit } from '../../types/habits';
 import { useNotifications } from '../../contexts/NotificationContext';
 
@@ -30,22 +30,22 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
       }
 
       const data = await response.json();
-      const text = data.text || "Belum ada pola yang cukup buat dianalisis. Coba lagi setelah checkin beberapa hari.";
+      const text = data.text || "Belum ada pola yang cukup untuk dianalisis. Coba lagi setelah check-in beberapa hari.";
       setAdvice(text);
       if (data.text) {
         await addNotification({
-          title: '🧠 Evaluasi AI Habit Coach',
-          message: 'AI Habit Coach telah menganalisis pola kebiasaanmu dan memberikan saran terbaru.',
+          title: 'Evaluasi kebiasaan harian',
+          message: 'Pola kebiasaan harian telah dianalisis untuk menjaga konsistensi alur kerja.',
           type: 'ai_insight',
           link: 'habits',
         });
       }
     } catch (error) {
-      console.warn("AI Habit Coach network fallback:", error);
+      console.warn("Habit Coach network fallback:", error);
       const fallbackTips = [
         "Fokus pada konsistensi 1 kebiasaan prioritas hari ini. Rutinitas kecil yang konsisten lebih berharga daripada intensitas sesaat.",
-        "Gunakan teknik habit stacking: gabungkan kebiasaan baru ini tepat setelah rutinitas yang sudah otomatis Anda lakukan.",
-        "Jangan biarkan kebiasaan terlewat dua hari berturut-turut untuk menjaga momentum streak Anda."
+        "Gunakan teknik penumpukan kebiasaan: kaitkan target baru tepat setelah rutinitas yang sudah otomatis Anda lakukan setiap pagi.",
+        "Jangan biarkan kebiasaan terlewat dua hari berturut-turut untuk menjaga momentum konsistensi Anda."
       ];
       setAdvice(fallbackTips[Math.floor(Math.random() * fallbackTips.length)]);
     } finally {
@@ -69,18 +69,16 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
             if (!advice && !loading) getCoachAdvice();
           }
         }}
-        className="w-full p-8 rounded-lg bg-surface-1 border border-hairline hover:border-accent/40 active:scale-[0.98] transition-all overflow-hidden group cursor-pointer"
+        className="w-full p-6 rounded-lg bg-surface-1 border border-hairline hover:border-hairline-strong active:scale-[0.99] transition-all overflow-hidden group cursor-pointer"
         id="ai-habit-coach-toggle"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-pill -mr-16 -mt-16 blur-2xl group-hover:bg-accent/10 transition-all duration-700" />
-        
-        <div className="relative flex items-center gap-6">
-          <div className="w-14 h-14 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-center text-accent shadow-sm transition-transform group-hover:rotate-12">
-            <Brain size={28} />
+        <div className="relative flex items-center gap-4">
+          <div className="w-10 h-10 bg-surface-2 border border-hairline rounded-lg flex items-center justify-center text-[#C8A27C] shrink-0">
+            <TrendUp size={20} weight="regular" />
           </div>
           <div className="text-left">
-            <h4 className="text-heading-sm font-black text-ink uppercase tracking-tight">Baca Pola Kebiasaan</h4>
-            <p className="text-body-sm text-ink-tertiary">Analisis singkat dari data checkin kamu</p>
+            <h4 className="text-sm font-semibold text-ink">Evaluasi Pola Rutinitas</h4>
+            <p className="text-xs text-ink-tertiary">Kajian kontinuitas dari data check-in kebiasaan Anda</p>
           </div>
         </div>
 
@@ -90,27 +88,27 @@ export function AIHabitCoach({ habits }: AIHabitCoachProps) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="mt-8 pt-8 border-t border-hairline text-left"
+              className="mt-6 pt-6 border-t border-hairline text-left"
             >
               {loading ? (
-                <div className="flex items-center gap-3 text-accent font-black text-eyebrow uppercase tracking-widest animate-pulse">
-                  <div className="w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
-                  <span>Menganalisis data checkin...</span>
+                <div className="flex items-center gap-2.5 text-[#C8A27C] text-xs font-medium animate-pulse">
+                  <div className="w-4 h-4 border-2 border-[#C8A27C]/30 border-t-[#C8A27C] rounded-full animate-spin" />
+                  <span>Menganalisis data rutinitas...</span>
                 </div>
               ) : (
-                <div className="bg-surface-2 p-6 rounded-md border border-hairline shadow-inner italic leading-relaxed text-body-sm text-ink-subtle font-medium relative">
-                  <div className="absolute -top-3 left-4 px-2 bg-surface-1 text-[10px] font-black text-accent uppercase tracking-widest">Analisis</div>
-                   "{advice}"
+                <div className="bg-surface-2 p-5 rounded-md border border-hairline leading-relaxed text-xs text-ink-subtle relative">
+                  <div className="text-[10px] font-semibold text-ink-tertiary mb-2 uppercase tracking-wider">Catatan Evaluasi</div>
+                  "{advice}"
                 </div>
               )}
               
               {!loading && (
                 <button 
                   onClick={(e) => { e.stopPropagation(); getCoachAdvice(); }}
-                  className="mt-6 flex items-center gap-3 text-eyebrow font-black uppercase tracking-widest text-ink-tertiary hover:text-accent transition-colors active:scale-95"
+                  className="mt-4 flex items-center gap-2 text-xs font-medium text-ink-tertiary hover:text-[#C8A27C] transition-colors cursor-pointer"
                 >
-                  <Send size={14} className="group-hover:translate-x-1 transition-transform" />
-                  Analisis Ulang
+                  <ArrowsClockwise size={14} weight="regular" />
+                  <span>Perbarui Evaluasi</span>
                 </button>
               )}
             </motion.div>

@@ -4,7 +4,7 @@ import {
   Bot, 
   Send, 
   X, 
-  Sparkles, 
+  Compass, 
   Trash2, 
   Copy, 
   Check, 
@@ -57,12 +57,12 @@ export const AdvisorChat: React.FC = () => {
         id: 'welcome-msg',
         role: 'model',
         text: i18n.language === 'id' 
-          ? 'Halo! Saya Penasihat AI LifeFlow Anda. Saya memiliki akses aman dan terverifikasi ke data keuangan, target, dan kebiasaan harian Anda. Ada yang bisa saya bantu analisis hari ini?'
+          ? 'Halo! Saya Flo, asisten cerdas LifeFlow Anda. Saya memiliki akses ke data keuangan, target, dan kebiasaan harian Anda. Ada yang ingin dianalisis atau direncanakan hari ini?'
           : i18n.language === 'ar'
-          ? 'مرحباً! أنا مستشارك الذكي في لايف فلو. لدي وصول آمن إلى بياناتك المالية وعاداتك وأهدافك اليومية. كيف يمكنني مساعدتك اليوم؟'
+          ? 'مرحباً! أنا فلو (Flo)، مساعدك في لايف فلو. لدي وصول إلى بياناتك المالية وعاداتك وأهدافك. كيف يمكنني مساعدتك اليوم؟'
           : i18n.language === 'es'
-          ? '¡Hola! Soy tu Asesor de IA en LifeFlow. Tengo acceso verificado y seguro a tus finanzas, hábitos y objetivos. ¿En qué puedo ayudarte hoy?'
-          : 'Hello! I am your LifeFlow AI Advisor. I have secure, real-time access to your verified financial records, daily targets, and habits. How can I assist your workflow today?',
+          ? '¡Hola! Soy Flo, tu asistente en LifeFlow. Tengo acceso a tus finanzas, hábitos y objetivos. ¿En qué puedo ayudarte hoy?'
+          : 'Hello! I am Flo, your LifeFlow assistant. I have access to your financial records, daily targets, and habits. How can I assist your workflow today?',
         timestamp: new Date().toISOString()
       }
     ];
@@ -204,16 +204,15 @@ export const AdvisorChat: React.FC = () => {
           id="advisor-floating-button"
           type="button"
           onClick={() => setIsOpen(true)}
-          aria-label={t('open_advisor', 'LifeFlow AI Advisor')}
-          style={{ backgroundColor: '#e31049' }}
-          className="fixed bottom-6 end-6 z-50 flex items-center gap-2.5 px-4 py-3 bg-[#e31049] hover:bg-[#c80e3f] text-white rounded-full shadow-2xl hover:shadow-[#e31049]/25 transition-all duration-300 hover:scale-105 group border border-white/20 backdrop-blur-md"
+          aria-label={t('open_advisor', 'Flo')}
+          className="fixed bottom-6 end-6 z-50 flex items-center gap-2.5 px-3.5 py-2.5 bg-[#14161b] hover:bg-[#1a1d24] text-white/90 rounded-full shadow-xl transition-all duration-200 hover:scale-[1.02] group border border-white/[0.1] cursor-pointer"
         >
-          <div className="relative flex items-center justify-center">
-            <Bot className="w-5 h-5 transition-transform group-hover:rotate-12" />
-            <span className="absolute -top-1 -end-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#e31049] rounded-full animate-pulse" />
+          <div className="relative flex items-center justify-center text-[#C8A27C]">
+            <Compass className="w-4 h-4 transition-transform group-hover:rotate-45" />
+            <span className="absolute -top-0.5 -end-0.5 w-1.5 h-1.5 bg-[#C8A27C] rounded-full" />
           </div>
-          <span className="font-semibold text-xs tracking-wide hidden sm:inline">
-            {t('open_advisor', 'LifeFlow AI Advisor')}
+          <span className="font-medium text-xs tracking-wide hidden sm:inline text-white/90">
+            {t('open_advisor', 'Flo')}
           </span>
         </button>
       )}
@@ -222,27 +221,23 @@ export const AdvisorChat: React.FC = () => {
       {isOpen && (
         <div
           id="advisor-chat-window"
-          className={`fixed z-50 transition-all duration-300 flex flex-col bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden ${
+          className={`fixed z-50 transition-all duration-300 flex flex-col bg-white dark:bg-[#14161b] border border-stone-200 dark:border-white/[0.08] shadow-2xl overflow-hidden ${
             isExpanded 
-              ? 'inset-4 md:inset-10 rounded-3xl' 
-              : 'bottom-4 end-4 w-[calc(100vw-2rem)] sm:w-[420px] h-[580px] max-h-[85vh] rounded-3xl'
+              ? 'inset-4 md:inset-10 rounded-2xl' 
+              : 'bottom-4 end-4 w-[calc(100vw-2rem)] sm:w-[420px] h-[580px] max-h-[85vh] rounded-2xl'
           }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3.5 border-b border-stone-100 dark:border-stone-800 bg-stone-50/80 dark:bg-stone-900/80 backdrop-blur-md">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100 dark:border-white/[0.07] bg-stone-50/80 dark:bg-[#14161b]/95 backdrop-blur-md">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
-                <Sparkles className="w-5 h-5" />
+              <div className="w-8 h-8 rounded-lg bg-[#C8A27C]/15 text-[#C8A27C] flex items-center justify-center border border-[#C8A27C]/20">
+                <Compass className="w-4 h-4" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                    {t('title', 'AI Life & Financial Advisor')}
+                  <h3 className="text-xs font-semibold text-stone-900 dark:text-stone-100">
+                    {t('title', 'Flo')}
                   </h3>
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    {t('online_badge', 'Live Sync')}
-                  </span>
                 </div>
                 <p className="text-[11px] text-stone-400 dark:text-stone-500">
                   {transactions.length} transactions · {habits.length} habits · {targets.length} targets

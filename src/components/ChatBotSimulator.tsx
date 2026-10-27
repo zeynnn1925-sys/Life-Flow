@@ -5,7 +5,6 @@ import {
   Check, 
   CornerDownLeft, 
   Info, 
-  Sparkles,
   PhoneCall, 
   Video, 
   MoreVertical, 

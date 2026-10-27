@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, RotateCcw, Maximize2, X, Sparkles } from 'lucide-react';
+import { Play, Pause, ArrowsCounterClockwise, ArrowsOutSimple, X } from '@phosphor-icons/react';
 import { usePomodoro } from '../contexts/PomodoroContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -58,7 +58,7 @@ export const FloatingPomodoro: React.FC<FloatingPomodoroProps> = ({ activeView, 
         whileHover={{ scale: 1.02 }}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
-        className="fixed z-50 cursor-grab active:cursor-grabbing bg-slate-950/90 border border-violet-500/35 rounded-2xl p-3 shadow-2xl shadow-black/80 backdrop-blur-md flex items-center gap-3"
+        className="fixed z-50 cursor-grab active:cursor-grabbing bg-[#0f1115]/95 border border-white/10 rounded-2xl p-3 shadow-2xl shadow-black/80 backdrop-blur-md flex items-center gap-3"
         style={{
           width: isHovered ? '240px' : '90px',
           transition: 'width 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -72,7 +72,7 @@ export const FloatingPomodoro: React.FC<FloatingPomodoroProps> = ({ activeView, 
               cx="28"
               cy="28"
               r={radius}
-              className="stroke-slate-800"
+              className="stroke-stone-800"
               strokeWidth="3.5"
               fill="transparent"
               style={{ r: 24 }}
@@ -82,7 +82,7 @@ export const FloatingPomodoro: React.FC<FloatingPomodoroProps> = ({ activeView, 
               cx="28"
               cy="28"
               r={radius}
-              className="stroke-violet-500"
+              className="stroke-[#C8A27C]"
               strokeWidth="3.5"
               fill="transparent"
               strokeDasharray={circumference}
@@ -94,10 +94,10 @@ export const FloatingPomodoro: React.FC<FloatingPomodoroProps> = ({ activeView, 
 
           {/* Time digits inside circle */}
           <div className="flex flex-col items-center justify-center z-10 pointer-events-none">
-            <span className="text-[11px] font-bold font-mono text-slate-100">
+            <span className="text-[11px] font-bold font-mono text-slate-100 tabular-nums">
               {String(pomoMinutes).padStart(2, '0')}
             </span>
-            <span className="text-[9px] font-bold font-mono text-slate-400 -mt-1">
+            <span className="text-[9px] font-bold font-mono text-slate-400 -mt-1 tabular-nums">
               {String(pomoSeconds).padStart(2, '0')}
             </span>
           </div>
@@ -112,52 +112,52 @@ export const FloatingPomodoro: React.FC<FloatingPomodoroProps> = ({ activeView, 
           >
             {/* Mode & Breathing Indicator */}
             <div className="flex flex-col">
-              <span className="text-[9px] font-bold tracking-widest text-violet-400 uppercase leading-none font-mono">
+              <span className="text-[9px] font-bold tracking-widest text-[#C8A27C] uppercase leading-none font-mono">
                 {pomoMode.replace('_', ' ')}
               </span>
               {pomoActive ? (
-                <span className="text-[10px] text-slate-300 font-semibold truncate animate-pulse mt-1 flex items-center gap-1">
-                  💆 {breathingText}
+                <span className="text-[10px] text-slate-300 font-medium truncate mt-1 flex items-center gap-1">
+                  {breathingText}
                 </span>
               ) : (
-                <span className="text-[10px] text-slate-500 font-semibold truncate mt-1">
+                <span className="text-[10px] text-slate-500 font-medium truncate mt-1">
                   {isId ? 'Sesi Jeda' : 'Paused'}
                 </span>
               )}
             </div>
 
             {/* Micro Controls */}
-            <div className="flex items-center gap-2 mt-auto">
+            <div className="flex items-center gap-1.5 mt-auto">
               <button
                 onClick={() => setPomoActive(!pomoActive)}
-                className="p-1 rounded bg-violet-600/20 hover:bg-violet-600 text-violet-400 hover:text-white transition-colors cursor-pointer"
+                className="p-1 rounded bg-white/5 hover:bg-white/10 text-white transition-colors cursor-pointer"
                 title={pomoActive ? (isId ? "Jeda" : "Pause") : (isId ? "Mulai" : "Start")}
               >
-                {pomoActive ? <Pause size={12} /> : <Play size={12} />}
+                {pomoActive ? <Pause size={12} weight="regular" /> : <Play size={12} weight="regular" />}
               </button>
               <button
                 onClick={resetTimer}
-                className="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                className="p-1 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
                 title="Reset"
               >
-                <RotateCcw size={12} />
+                <ArrowsCounterClockwise size={12} weight="regular" />
               </button>
               <button
                 onClick={() => {
                   setActiveView('smart_space');
-                  setIsFloating(false); // return to full space
+                  setIsFloating(false);
                 }}
-                className="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
-                title={isId ? "Buka Fokus Space" : "Maximize view"}
+                className="p-1 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                title={isId ? "Buka Ruang Fokus" : "Maximize view"}
               >
-                <Maximize2 size={12} />
+                <ArrowsOutSimple size={12} weight="regular" />
               </button>
               <button
                 onClick={() => setIsFloating(false)}
-                className="p-1 rounded bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer ml-auto"
+                className="p-1 rounded bg-white/5 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer ml-auto"
                 title={isId ? "Tutup Melayang" : "Hide floating widget"}
               >
-                <X size={12} />
+                <X size={12} weight="regular" />
               </button>
             </div>
           </motion.div>

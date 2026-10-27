@@ -1,10 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, LayoutDashboard, Wallet, Calendar, Target, Zap, 
-  Sparkles, BookOpen, BrainCircuit, Settings, Trophy, 
-  ArrowRight, Command, Keyboard
-} from 'lucide-react';
+  MagnifyingGlass, 
+  SquaresFour, 
+  Coins, 
+  CalendarBlank, 
+  CalendarCheck, 
+  Repeat, 
+  Target, 
+  BookOpenText, 
+  Wallet, 
+  Headphones, 
+  Trophy, 
+  Gear, 
+  Keyboard, 
+  ArrowRight, 
+  Command 
+} from '@phosphor-icons/react';
 import { View } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Kbd } from './Kbd';
@@ -42,71 +54,73 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       id: 'dashboard', 
       title: 'Dashboard', 
       category: isId ? 'Navigasi' : 'Navigation', 
-      icon: LayoutDashboard, 
+      icon: SquaresFour, 
       view: 'dashboard' as View,
-      shortcut: 'Alt+1' 
+      shortcut: '⌥1' 
     },
     { 
       id: 'finance', 
       title: isId ? 'Keuangan & Transaksi' : 'Finance & Transactions', 
-      category: isId ? 'Navigasi' : 'Navigation', 
-      icon: Wallet, 
+      category: isId ? 'Keuangan' : 'Finance', 
+      icon: Coins, 
       view: 'finance' as View,
-      shortcut: 'Alt+2' 
-    },
-    { 
-      id: 'schedule', 
-      title: isId ? 'Jadwal & Tugas' : 'Schedule & Tasks', 
-      category: isId ? 'Navigasi' : 'Navigation', 
-      icon: Calendar, 
-      view: 'schedule' as View,
-      shortcut: 'Alt+3' 
-    },
-    { 
-      id: 'ai_planner', 
-      title: isId ? 'AI Planner (Perencana Harian)' : 'AI Daily Planner', 
-      category: 'AI Assistant', 
-      icon: Sparkles, 
-      view: 'ai_planner' as View,
-      shortcut: 'Alt+4' 
-    },
-    { 
-      id: 'habits', 
-      title: isId ? 'Pelacak Kebiasaan (Habits)' : 'Habit Tracker', 
-      category: isId ? 'Produktivitas' : 'Productivity', 
-      icon: Zap, 
-      view: 'habits' as View,
-      shortcut: 'Alt+5' 
-    },
-    { 
-      id: 'targets', 
-      title: isId ? 'Target Harian (Daily Targets)' : 'Daily Targets', 
-      category: isId ? 'Produktivitas' : 'Productivity', 
-      icon: Target, 
-      view: 'targets' as View,
-      shortcut: 'Alt+6' 
-    },
-    { 
-      id: 'journal', 
-      title: isId ? 'Jurnal Refleksi' : 'Daily Journal', 
-      category: isId ? 'Produktivitas' : 'Productivity', 
-      icon: BookOpen, 
-      view: 'journal' as View,
-      shortcut: 'Alt+7' 
+      shortcut: '⌥2' 
     },
     { 
       id: 'budgets', 
       title: isId ? 'Anggaran & Tabungan' : 'Budgets & Savings', 
       category: isId ? 'Keuangan' : 'Finance', 
       icon: Wallet, 
-      view: 'budgets' as View 
+      view: 'budgets' as View,
+      shortcut: '⌥3' 
+    },
+    { 
+      id: 'schedule', 
+      title: isId ? 'Jadwal & Agenda' : 'Schedule & Agenda', 
+      category: isId ? 'Produktivitas' : 'Productivity', 
+      icon: CalendarBlank, 
+      view: 'schedule' as View,
+      shortcut: '⌥4' 
+    },
+    { 
+      id: 'habits', 
+      title: isId ? 'Pelacak Kebiasaan' : 'Habit Tracker', 
+      category: isId ? 'Produktivitas' : 'Productivity', 
+      icon: Repeat, 
+      view: 'habits' as View,
+      shortcut: '⌥5' 
+    },
+    { 
+      id: 'ai_planner', 
+      title: isId ? 'Rencana Hari Ini' : 'Daily Plan', 
+      category: isId ? 'Produktivitas' : 'Productivity', 
+      icon: CalendarCheck, 
+      view: 'ai_planner' as View,
+      shortcut: '⌥6' 
+    },
+    { 
+      id: 'targets', 
+      title: isId ? 'Target Harian' : 'Daily Targets', 
+      category: isId ? 'Produktivitas' : 'Productivity', 
+      icon: Target, 
+      view: 'targets' as View,
+      shortcut: '⌥7' 
     },
     { 
       id: 'smart_space', 
-      title: isId ? 'Ruang Pintar' : 'Smart Space', 
+      title: isId ? 'Smart Space (Fokus & Suasana)' : 'Smart Space (Focus & Ambient)', 
       category: isId ? 'Produktivitas' : 'Productivity', 
-      icon: BrainCircuit, 
-      view: 'smart_space' as View 
+      icon: Headphones, 
+      view: 'smart_space' as View,
+      shortcut: '⌥8' 
+    },
+    { 
+      id: 'journal', 
+      title: isId ? 'Jurnal Refleksi' : 'Daily Journal', 
+      category: isId ? 'Produktivitas' : 'Productivity', 
+      icon: BookOpenText, 
+      view: 'journal' as View,
+      shortcut: '⌥9' 
     },
     { 
       id: 'achievements', 
@@ -119,13 +133,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       id: 'settings', 
       title: isId ? 'Pengaturan Sistem' : 'System Settings', 
       category: isId ? 'Sistem' : 'System', 
-      icon: Settings, 
-      view: 'settings' as View,
-      shortcut: 'Alt+8' 
+      icon: Gear, 
+      view: 'settings' as View 
     },
     ...(onOpenShortcutsHelp ? [{
       id: 'shortcuts_help',
-      title: isId ? 'Lihat Semua Pintasan Keyboard' : 'View All Keyboard Shortcuts',
+      title: isId ? 'Daftar Pintasan Keyboard' : 'View Keyboard Shortcuts',
       category: isId ? 'Bantuan' : 'Help',
       icon: Keyboard,
       shortcut: '?',
@@ -192,30 +205,30 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: -10 }}
+            initial={{ opacity: 0, scale: 0.97, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: -10 }}
+            exit={{ opacity: 0, scale: 0.97, y: -10 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="relative z-50 w-full max-w-xl bg-[#14151a] border border-white/15 rounded-xl shadow-2xl overflow-hidden flex flex-col"
+            className="relative z-50 w-full max-w-xl bg-[#14161b] border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden flex flex-col"
           >
             {/* Search Input Bar */}
-            <div className="flex items-center px-4 py-3 border-b border-white/10 gap-2.5 bg-[#181920]">
-              <Search size={16} className="text-zinc-400 shrink-0" />
+            <div className="flex items-center px-4 py-3 border-b border-white/[0.07] gap-2.5 bg-white/[0.02]">
+              <MagnifyingGlass size={16} weight="light" className="text-white/40 shrink-0" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={isId ? 'Ketik perintah atau modul (misal: Keuangan, Jadwal, AI)...' : 'Type a command or search module (e.g. Finance, Schedule, AI)...'}
+                placeholder={isId ? 'Ketik perintah atau modul (misal: Keuangan, Jadwal, Target)...' : 'Type a command or search module (e.g. Finance, Schedule, Targets)...'}
                 autoFocus
-                className="w-full bg-transparent text-sm text-zinc-100 placeholder:text-zinc-500 outline-none"
+                className="w-full bg-transparent text-sm text-white/90 placeholder:text-white/35 outline-none font-normal"
               />
-              <Kbd className="text-[10px] text-zinc-400">ESC</Kbd>
+              <Kbd className="text-[10px] text-white/40 border-white/10 bg-white/[0.04]">ESC</Kbd>
             </div>
 
             {/* Results List */}
-            <div className="max-h-80 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+            <div className="max-h-80 overflow-y-auto p-2 space-y-0.5 custom-scrollbar">
               {filtered.length === 0 ? (
-                <div className="p-6 text-center text-xs text-zinc-500">
+                <div className="p-6 text-center text-xs text-white/40">
                   {isId ? 'Tidak ada modul atau perintah yang cocok.' : 'No commands or views found.'}
                 </div>
               ) : (
@@ -227,33 +240,33 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       key={item.id}
                       onClick={() => executeAction(item)}
                       onMouseEnter={() => setSelectedIndex(idx)}
-                      className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs cursor-pointer transition-colors ${
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer transition-colors ${
                         isSelected
-                          ? 'bg-orange-500/15 text-orange-400 border border-orange-500/25'
-                          : 'text-zinc-300 hover:bg-white/5 border border-transparent'
+                          ? 'bg-white/[0.06] text-white'
+                          : 'text-white/70 hover:bg-white/[0.03]'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
                           className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${
-                            isSelected ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 text-zinc-400'
+                            isSelected ? 'text-[#C8A27C]' : 'text-white/40'
                           }`}
                         >
-                          <Icon size={14} />
+                          <Icon size={16} weight={isSelected ? "regular" : "light"} />
                         </div>
-                        <span className="font-medium truncate">{item.title}</span>
+                        <span className="font-normal truncate">{item.title}</span>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
                         {item.shortcut && (
-                          <Kbd className="text-[9px] py-0 px-1 text-zinc-400 border-white/10 bg-white/5">
+                          <Kbd className="text-[10px] py-0 px-1 text-white/40 border-white/10 bg-white/[0.04] font-mono">
                             {item.shortcut}
                           </Kbd>
                         )}
-                        <span className="text-[10px] font-mono text-zinc-500 uppercase">
+                        <span className="text-[10px] font-mono text-white/35">
                           {item.category}
                         </span>
-                        {isSelected && <ArrowRight size={12} className="text-orange-400" />}
+                        {isSelected && <ArrowRight size={12} weight="light" className="text-[#C8A27C]" />}
                       </div>
                     </div>
                   );
@@ -262,16 +275,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2.5 bg-[#101114] border-t border-white/5 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+            <div className="px-4 py-2.5 bg-white/[0.01] border-t border-hairline flex items-center justify-between text-[10px] text-white/40 font-mono">
               <span className="flex items-center gap-2">
                 <span>Navigate: ↑ ↓</span>
-                <span>•</span>
+                <span>·</span>
                 <span>Select: ↵</span>
-                <span>•</span>
+                <span>·</span>
                 <span>Shortcuts: <Kbd className="text-[9px] py-0">?</Kbd></span>
               </span>
               <span className="flex items-center gap-1">
-                <Command size={10} /> + K
+                <Command size={11} weight="light" /> + K
               </span>
             </div>
           </motion.div>

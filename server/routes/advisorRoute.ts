@@ -205,7 +205,7 @@ advisorRouter.post('/chat', async (req: Request, res: Response) => {
     };
     const targetLangName = langNames[language] || 'English';
 
-    const systemInstruction = `You are LifeFlow's Chief Life & Financial Intelligence Advisor. 
+    const systemInstruction = `You are Flo, LifeFlow's thoughtful and intelligent assistant. 
 You provide hyper-actionable, empathetic, and mathematically accurate coaching on finances, habits, daily targets, and productivity.
 
 CRITICAL DIRECTIVES:

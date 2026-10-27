@@ -1,6 +1,6 @@
 {
-  "summary": "Pembaruan rancangan ekspor spreadsheet ke standar Data Analyst/Data Engineer: format tabel terstandarisasi, pemisahan tipe data angka murni agar formula Excel berfungsi, blok ringkasan KPI eksekutif, pencegahan distorsi karakter dengan UTF-8 BOM, serta opsi ekspor spesifik per modul atau lembar konsolidasi profesional.",
-  "updatedAt": "2026-10-13T08:57:35.996678209Z",
-  "requestFeedback": true,
-  "userFacing": true
+  "summary":  "Revised implementation plan for human-centric UI/UX refinement grounded in Mobbin, Refero, Godly, and Dark Mode Design: eliminating all AI slop, sparkles, emojis, and [AI] badges, adopting pure Phosphor icons, calm functional feature naming, clean dark mode surfaces, and natural microcopy without em dashes.",
+  "updatedAt":  "2026-10-27T03:47:07.985889337Z",
+  "requestFeedback":  true,
+  "userFacing":  true
 }

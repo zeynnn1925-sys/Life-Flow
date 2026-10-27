@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { PieChart, Loader2, AlertCircle, ArrowUpRight } from 'lucide-react';
+import { ChartPieSlice, SpinnerGap, WarningCircle, ArrowUpRight } from '@phosphor-icons/react';
 import { Transaction, Category } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNotifications } from '../contexts/NotificationContext';
@@ -65,10 +65,10 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
       const generatedText = data.text || "No advice generated.";
       setAdvice(generatedText);
       await addNotification({
-        title: language === 'id' ? '💡 Saran Finansial AI Siap' : '💡 AI Financial Advice Ready',
+        title: language === 'id' ? 'Evaluasi anggaran selesai' : 'Budget evaluation ready',
         message: language === 'id' 
-          ? 'Evaluasi anggaran 50/30/20 dan rekomendasi keuanganmu telah selesai disusun.' 
-          : 'Your 50/30/20 budget evaluation and financial suggestions are ready.',
+          ? 'Ringkasan alokasi 50/30/20 dan rekomendasi keuangan telah diperbarui.' 
+          : '50/30/20 allocation summary and suggestions updated.',
         type: 'ai_insight',
         link: 'finance',
       });
@@ -98,43 +98,41 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
         animate={{ opacity: 1, y: 0 }}
         className="bg-surface-1 p-6 rounded-lg shadow-card border border-hairline mt-8 relative overflow-hidden z-10"
       >
-        <div className="absolute top-0 left-0 w-1 h-full bg-accent" />
-        
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
         <div className="flex-1">
-          <h3 className="text-heading-sm font-bold flex items-center gap-2 text-ink uppercase tracking-tight">
-            <PieChart className="w-5 h-5 text-accent shrink-0" />
-            {language === 'id' ? 'Penasihat AI 50/30/20' : '50/30/20 AI Advisor'}
+          <h3 className="text-heading-sm font-semibold flex items-center gap-2.5 text-ink tracking-tight">
+            <ChartPieSlice size={20} weight="regular" className="text-[#C8A27C] shrink-0" />
+            {language === 'id' ? 'Wawasan Alokasi Anggaran' : 'Budget Allocation Insights'}
           </h3>
           <p className="text-body-sm text-ink-tertiary mt-1.5 leading-relaxed">
             {language === 'id' 
-              ? 'Analisis cerdas berdasarkan metode alokasi 50/30/20 untuk stabilitas keuangan Anda.' 
-              : 'Smart analysis based on the 50/30/20 allocation method for your financial stability.'}
+              ? 'Evaluasi pengeluaran dan tabungan berdasarkan prinsip alokasi 50/30/20.' 
+              : 'Evaluation of spending and savings based on the 50/30/20 allocation framework.'}
           </p>
         </div>
         <button
           onClick={getAdvice}
           disabled={loading}
-          className="w-full sm:w-auto px-6 h-12 bg-accent text-white font-bold rounded-pill hover:bg-accent-hover active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-glow-accent shrink-0"
+          className="w-full sm:w-auto px-5 h-10 bg-surface-2 hover:bg-surface-3 text-ink font-medium text-xs rounded-md border border-hairline hover:border-[#C8A27C]/50 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
         >
           {loading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <SpinnerGap size={14} weight="regular" className="animate-spin text-[#C8A27C]" />
               {language === 'id' ? 'Menganalisis...' : 'Analyzing...'}
             </>
           ) : (
             <>
-              <ArrowUpRight className="w-4 h-4" />
-              {language === 'id' ? 'Minta Saran AI' : 'Get AI Advice'}
+              <ArrowUpRight size={14} weight="regular" className="text-[#C8A27C]" />
+              {language === 'id' ? 'Evaluasi Anggaran' : 'Evaluate Budget'}
             </>
           )}
         </button>
       </div>
 
       {error && (
-        <div className="bg-danger/10 border border-danger/20 p-4 rounded-md flex items-start gap-4 text-danger mb-6 animate-shake">
-          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-          <p className="text-body-sm font-bold">{error}</p>
+        <div className="bg-danger/10 border border-danger/20 p-4 rounded-md flex items-start gap-3 text-danger mb-6">
+          <WarningCircle size={18} weight="regular" className="shrink-0 mt-0.5" />
+          <p className="text-body-sm font-medium">{error}</p>
         </div>
       )}
 
@@ -144,8 +142,8 @@ export default function AIFinanceAdvisor({ transactions, categories }: AIFinance
           animate={{ opacity: 1 }}
           className="bg-surface-2 border border-hairline p-6 rounded-md relative"
         >
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-accent/10 text-accent text-[11px] font-mono font-semibold uppercase tracking-wider mb-4 border border-accent/20">
-            AI Financial Advice
+          <div className="text-xs text-ink-subtle mb-3 font-medium">
+            {language === 'id' ? 'Rekomendasi Alokasi 50/30/20' : '50/30/20 Allocation Summary'}
           </div>
           <div className="markdown-body text-ink prose prose-sm max-w-none prose-headings:text-ink prose-p:text-ink-subtle prose-strong:text-ink prose-li:text-ink-subtle">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{advice}</ReactMarkdown>

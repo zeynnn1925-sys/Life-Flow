@@ -18,7 +18,6 @@ import {
   Zap,
   CreditCard,
   Globe,
-  Sparkles,
   Moon,
   Sun
 } from 'lucide-react';

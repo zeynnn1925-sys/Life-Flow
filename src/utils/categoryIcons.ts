@@ -6,7 +6,7 @@ import {
   Heart, Activity, Dumbbell, Smile, Pill,
   Briefcase, DollarSign, Wallet, CreditCard, Landmark, TrendingUp, Coins, PiggyBank, Building, Receipt,
   Music, Gamepad, Tv, Film, Camera, Laptop, Book, GraduationCap,
-  ShieldCheck, Users, Trophy, Sparkles, HelpCircle
+  ShieldCheck, Users, Trophy, Star, HelpCircle
 } from 'lucide-react';
 
 export const CATEGORY_ICON_MAP: Record<string, React.ElementType> = {
@@ -55,8 +55,8 @@ export const CATEGORY_ICON_MAP: Record<string, React.ElementType> = {
   GraduationCap,
   ShieldCheck,
   Users,
-  Trophy,
-  Sparkles,
+  Star,
+  Sparkles: Star,
   HelpCircle
 };
 

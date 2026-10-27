@@ -1,22 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Globe, Check, ChevronDown } from 'lucide-react';
+import { Globe, Check, CaretDown } from '@phosphor-icons/react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export interface LanguageOption {
   code: 'en' | 'id' | 'es' | 'ar' | 'de';
   label: string;
   nativeName: string;
-  flag: string;
   dir: 'ltr' | 'rtl';
 }
 
 export const languages: LanguageOption[] = [
-  { code: 'en', label: 'English', nativeName: 'English (US)', flag: '🇺🇸', dir: 'ltr' },
-  { code: 'id', label: 'Indonesian', nativeName: 'Bahasa Indonesia', flag: '🇮🇩', dir: 'ltr' },
-  { code: 'es', label: 'Spanish', nativeName: 'Español', flag: '🇪🇸', dir: 'ltr' },
-  { code: 'ar', label: 'Arabic', nativeName: 'العربية (RTL)', flag: '🇸🇦', dir: 'rtl' },
-  { code: 'de', label: 'German', nativeName: 'Deutsch', flag: '🇩🇪', dir: 'ltr' },
+  { code: 'en', label: 'English', nativeName: 'English (US)', dir: 'ltr' },
+  { code: 'id', label: 'Indonesian', nativeName: 'Bahasa Indonesia', dir: 'ltr' },
+  { code: 'es', label: 'Spanish', nativeName: 'Español', dir: 'ltr' },
+  { code: 'ar', label: 'Arabic', nativeName: 'العربية (RTL)', dir: 'rtl' },
+  { code: 'de', label: 'German', nativeName: 'Deutsch', dir: 'ltr' },
 ];
 
 interface LanguageSwitcherProps {
@@ -65,15 +64,15 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
               id={`lang-btn-${lang.code}`}
               type="button"
               onClick={() => handleLanguageChange(lang.code)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all border ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
                 isActive
-                  ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 shadow-xs'
-                  : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-700'
+                  ? 'bg-white/10 text-white border-white/20'
+                  : 'bg-surface-2 text-ink-subtle border-hairline hover:text-ink hover:bg-surface-3'
               }`}
             >
-              <span className="text-sm leading-none">{lang.flag}</span>
+              <span className="font-mono text-[10px] tracking-wider text-ink-tertiary">{lang.code.toUpperCase()}</span>
               <span>{lang.nativeName}</span>
-              {isActive && <Check className="w-3.5 h-3.5 ms-1" />}
+              {isActive && <Check size={14} weight="regular" className="text-[#C8A27C] ms-1" />}
             </button>
           );
         })}
@@ -88,19 +87,19 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-label={t('select_language', 'Select Language')}
-        className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white/80 dark:bg-stone-900/80 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 text-xs font-medium transition-all shadow-xs backdrop-blur-md"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-hairline bg-surface-2/70 hover:bg-surface-2 text-ink-subtle hover:text-ink text-xs font-medium transition-all cursor-pointer"
       >
-        <span className="text-sm">{currentLang.flag}</span>
-        <span className="hidden sm:inline font-semibold">{currentLang.code.toUpperCase()}</span>
-        <ChevronDown className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <Globe size={15} weight="light" className="text-ink-subtle" />
+        <span className="font-mono text-[11px] tracking-wider font-semibold text-ink">{currentLang.code.toUpperCase()}</span>
+        <CaretDown size={12} weight="light" className={`text-ink-tertiary transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
         <div 
           id="language-dropdown-menu"
-          className="absolute end-0 mt-2 w-48 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+          className="absolute end-0 mt-2 w-48 rounded-xl bg-surface-1 border border-hairline shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
         >
-          <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 border-b border-stone-100 dark:border-stone-800">
+          <div className="px-3 py-1.5 text-[11px] font-semibold text-ink-tertiary border-b border-hairline">
             {t('select_language', 'Select Language')}
           </div>
           <div className="p-1 space-y-0.5">
@@ -112,20 +111,20 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                   id={`lang-option-${lang.code}`}
                   type="button"
                   onClick={() => handleLanguageChange(lang.code)}
-                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium transition-colors ${
+                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold'
-                      : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'
+                      ? 'bg-white/5 text-white font-semibold'
+                      : 'text-ink-subtle hover:text-ink hover:bg-surface-2'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-base leading-none">{lang.flag}</span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-mono text-[10px] text-ink-tertiary w-5 text-left">{lang.code.toUpperCase()}</span>
                     <div className="flex flex-col text-start">
                       <span className="leading-tight">{lang.nativeName}</span>
-                      <span className="text-[10px] text-stone-400 dark:text-stone-500">{lang.label}</span>
+                      <span className="text-[10px] text-ink-tertiary">{lang.label}</span>
                     </div>
                   </div>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-amber-500" />}
+                  {isSelected && <Check size={14} weight="regular" className="text-[#C8A27C]" />}
                 </button>
               );
             })}

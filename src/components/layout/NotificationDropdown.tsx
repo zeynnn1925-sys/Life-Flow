@@ -3,16 +3,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, 
   Check, 
-  Trash2, 
+  Trash, 
   Clock, 
   Trophy, 
-  Sparkles, 
-  AlertTriangle, 
-  CheckCircle2, 
+  Compass, 
+  Warning, 
+  CheckCircle, 
   Info, 
-  ExternalLink,
+  ArrowSquareOut,
   X
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { useNotifications, InAppNotification } from '../../contexts/NotificationContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { View } from '../../types';
@@ -105,37 +105,37 @@ export function NotificationDropdown({ isOpen, onClose, onNavigate }: Notificati
       case 'achievement':
         return (
           <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center shrink-0">
-            <Trophy className="w-4 h-4" />
+            <Trophy size={16} weight="regular" />
           </div>
         );
       case 'ai_insight':
         return (
-          <div className="w-8 h-8 rounded-lg bg-accent/15 text-accent border border-accent/25 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-lg bg-[#C8A27C]/15 text-[#C8A27C] border border-[#C8A27C]/25 flex items-center justify-center shrink-0">
+            <Compass size={16} weight="regular" />
           </div>
         );
       case 'reminder':
         return (
           <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 border border-blue-500/20 flex items-center justify-center shrink-0">
-            <Clock className="w-4 h-4" />
+            <Clock size={16} weight="regular" />
           </div>
         );
       case 'warning':
         return (
           <div className="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-500 border border-orange-500/20 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-4 h-4" />
+            <Warning size={16} weight="regular" />
           </div>
         );
       case 'success':
         return (
           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-4 h-4" />
+            <CheckCircle size={16} weight="regular" />
           </div>
         );
       default:
         return (
           <div className="w-8 h-8 rounded-lg bg-zinc-500/10 text-zinc-400 border border-zinc-500/20 flex items-center justify-center shrink-0">
-            <Info className="w-4 h-4" />
+            <Info size={16} weight="regular" />
           </div>
         );
     }
@@ -161,18 +161,18 @@ export function NotificationDropdown({ isOpen, onClose, onNavigate }: Notificati
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.98 }}
           transition={{ duration: 0.15 }}
-          className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-w-[calc(100vw-24px)] bg-surface-1 rounded-xl shadow-2xl border border-hairline z-50 overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[500px]"
+          className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-w-[calc(100vw-24px)] bg-[#14161b] rounded-xl shadow-2xl border border-hairline z-50 overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[500px]"
           style={{
             backdropFilter: 'blur(20px)',
           }}
         >
           {/* Header */}
-          <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between bg-surface-2/40">
+          <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between bg-white/[0.02]">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-sm text-ink tracking-tight flex items-center gap-2">
+              <h3 className="font-semibold text-xs text-white/90 tracking-normal flex items-center gap-2">
                 <span>{language === 'id' ? 'Notifikasi' : 'Notifications'}</span>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 text-[11px] font-mono font-bold bg-accent text-white rounded-full">
+                  <span className="px-1.5 py-0.5 text-[10px] font-mono font-medium bg-[#C8A27C] text-stone-950 rounded-full">
                     {unreadCount}
                   </span>
                 )}
@@ -184,20 +184,20 @@ export function NotificationDropdown({ isOpen, onClose, onNavigate }: Notificati
                 <button
                   type="button"
                   onClick={markAllAsRead}
-                  className="px-2.5 py-1 text-[11px] font-semibold text-accent hover:bg-accent/10 rounded-md transition-colors flex items-center gap-1.5"
+                  className="px-2 py-1 text-[11px] font-medium text-[#C8A27C] hover:bg-white/[0.04] rounded-md transition-colors flex items-center gap-1.5 cursor-pointer"
                   title={language === 'id' ? 'Tandai semua sudah dibaca' : 'Mark all as read'}
                 >
-                  <Check className="w-3.5 h-3.5" />
+                  <Check size={13} weight="regular" />
                   <span>{language === 'id' ? 'Tandai Semua' : 'Mark All'}</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1 text-ink-subtle hover:text-ink hover:bg-surface-2 rounded-md transition-colors sm:hidden"
+                className="p-1 text-ink-subtle hover:text-ink hover:bg-white/[0.04] rounded-md transition-colors sm:hidden cursor-pointer"
                 aria-label="Close"
               >
-                <X className="w-4 h-4" />
+                <X size={15} weight="light" />
               </button>
             </div>
           </div>
@@ -206,16 +206,16 @@ export function NotificationDropdown({ isOpen, onClose, onNavigate }: Notificati
           <div className="flex-1 overflow-y-auto divide-y divide-hairline overscroll-contain">
             {notifications.length === 0 ? (
               <div className="p-8 text-center flex flex-col items-center justify-center">
-                <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center text-ink-subtle mb-3 border border-hairline">
-                  <Bell className="w-6 h-6 opacity-60" />
+                <div className="w-10 h-10 rounded-full bg-white/[0.03] flex items-center justify-center text-ink-subtle mb-3 border border-hairline">
+                  <Bell size={18} weight="light" className="opacity-60" />
                 </div>
-                <p className="text-xs font-semibold text-ink mb-1">
-                  {language === 'id' ? 'Belum Ada Notifikasi' : 'No Notifications'}
+                <p className="text-xs font-medium text-white/80 mb-1">
+                  {language === 'id' ? 'Belum ada notifikasi' : 'No notifications'}
                 </p>
-                <p className="text-[11px] text-ink-subtle max-w-[220px]">
+                <p className="text-[11px] text-white/45 max-w-[240px] leading-relaxed">
                   {language === 'id'
-                    ? 'Pengingat jadwal, milestone habit, dan saran AI akan muncul di sini.'
-                    : 'Reminders, habit milestones, and AI insights will appear here.'}
+                    ? 'Pengingat jadwal, milestone habit, dan wawasan produktivitas akan muncul di sini.'
+                    : 'Reminders, habit milestones, and productivity insights will appear here.'}
                 </p>
               </div>
             ) : (
@@ -225,8 +225,8 @@ export function NotificationDropdown({ isOpen, onClose, onNavigate }: Notificati
                   onClick={() => handleNotificationClick(item)}
                   className={`p-3.5 transition-colors relative flex items-start gap-3 cursor-pointer group ${
                     !item.isRead 
-                      ? 'bg-accent/[0.04] hover:bg-accent/[0.08]' 
-                      : 'hover:bg-surface-2/60'
+                      ? 'bg-white/[0.03] hover:bg-white/[0.05]' 
+                      : 'hover:bg-white/[0.02]'
                   }`}
                 >
                   {/* Icon */}
@@ -235,26 +235,26 @@ export function NotificationDropdown({ isOpen, onClose, onNavigate }: Notificati
                   {/* Content */}
                   <div className="flex-1 min-w-0 pr-6">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className={`text-xs font-semibold truncate ${!item.isRead ? 'text-ink font-bold' : 'text-ink-secondary'}`}>
+                      <span className={`text-xs truncate ${!item.isRead ? 'text-white/95 font-medium' : 'text-white/70'}`}>
                         {item.title}
                       </span>
                       {!item.isRead && (
-                        <span className="w-2 h-2 rounded-full bg-accent shrink-0 animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#C8A27C] shrink-0" />
                       )}
                     </div>
 
-                    <p className="text-[12px] text-ink-subtle leading-snug line-clamp-2 mb-1.5">
+                    <p className="text-[12px] text-white/50 leading-snug line-clamp-2 mb-1.5">
                       {item.message}
                     </p>
 
-                    <div className="flex items-center gap-2 text-[10px] text-ink-tertiary">
+                    <div className="flex items-center gap-2 text-[10px] text-white/40 font-mono">
                       <span>{formatTimestamp(item.createdAt)}</span>
                       {item.link && (
                         <>
-                          <span>•</span>
-                          <span className="text-accent flex items-center gap-0.5 font-medium hover:underline">
+                          <span>·</span>
+                          <span className="text-[#C8A27C] flex items-center gap-0.5 font-sans hover:underline">
                             <span>{language === 'id' ? 'Buka' : 'View'}</span>
-                            <ExternalLink className="w-2.5 h-2.5" />
+                            <ArrowSquareOut size={12} weight="light" />
                           </span>
                         </>
                       )}
@@ -268,11 +268,11 @@ export function NotificationDropdown({ isOpen, onClose, onNavigate }: Notificati
                       e.stopPropagation();
                       removeNotification(item.id);
                     }}
-                    className="absolute right-2 top-2 p-1.5 text-ink-subtle opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all"
+                    className="absolute right-2 top-2 p-1.5 text-white/40 opacity-0 group-hover:opacity-100 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all cursor-pointer"
                     title={language === 'id' ? 'Hapus' : 'Delete'}
                     aria-label="Delete notification"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash size={14} weight="light" />
                   </button>
                 </div>
               ))
@@ -281,8 +281,8 @@ export function NotificationDropdown({ isOpen, onClose, onNavigate }: Notificati
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="p-2 border-t border-hairline bg-surface-2/30 text-center">
-              <span className="text-[10px] text-ink-tertiary">
+            <div className="p-2 border-t border-hairline bg-white/[0.01] text-center">
+              <span className="text-[10px] text-white/40 font-mono">
                 {language === 'id'
                   ? `${notifications.length} notifikasi tersimpan`
                   : `${notifications.length} stored notifications`}

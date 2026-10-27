@@ -18,8 +18,7 @@ import {
   Flame,
   ArrowRight,
   Plus,
-  Search,
-  Sparkles
+  Search
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -149,40 +148,40 @@ export default function DashboardPage({
     });
   };
 
-  // Dynamic moving phrases (Sapaan, Motivasi, Tips Harian) — clean typography without badges
+  // Dynamic moving phrases (Sapaan, Motivasi, Tips Harian) · clean typography without badges
   const welcomePhrases = useMemo(() => {
     if (language === 'id') {
       const list = [
-        `Hai ${displayName}! Siap menata hari dan produktif bersama LifeFlow? ✨`,
-        `Motivasi: "Konsistensi kecil setiap hari menciptakan lompatan hasil yang luar biasa." 🚀`,
-        `Tips Harian: Selesaikan prioritas utama di pagi hari saat fokus mental masih prima. 💡`,
-        `Motivasi: "Fokuslah pada kemajuan hari ini, bukan mengejar kesempurnaan sesaat." 🌱`,
-        `Tips Harian: Istirahatkan mata selama 20 detik setiap 20 menit menatap layar. 🌿`,
-        `Motivasi: "Disiplin adalah jembatan nyata antara impian dan pencapaianmu." 🔥`,
-        `Tips Harian: Catat pengeluaran secara teratur agar kendali finansial tetap terjaga. 📊`,
-        `Motivasi: "Setiap langkah kecil membawamu lebih dekat ke impian besarmu." 🌟`,
-        `Tips Harian: Minum segelas air putih sebelum memulai sesi fokus kerjamu. 💧`,
-        `Tips Harian: Luangkan 5 menit sebelum istirahat malam untuk mereview hari dan bersyukur. 🌙`
+        `Hai ${displayName}! Siap menata hari dan produktif bersama LifeFlow?`,
+        `Motivasi: "Konsistensi kecil setiap hari menciptakan lompatan hasil yang luar biasa."`,
+        `Tips Harian: Selesaikan prioritas utama di pagi hari saat fokus mental masih prima.`,
+        `Motivasi: "Fokuslah pada kemajuan hari ini, bukan mengejar kesempurnaan sesaat."`,
+        `Tips Harian: Istirahatkan mata sejenak setiap selesai menyelesaikan satu blok fokus.`,
+        `Motivasi: "Disiplin adalah jembatan nyata antara rencana dan pencapaianmu."`,
+        `Tips Harian: Catat transaksi secara teratur agar kendali finansial tetap terjaga.`,
+        `Motivasi: "Setiap langkah kecil membawamu lebih dekat ke target jangka panjang."`,
+        `Tips Harian: Minum segelas air putih sebelum memulai sesi fokus berikutnya.`,
+        `Tips Harian: Luangkan 5 menit sebelum istirahat malam untuk mereview hari.`
       ];
       if (dailyQuote?.text) {
-        list.splice(2, 0, `Motivasi: "${dailyQuote.text}"${dailyQuote.author ? ` — ${dailyQuote.author}` : ''} ✨`);
+        list.splice(2, 0, `Motivasi: "${dailyQuote.text}"${dailyQuote.author ? ` · ${dailyQuote.author}` : ''}`);
       }
       return list;
     } else {
       const list = [
-        `Hey ${displayName}! Ready to own your day and flow productively? ✨`,
-        `Motivation: "Small daily consistencies build extraordinary breakthroughs." 🚀`,
-        `Daily Tip: Tackle your top priority first thing in the morning when mental energy peaks. 💡`,
-        `Motivation: "Focus on today's forward progress, not fleeting perfection." 🌱`,
-        `Daily Tip: Rest your eyes for 20 seconds every 20 minutes of screen time. 🌿`,
-        `Motivation: "Discipline is the real bridge between goals and achievement." 🔥`,
-        `Daily Tip: Log expenses right away to keep your personal finances effortless and clear. 📊`,
-        `Motivation: "Every intentional small step brings you closer to your grand vision." 🌟`,
-        `Daily Tip: Drink a glass of water before starting your deep work session. 💧`,
-        `Daily Tip: Take 5 quiet minutes tonight to reflect on wins and plan tomorrow smoothly. 🌙`
+        `Hey ${displayName}! Ready to own your day and flow productively?`,
+        `Motivation: "Small daily consistencies build extraordinary breakthroughs."`,
+        `Daily Tip: Tackle your top priority first thing in the morning when mental energy peaks.`,
+        `Motivation: "Focus on today's forward progress, not fleeting perfection."`,
+        `Daily Tip: Rest your eyes briefly between deep focus sessions.`,
+        `Motivation: "Discipline is the real bridge between goals and achievement."`,
+        `Daily Tip: Log transactions right away to keep personal finances clear and effortless.`,
+        `Motivation: "Every intentional small step brings you closer to your vision."`,
+        `Daily Tip: Drink a glass of water before starting your next focus block.`,
+        `Daily Tip: Take 5 quiet minutes tonight to reflect on wins and plan tomorrow smoothly.`
       ];
       if (dailyQuote?.text) {
-        list.splice(2, 0, `Motivation: "${dailyQuote.text}"${dailyQuote.author ? ` — ${dailyQuote.author}` : ''} ✨`);
+        list.splice(2, 0, `Motivation: "${dailyQuote.text}"${dailyQuote.author ? ` · ${dailyQuote.author}` : ''}`);
       }
       return list;
     }
@@ -1040,7 +1039,7 @@ export default function DashboardPage({
                       "{dailyQuote.text}"
                     </p>
                     <span className="text-[10px] text-zinc-400 font-bold mt-1 text-right block pr-1">
-                      — {dailyQuote.author}
+                      · {dailyQuote.author}
                     </span>
                   </>
                 ) : (
@@ -1331,7 +1330,7 @@ export default function DashboardPage({
             <div className="h-px bg-white/5" />
             {dailyQuote ? (
               <p className="text-[11px] leading-relaxed text-zinc-200 italic text-left">
-                "{dailyQuote.text}" <span className="text-[9px] text-zinc-400 not-italic block mt-0.5">— {dailyQuote.author}</span>
+                "{dailyQuote.text}" <span className="text-[9px] text-zinc-400 not-italic block mt-0.5">· {dailyQuote.author}</span>
               </p>
             ) : (
               <p className="text-[10px] text-zinc-400 italic text-center">Loading quote...</p>

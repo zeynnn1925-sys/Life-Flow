@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Quote, Trophy, CheckCircle2, Circle, Clock, RefreshCw, BrainCircuit, GripVertical } from 'lucide-react';
+import { 
+  Quotes, 
+  Trophy, 
+  CheckCircle, 
+  Clock, 
+  ArrowsClockwise, 
+  CalendarBlank, 
+  DotsSixVertical, 
+  GraduationCap 
+} from '@phosphor-icons/react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { DailyQuote, AIProductivityPlan, AIPlanItem } from '../types';
@@ -46,10 +55,10 @@ export default function AIPlanner() {
       const newPlan = await generateAIProductivityPlan(today, language);
       await saveAIPlan(newPlan);
       await addNotification({
-        title: language === 'id' ? '✨ Rencana AI Harian Siap' : '✨ Daily AI Plan Ready',
+        title: language === 'id' ? 'Rencana harian siap' : 'Daily plan ready',
         message: language === 'id'
-          ? `AI telah menyusun ${newPlan.items.length} agenda produktif untuk harimu.`
-          : `AI has curated ${newPlan.items.length} focus items for your day.`,
+          ? `${newPlan.items.length} agenda fokus telah disiapkan untuk harimu.`
+          : `${newPlan.items.length} focus items prepared for your day.`,
         type: 'ai_insight',
         link: 'ai_planner',
       });
@@ -91,13 +100,12 @@ export default function AIPlanner() {
       >
         {/* Quote Section */}
       <section className="relative overflow-hidden bg-surface-1 p-8 rounded-lg shadow-card border border-hairline group">
-        <div className="absolute top-0 left-0 w-1.5 h-full bg-accent" />
-        <div className="absolute top-4 right-4 text-accent/5 transition-transform group-hover:scale-110 duration-500">
-          <Quote size={120} />
+        <div className="absolute top-4 right-4 text-accent/5 transition-transform group-hover:scale-105 duration-500 pointer-events-none">
+          <Quotes size={96} weight="light" />
         </div>
         <div className="relative z-10 space-y-6">
-          <div className="flex items-center gap-3 text-accent text-eyebrow uppercase">
-            <Quote size={16} />
+          <div className="flex items-center gap-2 text-[#C8A27C] text-eyebrow uppercase tracking-widest font-semibold">
+            <Quotes size={16} weight="regular" />
             {t('dailyInspiration')}
           </div>
           {loadingQuote ? (
@@ -109,11 +117,11 @@ export default function AIPlanner() {
             <div className="space-y-6">
               <p className="text-heading-sm font-medium italic leading-relaxed text-ink">"{dailyQuote.text}"</p>
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-surface-2 border border-hairline flex items-center justify-center text-accent font-bold">
+                <div className="w-10 h-10 rounded-full bg-surface-2 border border-hairline flex items-center justify-center text-[#C8A27C] font-bold">
                   {dailyQuote.author.charAt(0)}
                 </div>
                 <div>
-                  <div className="font-black text-ink">{dailyQuote.author}</div>
+                  <div className="font-bold text-ink">{dailyQuote.author}</div>
                   <div className="text-eyebrow text-ink-tertiary uppercase">{dailyQuote.field}</div>
                 </div>
               </div>
@@ -124,31 +132,35 @@ export default function AIPlanner() {
           <button 
             id="btn-refresh-quote"
             onClick={fetchQuote}
-            className="text-eyebrow text-ink-tertiary hover:text-accent transition-all flex items-center gap-2 uppercase tracking-widest pt-4 border-t border-hairline w-full"
+            className="text-eyebrow text-ink-tertiary hover:text-[#C8A27C] transition-all flex items-center gap-2 uppercase tracking-widest pt-4 border-t border-hairline w-full cursor-pointer"
           >
-            <RefreshCw size={14} className={loadingQuote ? 'animate-spin' : ''} /> {t('refreshQuote')}
+            <ArrowsClockwise size={14} weight="regular" className={loadingQuote ? 'animate-spin' : ''} /> {t('refreshQuote')}
           </button>
         </div>
       </section>
 
-      {/* AI Plan Section */}
+      {/* Daily Plan Section */}
       <section className="space-y-8">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-heading-md font-bold text-ink flex items-center gap-3">
-              <BrainCircuit className="text-accent w-7 h-7" />
-              {t('aiProductivityPlan')}
+            <h2 className="text-heading-md font-bold text-ink flex items-center gap-2.5">
+              <CalendarBlank size={24} weight="regular" className="text-[#C8A27C]" />
+              {language === 'id' ? 'Rencana Fokus Hari Ini' : 'Daily Focus Plan'}
             </h2>
-            <p className="text-body-sm text-ink-tertiary mt-1 max-w-lg">{t('aiPlanDesc')}</p>
+            <p className="text-body-sm text-ink-tertiary mt-1 max-w-lg">
+              {language === 'id' 
+                ? 'Agenda harian terstruktur yang diprioritaskan untuk menjaga alur kerja Anda.' 
+                : 'Structured focus agenda prioritized to maintain your daily workflow.'}
+            </p>
           </div>
           <button 
             id="btn-regenerate-plan"
             onClick={fetchPlan}
             disabled={loadingPlan}
-            className="w-12 h-12 flex items-center justify-center bg-surface-1 border border-hairline rounded-md hover:border-accent hover:text-accent transition-all disabled:opacity-50 shadow-sm"
-            title={t('regeneratePlan')}
+            className="w-10 h-10 flex items-center justify-center bg-surface-1 border border-hairline rounded-md hover:border-[#C8A27C]/60 hover:text-[#C8A27C] transition-all disabled:opacity-50 cursor-pointer"
+            title={language === 'id' ? 'Perbarui Rencana' : 'Refresh Plan'}
           >
-            <RefreshCw className={`w-5 h-5 ${loadingPlan ? 'animate-spin' : ''}`} />
+            <ArrowsClockwise size={16} weight="regular" className={`${loadingPlan ? 'animate-spin' : ''}`} />
           </button>
         </div>
 
@@ -165,20 +177,20 @@ export default function AIPlanner() {
               <div className="flex justify-between items-end">
                 <div>
                   <div className="text-eyebrow text-ink-tertiary uppercase mb-1">{t('dailyChallengeProgress')}</div>
-                  <div className="text-heading-sm font-black text-ink">{completedCount} <span className="text-ink-tertiary font-bold text-lg">/ {totalCount}</span></div>
+                  <div className="text-heading-sm font-bold text-ink">{completedCount} <span className="text-ink-tertiary font-normal text-base">/ {totalCount}</span></div>
                 </div>
-                <div className="text-heading-sm font-black text-accent">{Math.round(progress)}%</div>
+                <div className="text-heading-sm font-bold text-[#C8A27C] tabular-nums font-mono">{Math.round(progress)}%</div>
               </div>
-              <div className="h-4 bg-surface-2 rounded-pill overflow-hidden border border-hairline p-0.5">
+              <div className="h-2.5 bg-surface-2 rounded-full overflow-hidden border border-hairline p-0.5">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
-                  className="h-full bg-accent rounded-pill shadow-glow-accent"
+                  className="h-full bg-[#C8A27C] rounded-full"
                 />
               </div>
-              <div className="text-eyebrow text-ink-tertiary flex items-center gap-2 font-bold">
-                <Trophy size={16} className="text-accent" />
-                {t('challengesCompleted').toUpperCase()}
+              <div className="text-eyebrow text-ink-tertiary flex items-center gap-2 font-medium">
+                <Trophy size={16} weight="light" className="text-[#C8A27C]" />
+                {t('challengesCompleted')}
               </div>
             </div>
 
@@ -187,7 +199,7 @@ export default function AIPlanner() {
               axis="y" 
               values={aiPlan.items} 
               onReorder={handleReorder} 
-              className="flex flex-col gap-6"
+              className="flex flex-col gap-4"
             >
               <AnimatePresence mode="popLayout">
                 {aiPlan.items.map((item, index) => (
@@ -199,65 +211,66 @@ export default function AIPlanner() {
                     transition={{ delay: index * 0.05 }}
                     className={`p-6 bg-surface-1 rounded-lg border shadow-card transition-all cursor-grab active:cursor-grabbing group ${
                       item.completed 
-                        ? 'border-hairline opacity-60 grayscale-[0.5]' 
-                        : 'border-hairline hover:border-accent/40'
+                        ? 'border-hairline opacity-60' 
+                        : 'border-hairline hover:border-hairline-strong'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-5 flex-1">
+                      <div className="flex items-start gap-4 flex-1">
                         <button 
                           onClick={() => toggleItem(item.id)}
-                          className={`w-12 h-12 rounded-md border flex items-center justify-center transition-all shrink-0 ${
-                            item.completed ? 'bg-accent border-accent text-white shadow-glow-accent' : 'bg-surface-1 border-hairline-strong text-transparent hover:border-accent hover:text-accent/20'
+                          className={`w-9 h-9 rounded-md border flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                            item.completed ? 'bg-[#C8A27C] border-[#C8A27C] text-stone-950' : 'bg-surface-1 border-hairline hover:border-[#C8A27C]'
                           }`}
                         >
-                          <CheckCircle2 size={24} className={item.completed ? 'scale-100 opacity-100' : 'scale-50 opacity-0'} />
+                          <CheckCircle size={20} weight={item.completed ? "fill" : "light"} className={item.completed ? 'opacity-100' : 'opacity-0'} />
                         </button>
                         <div className="space-y-1">
-                          <h3 className={`text-heading-xs font-bold transition-all ${item.completed ? 'text-ink-tertiary line-through' : 'text-ink'}`}>
+                          <h3 className={`text-sm font-semibold transition-all ${item.completed ? 'text-ink-tertiary line-through' : 'text-ink'}`}>
                             {item.title}
                           </h3>
-                          <div className="flex items-center gap-2 text-eyebrow text-ink-tertiary uppercase">
-                            <Clock size={14} />
-                            <span className="font-mono">{item.startTime} — {item.endTime}</span>
+                          <div className="flex items-center gap-2 text-eyebrow text-ink-tertiary">
+                            <Clock size={13} weight="light" />
+                            <span className="font-mono tabular-nums text-xs">{item.startTime} – {item.endTime}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="text-ink-tertiary opacity-0 group-hover:opacity-100 transition-opacity p-2 cursor-grab active:cursor-grabbing">
-                        <GripVertical size={24} />
+                      <div className="text-ink-tertiary opacity-0 group-hover:opacity-100 transition-opacity p-1 cursor-grab active:cursor-grabbing">
+                        <DotsSixVertical size={20} weight="light" />
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                      <div className={`p-5 rounded-md border shadow-sm transition-all ${
-                        item.completed ? 'bg-surface-2 border-hairline text-ink-tertiary' : 'bg-surface-2 border-hairline-strong text-ink'
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                      <div className={`p-4 rounded-md border transition-all ${
+                        item.completed ? 'bg-surface-2 border-hairline text-ink-tertiary' : 'bg-surface-2 border-hairline text-ink'
                       }`}>
-                        <div className="text-eyebrow text-ink-tertiary uppercase font-black mb-3 flex items-center gap-2">
-                          <Trophy size={14} className="text-accent" />
+                        <div className="text-eyebrow text-ink-tertiary uppercase font-medium mb-2 flex items-center gap-1.5">
+                          <Trophy size={14} weight="light" className="text-[#C8A27C]" />
                           {t('challenge')}
                         </div>
-                        <p className="text-body-sm leading-relaxed">{item.challenge}</p>
+                        <p className="text-body-sm leading-relaxed text-ink-subtle">{item.challenge}</p>
                       </div>
 
                       {item.fieldToStudy && (
-                        <div className={`p-5 rounded-md border shadow-sm transition-all ${
-                          item.completed ? 'bg-surface-2 border-hairline text-ink-tertiary' : 'bg-accent/5 border-accent/20 text-ink'
+                        <div className={`p-4 rounded-md border transition-all ${
+                          item.completed ? 'bg-surface-2 border-hairline text-ink-tertiary' : 'bg-surface-2 border-hairline text-ink'
                         }`}>
-                          <div className="text-eyebrow text-accent uppercase font-black mb-3 flex items-center gap-2">
-                            <BrainCircuit size={14} />
+                          <div className="text-eyebrow text-[#C8A27C] uppercase font-medium mb-2 flex items-center gap-1.5">
+                            <GraduationCap size={15} weight="light" />
                             {t('fieldOfStudy')}
                           </div>
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center bg-surface-1 p-2 rounded-md border border-hairline">
-                              <span className="text-body-sm font-bold">{item.fieldToStudy}</span>
-                              <span className="text-heading-xs font-black text-accent">{item.targetPercentage}%</span>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center bg-surface-1 p-2 rounded border border-hairline">
+                              <span className="text-body-sm font-medium">{item.fieldToStudy}</span>
+                              <span className="text-xs font-mono tabular-nums font-bold text-[#C8A27C]">{item.targetPercentage}%</span>
                             </div>
                             {item.toolsNeeded && item.toolsNeeded.length > 0 && (
-                              <div className="flex flex-wrap gap-2 pt-2 border-t border-hairline">
-                                {item.toolsNeeded.map(tool => (
-                                  <span key={tool} className="px-2 py-0.5 bg-surface-1 border border-hairline rounded-md text-[10px] font-bold text-ink-tertiary truncate">
-                                    {tool}
-                                  </span>
+                              <div className="flex flex-wrap items-center gap-1.5 pt-2 text-xs text-ink-tertiary">
+                                {item.toolsNeeded.map((tool, idx) => (
+                                  <React.Fragment key={tool}>
+                                    {idx > 0 && <span aria-hidden="true" className="text-ink-tertiary/40">·</span>}
+                                    <span>{tool}</span>
+                                  </React.Fragment>
                                 ))}
                               </div>
                             )}
@@ -271,7 +284,7 @@ export default function AIPlanner() {
             </Reorder.Group>
           </div>
         ) : (
-          <div className="p-16 text-center text-ink-tertiary bg-surface-1 rounded-lg border border-hairline border-dashed italic">
+          <div className="p-12 text-center text-ink-tertiary bg-surface-1 rounded-lg border border-hairline border-dashed italic">
             {t('noPlanAvailable')}
           </div>
         )}

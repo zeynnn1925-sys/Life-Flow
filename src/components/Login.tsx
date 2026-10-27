@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Zap, ArrowRight, Sparkles, Info, Mail, Lock, Github, Scan, User } from 'lucide-react';
+import { ShieldCheck, Zap, ArrowRight, Info, Mail, Lock, Github, Scan, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Logo } from './Logo';

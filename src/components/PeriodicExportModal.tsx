@@ -7,7 +7,6 @@ import {
   X,
   Calendar,
   Layers,
-  Sparkles,
   TrendingUp,
   Activity,
   CheckCircle2,
@@ -260,7 +259,7 @@ export function PeriodicExportModal({ isOpen, onClose, defaultModule = 'master' 
                   titleEn: 'Consolidated Master Ledger',
                   descId: 'Lengkap: KPI Eksekutif + Finansial + Kebiasaan + Tugas',
                   descEn: 'Full: Executive KPI + Financial + Habits + Tasks',
-                  icon: Sparkles
+                  icon: Table
                 },
                 {
                   id: 'finance',

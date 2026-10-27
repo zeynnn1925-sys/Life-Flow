@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, X, Info, AlertTriangle, CheckCircle, Trophy, Sparkles, Clock } from 'lucide-react';
+import { Trophy, Compass, Clock, Warning, CheckCircle, Info, X } from '@phosphor-icons/react';
 import { useAuth } from './AuthContext';
 import { db } from '../firebase';
 import { 
@@ -245,7 +245,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                   activeToast.type === 'achievement'
                     ? 'bg-amber-500/15 text-amber-500'
                     : activeToast.type === 'ai_insight'
-                    ? 'bg-accent/15 text-accent'
+                    ? 'bg-[#C8A27C]/15 text-[#C8A27C]'
                     : activeToast.type === 'reminder'
                     ? 'bg-blue-500/15 text-blue-500'
                     : activeToast.type === 'warning'
@@ -255,12 +255,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     : 'bg-zinc-500/15 text-zinc-400'
                 }`}
               >
-                {activeToast.type === 'achievement' && <Trophy size={18} />}
-                {activeToast.type === 'ai_insight' && <Sparkles size={18} />}
-                {activeToast.type === 'reminder' && <Clock size={18} />}
-                {activeToast.type === 'warning' && <AlertTriangle size={18} />}
-                {activeToast.type === 'success' && <CheckCircle size={18} />}
-                {activeToast.type === 'info' && <Info size={18} />}
+                {activeToast.type === 'achievement' && <Trophy size={18} weight="regular" />}
+                {activeToast.type === 'ai_insight' && <Compass size={18} weight="regular" />}
+                {activeToast.type === 'reminder' && <Clock size={18} weight="regular" />}
+                {activeToast.type === 'warning' && <Warning size={18} weight="regular" />}
+                {activeToast.type === 'success' && <CheckCircle size={18} weight="regular" />}
+                {activeToast.type === 'info' && <Info size={18} weight="regular" />}
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold text-ink text-xs truncate">{activeToast.title}</h4>
