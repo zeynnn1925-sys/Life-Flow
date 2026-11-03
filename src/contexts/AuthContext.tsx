@@ -74,49 +74,69 @@ const removeSafeStorage = (key: string): void => {
   }
 };
 
+const DEMO_USER = {
+  uid: 'demo_user_lifeflow',
+  email: 'demo@lifeflow.app',
+  displayName: 'LifeFlow User',
+  photoURL: null,
+  isAnonymous: true,
+  emailVerified: true,
+} as unknown as User;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => auth.currentUser || DEMO_USER);
+  const [loading, setLoading] = useState(false);
   const [googleSheetsAccessToken, setGoogleSheetsAccessToken] = useState<string | null>(getSafeStorage('google_sheets_token'));
   const [isSheetsConnected, setIsSheetsConnected] = useState<boolean>(!!getSafeStorage('google_sheets_token'));
 
   useEffect(() => {
-    // Safety fallback timer to prevent infinite loading screen
     const safetyTimer = setTimeout(() => {
       setLoading(false);
-    }, 1500);
+    }, 1000);
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       clearTimeout(safetyTimer);
-      setUser(user);
-      setLoading(false);
+      if (currentUser) {
+        setUser(currentUser);
+        setLoading(false);
 
-      if (user) {
         let defaultDisplayName = 'User';
         let defaultEmail = 'user@lifeflow.app';
 
-        if (user.isAnonymous) {
+        if (currentUser.isAnonymous) {
           defaultDisplayName = 'Guest User';
           defaultEmail = 'guest@lifeflow.app';
-        } else if (user.email === 'face-login@lifeflow.app') {
+        } else if (currentUser.email === 'face-login@lifeflow.app') {
           defaultDisplayName = 'Face User';
           defaultEmail = 'face-login@lifeflow.app';
         } else {
-          defaultDisplayName = user.displayName || user.email?.split('@')[0] || 'User';
-          defaultEmail = user.email || 'user@lifeflow.app';
+          defaultDisplayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
+          defaultEmail = currentUser.email || 'user@lifeflow.app';
         }
 
         // Run user profile update asynchronously in background
-        setDoc(doc(db, 'users', user.uid), {
-          uid: user.uid,
-          email: user.email || defaultEmail,
-          displayName: user.displayName || defaultDisplayName,
-          photoURL: user.photoURL,
+        setDoc(doc(db, 'users', currentUser.uid), {
+          uid: currentUser.uid,
+          email: currentUser.email || defaultEmail,
+          displayName: currentUser.displayName || defaultDisplayName,
+          photoURL: currentUser.photoURL,
           lastLogin: new Date().toISOString(),
-          isAnonymous: user.isAnonymous
+          isAnonymous: currentUser.isAnonymous
         }, { merge: true }).catch((error) => {
           console.debug("Background user doc save:", error);
         });
+      } else {
+        // Auto-authenticate anonymously in background so user directly enters app for demo video
+        signInAnonymously(auth)
+          .then((cred) => {
+            setUser(cred.user);
+            setLoading(false);
+          })
+          .catch((err) => {
+            console.debug("Auto anonymous auth notice:", err);
+            setUser(DEMO_USER);
+            setLoading(false);
+          });
       }
     });
 
@@ -264,9 +284,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('google_sheets_token');
       setGoogleSheetsAccessToken(null);
       setIsSheetsConnected(false);
+      signInAnonymously(auth).catch(() => {
+        setUser(DEMO_USER);
+      });
     } catch (error) {
       console.error('Error signing out:', error);
-      throw error;
+      setUser(DEMO_USER);
     }
   }, []);
 

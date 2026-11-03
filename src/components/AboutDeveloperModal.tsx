@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Code2, Terminal, Layers, ShieldCheck, Mail, 
   Check, Copy, MessageSquare, ArrowUpRight, Server, 
   Database, Cpu, Globe, Laptop, Workflow, GitBranch, 
-  Container, Wrench, Network
+  Container, Wrench, Network, ZoomIn, ZoomOut, Sparkle
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { TiltedCard } from './ui/TiltedCard';
@@ -27,6 +27,7 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
   const [activeTab, setActiveTab] = useState<TabType>('story');
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const developerEmail = 'muhammadfaizdzahin11@gmail.com';
   const developerPhone = '087792811601';
@@ -44,11 +45,25 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
     setTimeout(() => setCopiedPhone(false), 2000);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isZoomed) {
+          setIsZoomed(false);
+        } else if (isOpen) {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isZoomed, onClose]);
+
   const tabs: { id: TabType; label: string }[] = [
-    { id: 'story', label: isId ? 'Profil & Pendekatan Rekayasa' : 'Profile & Philosophy' },
+    { id: 'story', label: isId ? 'Profil & Pendekatan Kerja' : 'Profile & Philosophy' },
     { id: 'languages', label: isId ? 'Bahasa Pemrograman & Stack' : 'Languages & Stack' },
-    { id: 'automation', label: isId ? 'Otomatisasi & Infrastruktur' : 'Automation & Infra' },
-    { id: 'services', label: isId ? 'Kapabilitas & Layanan' : 'Capabilities & Services' },
+    { id: 'automation', label: isId ? 'Otomatisasi & Deploy' : 'Automation & Deploy' },
+    { id: 'services', label: isId ? 'Keahlian & Layanan' : 'Skills & Services' },
     { id: 'contact', label: isId ? 'Kontak Langsung' : 'Direct Contact' }
   ];
 
@@ -56,16 +71,17 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={() => {
+              if (isZoomed) setIsZoomed(false);
+              else onClose();
+            }}
             className="fixed inset-0 bg-black/85 backdrop-blur-md z-40"
           />
 
-          {/* Modal Container */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -73,11 +89,10 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className="relative z-50 w-full max-w-4xl bg-[#121316] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
           >
-            {/* Header Bar */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#16181d]">
               <div>
                 <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold block">
-                  ENGINEERING PORTFOLIO
+                  DEVELOPER PORTFOLIO
                 </span>
                 <h2 className="text-sm font-semibold text-zinc-100">
                   Muhammad Faiz Dzahin
@@ -98,104 +113,123 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="overflow-y-auto flex-1 custom-scrollbar">
-              
-              {/* Hero & Nametag Section */}
-              <div className="px-6 pt-6 pb-7 border-b border-white/10 bg-[#14151a]">
-                <div className="flex flex-col lg:flex-row gap-7 items-center lg:items-start">
-                  
-                  {/* Hanging Nametag Card with React Bits TiltedCard 3D Interactive Effect */}
-                  <div className="flex flex-col items-center shrink-0 w-60 select-none">
-                    {/* Lanyard Top Strap */}
-                    <div className="flex flex-col items-center">
-                      <div className="w-5 h-10 bg-zinc-800 rounded-t border-x border-zinc-700/60 shadow-inner flex justify-center py-1">
-                        <div className="w-0.5 h-full bg-zinc-600/70" />
-                      </div>
+              <div className="px-6 pt-6 pb-7 border-b border-white/10 bg-gradient-to-b from-[#17181f] via-[#14151b] to-[#121318] relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,rgba(200,162,124,0.06),transparent_50%)] pointer-events-none" />
+                
+                <div className="flex flex-col lg:flex-row gap-7 items-center lg:items-start relative z-10">
+                  <div className="flex flex-col items-center shrink-0 w-64 select-none">
+                    <div className="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#241e19] via-[#1a1714] to-[#141312] border border-[#C8A27C]/30 shadow-2xl overflow-hidden group">
+                      <div 
+                        className="absolute inset-0 opacity-[0.22] pointer-events-none mix-blend-overlay z-[1]"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+                        }}
+                      />
+
+                      <div 
+                        className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay"
+                        style={{
+                          backgroundImage: `repeating-linear-gradient(0deg, #3d3126 0px, #3d3126 1px, transparent 1px, transparent 14px),
+                                            repeating-linear-gradient(90deg, #261f18 0px, #261f18 1px, transparent 1px, transparent 28px)`
+                        }}
+                      />
+
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(200,162,124,0.18),transparent_70%)] pointer-events-none z-[1]" />
+                      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.5)_100%)] pointer-events-none z-[1]" />
                       
-                      {/* Metal Swivel Clasp */}
-                      <div className="w-8 h-3 bg-gradient-to-b from-zinc-300 via-zinc-400 to-zinc-600 rounded-sm shadow border border-zinc-300" />
-                      <div className="w-3.5 h-3.5 rounded-full border-2 border-zinc-400 bg-zinc-800 -mt-1 shadow-inner flex items-center justify-center">
-                        <div className="w-1 h-1 rounded-full bg-zinc-950" />
+                      <div className="absolute top-2.5 right-3 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/50 border border-white/10 text-[9.5px] font-mono text-[#C8A27C] z-[2] backdrop-blur-[2px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#C8A27C] animate-pulse" />
+                        <span>Kamar Lo-Fi</span>
+                      </div>
+
+                      <div className="flex flex-col items-center relative z-10 pt-1">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-b from-amber-200 via-amber-400 to-amber-700 shadow-lg border border-amber-300 flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#141312] shadow-inner" />
+                        </div>
+
+                        <div className="relative w-16 h-12 flex justify-center -mt-1 pointer-events-none">
+                          <svg className="w-full h-full" viewBox="0 0 64 48" fill="none">
+                            <path 
+                              d="M32 4 L14 46" 
+                              stroke="#c8a27c" 
+                              strokeWidth="2.5" 
+                              strokeLinecap="round"
+                              opacity="0.9"
+                            />
+                            <path 
+                              d="M32 4 L50 46" 
+                              stroke="#c8a27c" 
+                              strokeWidth="2.5" 
+                              strokeLinecap="round"
+                              opacity="0.9"
+                            />
+                            <path 
+                              d="M23 25 L41 25" 
+                              stroke="#8a6d4d" 
+                              strokeWidth="1.5" 
+                              strokeDasharray="2 2"
+                              opacity="0.7"
+                            />
+                          </svg>
+                        </div>
+
+                        <div className="w-7 h-3 bg-gradient-to-b from-zinc-300 via-zinc-400 to-zinc-600 rounded-sm shadow-md border border-zinc-200 -mt-1.5 z-20 flex items-center justify-center">
+                          <div className="w-2.5 h-1 rounded-full bg-zinc-800" />
+                        </div>
+                      </div>
+
+                      <div className="mt-1 relative z-20">
+                        <TiltedCard 
+                          maxTilt={16} 
+                          perspective={950} 
+                          scaleOnHover={1.04} 
+                          showGlare={true} 
+                          glareOpacity={0.35}
+                          glareColor="rgba(240, 215, 185, 0.45)"
+                          className="cursor-pointer"
+                          onClick={() => setIsZoomed(true)}
+                        >
+                          <div className="relative w-56 rounded-xl p-3 bg-gradient-to-b from-[#1b1d24] to-[#121318] border border-white/20 shadow-2xl backdrop-blur-sm group/card">
+                            {/* Nametag slot hole */}
+                            <div className="w-8 h-1.5 rounded-full bg-black/80 border border-white/15 mx-auto mb-2.5" />
+
+                            {/* Photo frame */}
+                            <div className="relative w-full aspect-[4/5] rounded-lg overflow-hidden border border-white/15 bg-zinc-950 group/photo shadow-inner">
+                              <img 
+                                src="/kaciwww.png" 
+                                alt="Muhammad Faiz Dzahin" 
+                                className="w-full h-full object-cover object-center transition-transform duration-500 group-hover/photo:scale-105"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  if (target.src !== '/kaciwww.png') target.src = '/kaciwww.png';
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity flex items-end justify-center pb-2">
+                                <span className="text-[10px] text-white font-medium bg-black/60 px-2.5 py-1 rounded-full border border-white/20 backdrop-blur-sm flex items-center gap-1">
+                                  <ZoomIn size={11} /> Klik untuk perbesar
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Developer name & title */}
+                            <div className="mt-2.5 pb-0.5 text-center">
+                              <h3 className="text-sm font-bold text-white tracking-tight">
+                                <ShinyText speed={4}>Muhammad Faiz Dzahin</ShinyText>
+                              </h3>
+                              <p className="text-[11px] font-mono text-[#C8A27C] mt-0.5 font-medium">
+                                Full Stack Developer
+                              </p>
+                            </div>
+                          </div>
+                        </TiltedCard>
                       </div>
                     </div>
-
-                    {/* ID Card Holder inside TiltedCard */}
-                    <TiltedCard 
-                      maxTilt={14} 
-                      perspective={900} 
-                      scaleOnHover={1.03} 
-                      showGlare={true} 
-                      glareOpacity={0.25}
-                      glareColor="rgba(255, 255, 255, 0.45)"
-                      className="-mt-1"
-                    >
-                      <div className="relative w-60 rounded-xl p-3 bg-[#191b22] border border-white/15 shadow-2xl">
-                        {/* Slot Cutout */}
-                        <div className="w-8 h-1.5 rounded-full bg-black/70 border border-white/10 mx-auto mb-2" />
-
-                        {/* Header Inside Badge */}
-                        <div className="pb-2 mb-2.5 border-b border-white/10 flex items-center justify-between text-[9px] font-mono text-zinc-400">
-                          <span className="font-semibold text-zinc-300 flex items-center gap-1">
-                            <ShieldCheck size={11} className="text-zinc-400" /> ENGINEER PASS
-                          </span>
-                        </div>
-
-                        {/* Photo Frame */}
-                        <div className="relative w-full aspect-[4/5] rounded-lg overflow-hidden border border-white/10 bg-zinc-900 group">
-                          <img 
-                            src="/kaciwww.png" 
-                            alt="Muhammad Faiz Dzahin" 
-                            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              if (target.src !== '/kaciwww.png') target.src = '/kaciwww.png';
-                            }}
-                          />
-                        </div>
-
-                        {/* Identity Details with React Bits Animated Typography */}
-                        <div className="mt-2.5 text-center">
-                          <h3 className="text-sm font-bold text-white tracking-tight">
-                            <ShinyText speed={4}>Muhammad Faiz Dzahin</ShinyText>
-                          </h3>
-                          <div className="mt-1 h-4 flex items-center justify-center">
-                            <RotatingText
-                              texts={[
-                                'Senior Full-Stack Engineer',
-                                'Distributed Systems Architect',
-                                'High-Performance Backend',
-                                'DevOps & System Automation'
-                              ]}
-                              interval={2600}
-                              textClassName="text-[11px] font-mono text-zinc-400"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Barcode Strip */}
-                        <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between">
-                          <div className="flex items-center gap-0.5 opacity-40">
-                            {[3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7].map((w, idx) => (
-                              <div 
-                                key={idx} 
-                                className="bg-zinc-300 h-3" 
-                                style={{ width: `${w > 4 ? 2 : 1}px` }} 
-                              />
-                            ))}
-                          </div>
-                          <span className="text-[8px] font-mono text-zinc-500">
-                            ID: MFD-CORE-26
-                          </span>
-                        </div>
-                      </div>
-                    </TiltedCard>
                   </div>
 
-                  {/* Hero Intro */}
                   <div className="flex-1 text-center lg:text-left flex flex-col justify-center">
-                    <div className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                      FULL-STACK SOFTWARE ENGINEER & SYSTEM ARCHITECT
+                    <div className="text-xs font-mono font-semibold text-[#C8A27C] uppercase tracking-wider mb-2">
+                      FULL STACK DEVELOPER
                     </div>
 
                     <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight flex items-center gap-2 justify-center lg:justify-start">
@@ -204,42 +238,38 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
                     
                     <p className="text-sm text-zinc-300 mt-2.5 leading-relaxed max-w-2xl">
                       {isId 
-                        ? 'Software Engineer dengan spesialisasi pengembangan Full-Stack berskala produksi, otomatisasi sistem terdistribusi, optimasi database, dan integrasi kecerdasan buatan tingkat lanjut. Berpengalaman merancang arsitektur perangkat lunak dari layer komputasi sistem hingga pengalaman pengguna berkecepatan tinggi.'
-                        : 'Software Engineer specializing in production-grade Full-Stack architecture, distributed automation pipelines, database optimization, and applied artificial intelligence systems.'}
+                        ? 'Full Stack Developer yang berfokus membangun aplikasi web modern, antarmuka pengguna interaktif dan cepat, integrasi API backend yang solid, serta pengelolaan database yang rapi dan terstruktur.'
+                        : 'Full Stack Developer focused on building modern web applications, highly responsive and intuitive interfaces, robust backend APIs, and well-structured database systems.'}
                     </p>
 
-                    {/* Engineering Creed */}
-                    <div className="mt-4 p-3.5 rounded-lg bg-white/[0.03] border-l-2 border-l-blue-400 border-y border-r border-white/5 text-xs text-zinc-300 leading-relaxed text-left max-w-2xl">
+                    <div className="mt-4 p-3.5 rounded-lg bg-white/[0.03] border border-white/10 text-xs text-zinc-300 leading-relaxed text-left max-w-2xl">
                       "{isId 
-                        ? 'Rekayasa perangkat lunak sejati bukan sekadar merangkai pustaka atau mengandalkan alat bantu, melainkan pemahaman mendalam tentang bagaimana data mengalir, bagaimana memori dan konkurensi dikelola, serta bagaimana membangun sistem yang tetap kokoh saat beban transaksi melonjak tinggi.'
-                        : 'True software engineering lies in understanding how data flows, how concurrency and memory are managed, and how to build systems that remain resilient under high throughput.'}"
+                        ? 'Membangun aplikasi yang baik dimulai dari kode yang rapi, arsitektur yang mudah dipahami, dan antarmuka yang nyaman digunakan setiap hari oleh pengguna nyata.'
+                        : 'Building great software begins with clean code, maintainable architecture, and intuitive interfaces that users genuinely enjoy everyday.'}"
                     </div>
 
-                    {/* Quick Specs */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4 max-w-2xl">
                       <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5 text-left">
-                        <span className="text-[10px] font-mono uppercase text-zinc-500 block">DISIPLIN</span>
-                        <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">Full-Stack & Systems</span>
+                        <span className="text-[10px] font-mono uppercase text-zinc-500 block">ROLE</span>
+                        <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">Full Stack Developer</span>
                       </div>
                       <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5 text-left">
-                        <span className="text-[10px] font-mono uppercase text-zinc-500 block">ARSITEKTUR</span>
-                        <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">Distributed & Event-Driven</span>
+                        <span className="text-[10px] font-mono uppercase text-zinc-500 block">FRONTEND</span>
+                        <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">React, Next.js, Tailwind</span>
                       </div>
                       <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5 text-left">
-                        <span className="text-[10px] font-mono uppercase text-zinc-500 block">INFRASTRUKTUR</span>
-                        <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">Docker, Linux, CI/CD</span>
+                        <span className="text-[10px] font-mono uppercase text-zinc-500 block">BACKEND</span>
+                        <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">Node.js, Express, Go</span>
                       </div>
                       <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5 text-left">
-                        <span className="text-[10px] font-mono uppercase text-zinc-500 block">KUALITAS SISTEM</span>
-                        <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">Scalable & Resilient</span>
+                        <span className="text-[10px] font-mono uppercase text-zinc-500 block">DATABASE</span>
+                        <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">PostgreSQL, Firestore</span>
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
 
-              {/* Navigation Tabs with Animated Pill (shadcn / framer-motion pattern) */}
               <div className="sticky top-0 z-20 px-6 py-2.5 bg-[#121316]/95 backdrop-blur-md border-b border-white/10 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                 {tabs.map((tab) => {
                   const isActive = activeTab === tab.id;
@@ -266,359 +296,326 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
                 })}
               </div>
 
-              {/* Tab Contents */}
               <div className="p-6">
-                
-                {/* TAB 1: PROFIL & PENDEKATAN REKAYASA (First-Person Perspective) */}
                 {activeTab === 'story' && (
                   <div className="space-y-6">
-                    {/* Section 1 */}
                     <div className="p-5 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
                       <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider font-semibold">
-                        Pendekatan Rekayasa Saya
+                        Pendekatan Pembuatan Aplikasi
                       </div>
                       <h4 className="text-sm sm:text-base font-bold text-white">
-                        Keahlian Teknis Mendalam dan Kendali Penuh Terhadap Arsitektur
+                        Membangun Aplikasi Full Stack yang Bersih dan Fungsional
                       </h4>
                       <p className="text-xs sm:text-[13px] text-zinc-300 leading-relaxed">
-                        Sebagai seorang Full-Stack Engineer, saya membangun perangkat lunak dengan prinsip kendali penuh terhadap setiap lapisan sistem. Saya tidak membatasi diri pada satu framework atau sekadar menggunakan kode instan. Dari perancangan antarmuka pengguna yang reaktif, arsitektur REST/gRPC API, manajemen transaksi basis data ACID, hingga automasi server Linux di layer infrastruktur, semua saya bangun dengan pemahaman sistematis atas cara kerja komputasi.
+                        Sebagai Full Stack Developer, saya merancang aplikasi web dari awal hingga siap digunakan: mulai dari tampilan antarmuka yang bersih dan interaktif di browser, logika server backend, hingga penyimpanan data di database. Saya mengutamakan kode yang rapi, alur pengguna yang masuk akal, dan performa yang cepat saat diakses pengguna.
                       </p>
                     </div>
 
-                    {/* Section 2 */}
                     <div className="p-5 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
                       <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider font-semibold">
-                        Arsitektur Sistem LifeFlow
+                        Penerapan Nyata di LifeFlow
                       </div>
                       <h4 className="text-sm sm:text-base font-bold text-white">
-                        Menangani State Kompleks, Sinkronisasi Offline, dan Kerapian Logika
+                        Mengelola Alur Finansial, Kebiasaan, dan Rutinitas Terpadu
                       </h4>
                       <p className="text-xs sm:text-[13px] text-zinc-300 leading-relaxed">
-                        LifeFlow adalah cerminan langsung dari kapabilitas teknik saya dalam merancang aplikasi kompleks. Sistem ini menangani sinkronisasi multi-layer antara IndexedDB di sisi klien dan Firestore di sisi cloud, mempertahankan persistensi state saat offline, serta mengolah kalkulasi analitik finansial dan kebiasaan secara lokal dengan kecepatan tinggi. Setiap modul dirancang modular agar mudah diuji, diperluas, dan tahan terhadap kegagalan jaringan.
+                        Aplikasi LifeFlow ini saya rancang sebagai pembuktian nyata integrasi penuh: pencatatan pemasukan dan pengeluaran keuangan, pelacakan konsistensi kebiasaan harian, penjadwalan fokus, serta sinkronisasi aman dengan Firebase Firestore. Semua fitur dibuat langsung untuk menjawab kebutuhan nyata produktivitas sehari-hari.
                       </p>
                     </div>
 
-                    {/* Section 3 */}
-                    <div className="p-5 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
-                      <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider font-semibold">
-                        Penerapan Rekayasa AI & Otomasi Tingkat Lanjut
-                      </div>
-                      <h4 className="text-sm sm:text-base font-bold text-white">
-                        Mengintegrasikan Model Cerdas Secara Deterministik dan Andal
-                      </h4>
-                      <p className="text-xs sm:text-[13px] text-zinc-300 leading-relaxed">
-                        Dalam integrasi AI, saya menolak pendekatan tanpa arah. Saya merancang pipeline AI menggunakan teknik Function Calling, penegakan skema JSON terstruktur (*deterministic JSON schema validation*), serta fallback lokal dinamis jika API pihak ketiga mengalami kendala jaringan atau batas kapasitas. Model cerdas saya posisikan sebagai mesin pemroses data terstruktur (seperti OCR struk belanja dan pemodelan jadwal) yang selalu diverifikasi oleh logika validasi ketat di sisi backend.
-                      </p>
-                    </div>
-
-                    {/* Core Engineering Pillars */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                       <div className="p-3.5 rounded-lg bg-white/[0.02] border border-white/5">
-                        <span className="text-[10px] font-mono text-zinc-400 uppercase block font-semibold">PILAR 01</span>
-                        <h5 className="text-xs font-bold text-white mt-1">Ketelitian Algoritmik</h5>
+                        <span className="text-[10px] font-mono text-[#C8A27C] uppercase block font-semibold">FOKUS 01</span>
+                        <h5 className="text-xs font-bold text-white mt-1">Frontend Interaktif</h5>
                         <p className="text-[11px] text-zinc-400 mt-1 leading-snug">
-                          Memilih struktur data dan algoritma yang tepat untuk meminimalkan kompleksitas waktu (Big-O) dan penggunaan memori.
+                          Desain responsif, animasi halus 60fps, dan tata letak yang ramah pengguna.
                         </p>
                       </div>
                       <div className="p-3.5 rounded-lg bg-white/[0.02] border border-white/5">
-                        <span className="text-[10px] font-mono text-zinc-400 uppercase block font-semibold">PILAR 02</span>
-                        <h5 className="text-xs font-bold text-white mt-1">Resiliensi & Skalabilitas</h5>
+                        <span className="text-[10px] font-mono text-[#C8A27C] uppercase block font-semibold">FOKUS 02</span>
+                        <h5 className="text-xs font-bold text-white mt-1">Backend & Database</h5>
                         <p className="text-[11px] text-zinc-400 mt-1 leading-snug">
-                          Sistem dibangun dengan penanganan error komprehensif, retry berjangka, dan arsitektur yang siap di-scale secara horizontal.
+                          REST API cepat, penanganan autentikasi aman, dan struktur basis data efisien.
                         </p>
                       </div>
                       <div className="p-3.5 rounded-lg bg-white/[0.02] border border-white/5">
-                        <span className="text-[10px] font-mono text-zinc-400 uppercase block font-semibold">PILAR 03</span>
-                        <h5 className="text-xs font-bold text-white mt-1">Otomatisasi Penuh</h5>
+                        <span className="text-[10px] font-mono text-[#C8A27C] uppercase block font-semibold">FOKUS 03</span>
+                        <h5 className="text-xs font-bold text-white mt-1">Solusi Nyata</h5>
                         <p className="text-[11px] text-zinc-400 mt-1 leading-snug">
-                          Mengotomatiskan alur kerja pengujian, deployment, dan pemrosesan data di background untuk reliabilitas maksimal.
+                          Fitur dibangun berdasarkan fungsi nyata yang membantu alur kerja sehari-hari.
                         </p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* TAB 2: BAHASA PEMROGRAMAN & STACK TEKNIS LENGKAP */}
                 {activeTab === 'languages' && (
                   <div className="space-y-5">
-                    {/* Programming Languages Spectrum */}
                     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
                       <div className="flex items-center gap-2 mb-3">
                         <Code2 size={16} className="text-zinc-300" />
                         <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                          Spektrum Bahasa Pemrograman
+                          Bahasa Pemrograman Utama
                         </h4>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono text-zinc-200">
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
                           <span className="text-white font-bold block">TypeScript</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Full-Stack & Typing</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Aplikasi Web & Server</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="text-white font-bold block">JavaScript (ESNext)</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">V8 Engine & Node Runtime</span>
+                          <span className="text-white font-bold block">JavaScript</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Frontend & Node.js</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
                           <span className="text-white font-bold block">Go (Golang)</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Concurrency & Microservices</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Backend & API Cepat</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
                           <span className="text-white font-bold block">Python</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">FastAPI & Scripting</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Scripting & Otomasi</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="text-white font-bold block">Rust</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Systems & Memory Safety</span>
+                          <span className="text-white font-bold block">SQL</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">PostgreSQL Query</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="text-white font-bold block">SQL (PostgreSQL)</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Relational & Query Tuning</span>
+                          <span className="text-white font-bold block">HTML5 & CSS3</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Layout & Web Styling</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="text-white font-bold block">Java / Kotlin</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">JVM & OOP Architecture</span>
+                          <span className="text-white font-bold block">Bash</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Linux Shell & Deploy</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="text-white font-bold block">Bash / Shell</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Linux Ops & Automation</span>
+                          <span className="text-white font-bold block">JSON / REST</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Komunikasi Data API</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Frontend Architecture */}
                     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
                       <div className="flex items-center gap-2 mb-3">
                         <Laptop size={16} className="text-zinc-300" />
                         <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                          Frontend & Client Architecture
+                          Frontend Framework & Tools
                         </h4>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono text-zinc-200">
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="font-bold text-white block">React 19 & Next.js</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Server Components, Hooks</span>
+                          <span className="font-bold text-white block">React & Next.js</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Komponen & SPA</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="font-bold text-white block">Tailwind CSS (v3/v4)</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Design Tokens & Scalability</span>
+                          <span className="font-bold text-white block">Tailwind CSS</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Styling Cepat & Rapi</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="font-bold text-white block">Progressive Web Apps</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Service Worker, Offline Cache</span>
+                          <span className="font-bold text-white block">Vite</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Build Tool & Fast Refresh</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
                           <span className="font-bold text-white block">Framer Motion</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Physics Micro-Interactions</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Transisi & Animasi UI</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="font-bold text-white block">Vite Bundler</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Rollup, HMR, Code-Splitting</span>
+                          <span className="font-bold text-white block">PWA</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Aplikasi Web Offline</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="font-bold text-white block">Recharts / SVG</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Data Visualization & Canvas</span>
+                          <span className="font-bold text-white block">Recharts</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Grafik Finansial & Data</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Backend & Persistence */}
                     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
                       <div className="flex items-center gap-2 mb-3">
                         <Server size={16} className="text-zinc-300" />
                         <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                          Backend, Database & Data Systems
+                          Backend & Basis Data
                         </h4>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono text-zinc-200">
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="font-bold text-white block">Node.js / Express</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">High-throughput REST API</span>
-                        </div>
-                        <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="font-bold text-white block">Go HTTP / Gin</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Low-Latency Microservices</span>
+                          <span className="font-bold text-white block">Node.js & Express</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">REST API & Routing</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
                           <span className="font-bold text-white block">PostgreSQL</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">ACID, Indices, Drizzle ORM</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Database Relasional</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
                           <span className="font-bold text-white block">Firebase Firestore</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Real-time sync, Security Rules</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Database Cloud Realtime</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="font-bold text-white block">Redis In-Memory</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Caching & Key-Value Store</span>
+                          <span className="font-bold text-white block">Drizzle ORM</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">TypeScript Query Builder</span>
                         </div>
                         <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
-                          <span className="font-bold text-white block">IndexedDB API</span>
-                          <span className="text-[10px] text-zinc-400 font-sans">Browser Persistent Storage</span>
+                          <span className="font-bold text-white block">RESTful API Design</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">Endpoint Standar & Aman</span>
+                        </div>
+                        <div className="p-2.5 rounded bg-white/[0.03] border border-white/5">
+                          <span className="font-bold text-white block">Autentikasi</span>
+                          <span className="text-[10px] text-zinc-400 font-sans">JWT, OAuth & Auth Rules</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* TAB 3: OTOMATISASI & INFRASTRUKTUR SISTEM */}
                 {activeTab === 'automation' && (
                   <div className="space-y-4">
                     <div className="text-xs text-zinc-400 mb-2">
                       {isId 
-                        ? 'Penguasaan instrumen otomasi alur kerja, orkesrasi server, pipeline CI/CD, dan pemrosesan latar belakang yang menjamin reliabilitas sistem:'
-                        : 'Comprehensive system automation, background task orchestration, CI/CD pipelines, and infrastructure tooling:'}
+                        ? 'Pengalaman dalam otomatisasi alur deploy, manajemen server, dan tugas latar belakang:'
+                        : 'Experience in deployment automation, server configuration, and background workflows:'}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                      
                       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
                         <div className="flex items-center gap-2">
-                          <Container size={16} className="text-zinc-200" />
-                          <h4 className="text-sm font-bold text-white">Containerization & Linux Infrastructure</h4>
+                          <Container size={16} className="text-[#C8A27C]" />
+                          <h4 className="text-sm font-bold text-white">Docker & Lingkungan Server</h4>
                         </div>
                         <p className="text-xs text-zinc-300 leading-relaxed">
-                          Pengelolaan deployment menggunakan Docker dan Docker Compose. Mengonfigurasi lingkungan server Linux (Ubuntu/Debian), manajemen proses sistem, isolasi dependensi, dan Nginx reverse proxy dengan enkripsi SSL/TLS.
+                          Menggunakan Docker untuk membungkus aplikasi agar berjalan konsisten di lingkungan lokal maupun server produksi (Linux VPS).
                         </p>
                         <div className="pt-2 text-[10px] font-mono text-zinc-400 border-t border-white/5">
-                          Docker • Docker Compose • Nginx • Linux CLI
+                          Docker • Docker Compose • Linux Server
                         </div>
                       </div>
 
                       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
                         <div className="flex items-center gap-2">
-                          <GitBranch size={16} className="text-zinc-200" />
-                          <h4 className="text-sm font-bold text-white">CI/CD Pipeline & Automated Delivery</h4>
+                          <GitBranch size={16} className="text-[#C8A27C]" />
+                          <h4 className="text-sm font-bold text-white">CI/CD & Deploy Otomatis</h4>
                         </div>
                         <p className="text-xs text-zinc-300 leading-relaxed">
-                          Penerapan alur integrasi berkelanjutan (CI/CD) via GitHub Actions: otomatisasi linting kode, pengetikan statis TypeScript, build testing terisolasi, dan auto-deploy tanpa *downtime* ke production environment.
+                          Menyiapkan alur GitHub Actions untuk memeriksa error pengetikan TypeScript, build testing, dan deploy otomatis saat update kode.
                         </p>
                         <div className="pt-2 text-[10px] font-mono text-zinc-400 border-t border-white/5">
-                          GitHub Actions • Automated Testing • Deployment Hooks
+                          GitHub Actions • Automated Build • Cloudflare / VPS
                         </div>
                       </div>
 
                       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
                         <div className="flex items-center gap-2">
-                          <Workflow size={16} className="text-zinc-200" />
-                          <h4 className="text-sm font-bold text-white">Background Queues & Scheduled Jobs</h4>
+                          <Workflow size={16} className="text-[#C8A27C]" />
+                          <h4 className="text-sm font-bold text-white">Otomasi Tugas & Jadwal</h4>
                         </div>
                         <p className="text-xs text-zinc-300 leading-relaxed">
-                          Pemisahan tugas berat dari jalur HTTP utama menggunakan antrean latar belakang (*asynchronous worker queues*), manajemen event scheduler (cron jobs), serta sinkronisasi data antar-layanan secara periodik.
+                          Menjalankan tugas berkala (cron jobs), pengiriman pengingat jadwal otomatis, dan pemrosesan data di latar belakang.
                         </p>
                         <div className="pt-2 text-[10px] font-mono text-zinc-400 border-t border-white/5">
-                          Cron Jobs • Event-Driven Workers • Webhooks
+                          Cron Jobs • Background Work • Notifikasi Web
                         </div>
                       </div>
 
                       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
                         <div className="flex items-center gap-2">
-                          <Network size={16} className="text-zinc-200" />
-                          <h4 className="text-sm font-bold text-white">Browser Automation & Data Scraping</h4>
+                          <Network size={16} className="text-[#C8A27C]" />
+                          <h4 className="text-sm font-bold text-white">Scripting & Integrasi Webhook</h4>
                         </div>
                         <p className="text-xs text-zinc-300 leading-relaxed">
-                          Otomatisasi pengujian antarmuka dan ekstraksi data web menggunakan Python & headless browser (Playwright / Puppeteer), pemrosesan berkas terotomasi, serta parsing dokumen tabular skala besar.
+                          Menyambungkan berbagai layanan pihak ketiga melalui webhook, integrasi Google Sheets, dan skrip automasi Python/Node.js.
                         </p>
                         <div className="pt-2 text-[10px] font-mono text-zinc-400 border-t border-white/5">
-                          Playwright • Puppeteer • Python Automation • OCR Parsing
+                          Webhooks • API Integration • Data Scripts
                         </div>
                       </div>
-
                     </div>
                   </div>
                 )}
 
-                {/* TAB 4: KAPABILITAS & LAYANAN */}
                 {activeTab === 'services' && (
                   <div className="space-y-3.5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                      
                       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col justify-between">
                         <div>
-                          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-zinc-200 mb-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#C8A27C] mb-2.5">
                             <Layers size={16} />
                           </div>
-                          <h4 className="text-sm font-bold text-white">Pengembangan Web & Aplikasi SaaS End-to-End</h4>
+                          <h4 className="text-sm font-bold text-white">Pembuatan Website & Aplikasi Web</h4>
                           <p className="text-xs text-zinc-300 mt-1.5 leading-relaxed">
-                            Membangun sistem perangkat lunak web utuh dari perancangan arsitektur data, pembuatan REST/gRPC backend, hingga antarmuka front-end responsif berperforma tinggi yang siap menangani ribuan pengguna aktif.
+                            Membangun website responsif, dashboard manajemen data, dan web app interaktif yang cepat dibuka di komputer maupun ponsel.
                           </p>
                         </div>
                         <div className="mt-3 pt-2 border-t border-white/5 text-[11px] font-mono text-zinc-400">
-                          SaaS Platforms • Internal Web Portals • Realtime Dashboards
+                          Web Apps • Dashboard Admin • Landing Page Modern
                         </div>
                       </div>
 
                       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col justify-between">
                         <div>
-                          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-zinc-200 mb-2.5">
-                            <Workflow size={16} />
+                          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#C8A27C] mb-2.5">
+                            <Server size={16} />
                           </div>
-                          <h4 className="text-sm font-bold text-white">Sistem Otomasi Bisnis & Backend Engineering</h4>
+                          <h4 className="text-sm font-bold text-white">Pengembangan REST API & Backend</h4>
                           <p className="text-xs text-zinc-300 mt-1.5 leading-relaxed">
-                            Mendesain automasi operasional perusahaan, integrasi webhook antar-layanan, antrean pemrosesan tugas asinkron, dan migrasi sistem manual menjadi alur kerja terprogram otomatis.
+                            Membuat server API untuk kebutuhan aplikasi web dan mobile dengan autentikasi yang aman dan struktur data yang rapi.
                           </p>
                         </div>
                         <div className="mt-3 pt-2 border-t border-white/5 text-[11px] font-mono text-zinc-400">
-                          Microservices • Pipeline Otomasi • Webhook Hub
+                          Node.js / Express • Go API • Endpoint Autentikasi
                         </div>
                       </div>
 
                       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col justify-between">
                         <div>
-                          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-zinc-200 mb-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#C8A27C] mb-2.5">
                             <Database size={16} />
                           </div>
-                          <h4 className="text-sm font-bold text-white">Optimasi Basis Data & Arsitektur Data Terdistribusi</h4>
+                          <h4 className="text-sm font-bold text-white">Manajemen Database & Sinkronisasi</h4>
                           <p className="text-xs text-zinc-300 mt-1.5 leading-relaxed">
-                            Perancangan skema database relasional (PostgreSQL) maupun dokumen (Firestore), pembuatan indeks komposit efisien, pencegahan race-condition melalui transaksi atomik, dan caching berlapis Redis.
+                            Merancang skema database PostgreSQL dan Firebase Firestore agar data tersimpan aman, tidak ganda, dan cepat dipanggil.
                           </p>
                         </div>
                         <div className="mt-3 pt-2 border-t border-white/5 text-[11px] font-mono text-zinc-400">
-                          PostgreSQL • Caching Redis • Transaksi Atomik
+                          PostgreSQL • Firebase Firestore • Data Modeling
                         </div>
                       </div>
 
                       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col justify-between">
                         <div>
-                          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-zinc-200 mb-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#C8A27C] mb-2.5">
                             <Cpu size={16} />
                           </div>
-                          <h4 className="text-sm font-bold text-white">Penerapan AI Sistematis & Vision OCR</h4>
+                          <h4 className="text-sm font-bold text-white">Integrasi Fitur AI Terapan</h4>
                           <p className="text-xs text-zinc-300 mt-1.5 leading-relaxed">
-                            Integrasi model cerdas multimodal untuk ekstraksi data dokumen dan struk, pembuatan antarmuka penasihat analitik berbasis data terverifikasi, dan perancangan skema JSON deterministik tanpa halusinasi.
+                            Menghubungkan aplikasi dengan kemampuan AI (Gemini API) untuk analisis teks, pembacaan dokumen/struk, dan rekomendasi fokus.
                           </p>
                         </div>
                         <div className="mt-3 pt-2 border-t border-white/5 text-[11px] font-mono text-zinc-400">
-                          Structured JSON AI • Vision Extraction • Local Fallback
+                          Gemini API • Vision OCR • Structured Output
                         </div>
                       </div>
-
                     </div>
                   </div>
                 )}
 
-                {/* TAB 5: KONTAK LANGSUNG */}
                 {activeTab === 'contact' && (
                   <div className="space-y-4">
                     <div className="p-5 rounded-xl bg-white/[0.02] border border-white/10 space-y-4">
                       <div>
                         <h4 className="text-sm sm:text-base font-bold text-white">
-                          Saluran Komunikasi Langsung
+                          Kontak Langsung
                         </h4>
                         <p className="text-xs sm:text-[13px] text-zinc-300 mt-1 leading-relaxed">
-                          Saya terbuka untuk mendiskusikan rekayasa perangkat lunak berskala besar, kebutuhan arsitektur sistem otomatisasi, maupun pengembangan produk digital baru.
+                          Terbuka untuk kolaborasi proyek pembuatan aplikasi web, konsultasi full stack, maupun diskusi teknis.
                         </p>
                       </div>
 
-                      {/* Contact Action Cards */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                        
-                        {/* WhatsApp Contact */}
                         <div className="p-3.5 rounded-lg bg-white/[0.03] border border-white/10 flex flex-col justify-between gap-3">
                           <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                               <MessageSquare size={16} />
                             </div>
                             <div className="min-w-0">
-                              <span className="text-[10px] font-mono uppercase text-zinc-400 block font-semibold">WHATSAPP RESMI</span>
+                              <span className="text-[10px] font-mono uppercase text-zinc-400 block font-semibold">WHATSAPP</span>
                               <span className="text-xs font-mono font-bold text-zinc-100 truncate block">{developerPhone}</span>
                             </div>
                           </div>
@@ -647,14 +644,13 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
                           </div>
                         </div>
 
-                        {/* Email Contact */}
                         <div className="p-3.5 rounded-lg bg-white/[0.03] border border-white/10 flex flex-col justify-between gap-3">
                           <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0">
                               <Mail size={16} />
                             </div>
                             <div className="min-w-0">
-                              <span className="text-[10px] font-mono uppercase text-zinc-400 block font-semibold">EMAIL RESMI</span>
+                              <span className="text-[10px] font-mono uppercase text-zinc-400 block font-semibold">EMAIL</span>
                               <span className="text-xs font-mono font-bold text-zinc-100 truncate block">{developerEmail}</span>
                             </div>
                           </div>
@@ -662,7 +658,7 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
                           <div className="flex items-center gap-2">
                             <StarBorder color="#38bdf8" speed="5s" className="flex-1">
                               <a
-                                href={`mailto:${developerEmail}?subject=Diskusi%20Rekayasa%20Perangkat%20Lunak`}
+                                href={`mailto:${developerEmail}?subject=Diskusi%20Pengembangan%20Web%20Full%20Stack`}
                                 className="w-full py-2 px-3 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors hover:bg-sky-600/20 rounded-xl"
                               >
                                 <span>Kirim Email Langsung</span>
@@ -680,21 +676,19 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
                             </Magnet>
                           </div>
                         </div>
-
                       </div>
                     </div>
 
-                    {/* Developer Credentials Summary */}
                     <div className="p-3.5 rounded-lg bg-white/[0.02] border border-white/5 text-xs">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-zinc-300">
                         <div>
                           <span className="text-zinc-500 font-mono">Nama:</span> Muhammad Faiz Dzahin
                         </div>
                         <div>
-                          <span className="text-zinc-500 font-mono">Keahlian:</span> Senior Full-Stack & System Automation
+                          <span className="text-zinc-500 font-mono">Profesi:</span> Full Stack Developer
                         </div>
                         <div>
-                          <span className="text-zinc-500 font-mono">Status:</span> Terbuka untuk Diskusi & Kolaborasi Rekayasa
+                          <span className="text-zinc-500 font-mono">Status:</span> Terbuka untuk Diskusi Proyek
                         </div>
                         <div>
                           <span className="text-zinc-500 font-mono">Lokasi:</span> Indonesia (WIB / UTC+7)
@@ -703,14 +697,12 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
                     </div>
                   </div>
                 )}
-
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="px-6 py-3 border-t border-white/10 bg-[#16181d] flex items-center justify-between text-xs text-zinc-400">
-              <span className="font-mono text-[11px]">
-                LifeFlow Engineering • Muhammad Faiz Dzahin
+              <span className="font-mono text-[11px] text-zinc-500">
+                Muhammad Faiz Dzahin · Full Stack Developer
               </span>
               <button
                 onClick={onClose}
@@ -720,8 +712,109 @@ export function AboutDeveloperModal({ isOpen, onClose }: AboutDeveloperModalProp
               </button>
             </div>
           </motion.div>
+
+          <AnimatePresence>
+            {isZoomed && (
+              <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsZoomed(false)}
+                  className="fixed inset-0 bg-black/90 backdrop-blur-lg"
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.75, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  className="relative z-10 flex flex-col items-center max-w-sm w-full"
+                >
+                  <div className="w-full flex items-center justify-between pb-3 text-white px-1">
+                    <span className="text-xs font-mono text-[#C8A27C] flex items-center gap-1.5">
+                      <ZoomIn size={14} /> Tampilan Detail Nametag 3D
+                    </span>
+                    <button
+                      onClick={() => setIsZoomed(false)}
+                      className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer border border-white/15"
+                    >
+                      <ZoomOut size={13} />
+                      <span>Zoom Out</span>
+                    </button>
+                  </div>
+
+                  <TiltedCard
+                    maxTilt={20}
+                    perspective={1100}
+                    scaleOnHover={1.03}
+                    showGlare={true}
+                    glareOpacity={0.4}
+                    glareColor="rgba(240, 215, 185, 0.55)"
+                  >
+                    <div className="w-80 rounded-2xl p-4 bg-gradient-to-b from-[#1c1e27] via-[#151720] to-[#0f1015] border-2 border-[#C8A27C]/40 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] text-left">
+                      <div className="w-12 h-2 rounded-full bg-black/90 border border-white/20 mx-auto mb-3" />
+
+                      <div className="pb-2 mb-3 border-b border-white/15 flex items-center justify-between text-[10px] font-mono text-zinc-300">
+                        <span className="font-semibold text-white flex items-center gap-1.5">
+                          <ShieldCheck size={13} className="text-[#C8A27C]" /> VERIFIED DEV PASS
+                        </span>
+                        <span className="text-[#C8A27C] font-mono text-[9px] bg-[#C8A27C]/15 px-2 py-0.5 rounded-full border border-[#C8A27C]/30">
+                          2026 EDITION
+                        </span>
+                      </div>
+
+                      <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden border-2 border-white/20 bg-zinc-950 shadow-2xl">
+                        <img 
+                          src="/kaciwww.png" 
+                          alt="Muhammad Faiz Dzahin" 
+                          className="w-full h-full object-cover object-center"
+                        />
+                        <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/70 border border-white/20 text-[9px] font-mono text-emerald-400">
+                          Active
+                        </div>
+                      </div>
+
+                      <div className="mt-3.5 text-center">
+                        <h3 className="text-base font-bold text-white tracking-tight">
+                          Muhammad Faiz Dzahin
+                        </h3>
+                        <p className="text-xs font-mono text-[#C8A27C] font-medium mt-0.5">
+                          Full Stack Developer
+                        </p>
+                        <p className="text-[11px] text-zinc-400 mt-1">
+                          Web Apps · Frontend & Backend Systems
+                        </p>
+                      </div>
+
+                      <div className="mt-3.5 pt-3 border-t border-white/15 flex items-center justify-between">
+                        <div className="flex items-center gap-1 opacity-60">
+                          {[4, 2, 5, 2, 6, 9, 3, 7, 5, 4, 6, 8, 9, 8, 5].map((w, idx) => (
+                            <div 
+                              key={idx} 
+                              className="bg-zinc-200 h-4" 
+                              style={{ width: `${w > 5 ? 2.5 : 1.5}px` }} 
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[9px] font-mono text-zinc-400">
+                          ID: MFD-FULLSTACK-26
+                        </span>
+                      </div>
+                    </div>
+                  </TiltedCard>
+
+                  <p className="text-zinc-400 text-xs mt-3.5 text-center">
+                    Gerakkan kursor untuk efek 3D tilt fisik · Klik di luar kartu atau tombol untuk menutup
+                  </p>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </AnimatePresence>
   );
 }
+
+export default AboutDeveloperModal;

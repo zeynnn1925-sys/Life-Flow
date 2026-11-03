@@ -1,6 +1,6 @@
 {
-  "summary":  "Revised implementation plan for human-centric UI/UX refinement grounded in Mobbin, Refero, Godly, and Dark Mode Design: eliminating all AI slop, sparkles, emojis, and [AI] badges, adopting pure Phosphor icons, calm functional feature naming, clean dark mode surfaces, and natural microcopy without em dashes.",
-  "updatedAt":  "2026-10-27T03:47:07.985889337Z",
+  "summary":  "Rencana transformasi komponen About Developer:\n1. Menata ulang gelar dan narasi menjadi realistis: mengganti klaim berlebihan dan istilah 'Software Engineer' menjadi 'Full Stack Developer', serta menghapus komentar kode yang tidak perlu.\n2. Mendesain ulang nametag 3D tergantung secara estetis di dinding kamar / lemari kayu lo-fi dengan gantungan tali fisik dan pencahayaan hangat.\n3. Menambahkan fitur interaktif Zoom In & Zoom Out beranimasi 3D tilt penuh saat kartu foto diklik.",
+  "updatedAt":  "2026-10-31T06:19:28.344801130Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

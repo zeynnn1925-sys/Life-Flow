@@ -85,18 +85,10 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
-  // Auto start onboarding tour for new users on successful login/load
+  // Onboarding tour is kept manual for clean video demo recording
+  // Can be manually triggered anytime via Tour navigation item
   useEffect(() => {
-    if (user && !loading) {
-      try {
-        const completed = typeof window !== 'undefined' ? localStorage.getItem('lifeflow_onboarding_completed') : 'true';
-        if (!completed) {
-          setIsOnboardingOpen(true);
-        }
-      } catch (err) {
-        console.debug('LocalStorage check skipped:', err);
-      }
-    }
+    // Keep auto-trigger silent during demo
   }, [user, loading]);
 
   // Handle manual tour trigger
@@ -289,6 +281,9 @@ export default function App() {
     );
   }
 
+  // Login page temporarily bypassed for demo video recording
+  // To restore, simply uncomment this block
+  /*
   if (!user) {
     return (
       <ErrorBoundary>
@@ -296,6 +291,7 @@ export default function App() {
       </ErrorBoundary>
     );
   }
+  */
 
   const renderView = () => {
     return (
