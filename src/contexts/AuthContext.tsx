@@ -84,15 +84,15 @@ const DEMO_USER = {
 } as unknown as User;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => auth.currentUser || DEMO_USER);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(() => auth.currentUser);
+  const [loading, setLoading] = useState(true);
   const [googleSheetsAccessToken, setGoogleSheetsAccessToken] = useState<string | null>(getSafeStorage('google_sheets_token'));
   const [isSheetsConnected, setIsSheetsConnected] = useState<boolean>(!!getSafeStorage('google_sheets_token'));
 
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 1200);
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       clearTimeout(safetyTimer);
@@ -126,17 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.debug("Background user doc save:", error);
         });
       } else {
-        // Auto-authenticate anonymously in background so user directly enters app for demo video
-        signInAnonymously(auth)
-          .then((cred) => {
-            setUser(cred.user);
-            setLoading(false);
-          })
-          .catch((err) => {
-            console.debug("Auto anonymous auth notice:", err);
-            setUser(DEMO_USER);
-            setLoading(false);
-          });
+        setUser(null);
+        setLoading(false);
       }
     });
 
@@ -271,9 +262,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInAnonymouslyUser = React.useCallback(async () => {
     try {
-      await signInAnonymously(auth);
+      const cred = await signInAnonymously(auth);
+      setUser(cred.user);
     } catch (error) {
-      handleAuthError(error, 'Anonymous Login');
+      console.warn('Anonymous login note, fallback to demo guest user:', error);
+      setUser(DEMO_USER);
     }
   }, []);
 
@@ -284,12 +277,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('google_sheets_token');
       setGoogleSheetsAccessToken(null);
       setIsSheetsConnected(false);
-      signInAnonymously(auth).catch(() => {
-        setUser(DEMO_USER);
-      });
+      setUser(null);
     } catch (error) {
       console.error('Error signing out:', error);
-      setUser(DEMO_USER);
+      setUser(null);
     }
   }, []);
 

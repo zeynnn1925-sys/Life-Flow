@@ -281,9 +281,6 @@ export default function App() {
     );
   }
 
-  // Login page temporarily bypassed for demo video recording
-  // To restore, simply uncomment this block
-  /*
   if (!user) {
     return (
       <ErrorBoundary>
@@ -291,7 +288,6 @@ export default function App() {
       </ErrorBoundary>
     );
   }
-  */
 
   const renderView = () => {
     return (

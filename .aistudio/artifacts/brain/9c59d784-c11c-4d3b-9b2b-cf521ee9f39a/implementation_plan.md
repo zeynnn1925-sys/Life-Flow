@@ -1,95 +1,101 @@
-# Transformasi 3D Nametag Kamar Estetik & Realistis Profil Developer (Full Stack Developer)
+# Redesain Halaman Login & Registrasi 3D Interaktif LifeFlow
 
-Menata ulang komponen About Developer di LifeFlow agar deskripsi dan gelar profesi tampil apa adanya dan realistis ("Full Stack Developer", tanpa klaim berlebihan atau istilah yang tidak ada di industri), membersihkan komentar-komentar kode yang tidak penting, serta mengubah total gaya visual nametag menjadi gantungan 3D yang menggantung di dinding/lemari kamar estetik dengan pencahayaan hangat lo-fi dan interaktivitas Zoom In / Zoom Out saat foto diklik.
+Membangun ulang halaman autentikasi LifeFlow menjadi antarmuka modern kelas dunia dengan tata letak split-screen: pameran kanvas 3D Three.js interaktif di panel kiri (aliran partikel fluida cerdas dan elemen 3D pilar keuangan & produktivitas) bersanding dengan kartu autentikasi glassmorphism di panel kanan yang dilengkapi tab switch Login & Registrasi instan, Google OAuth, Face Recognition biometrik, serta Akses Tamu satu klik.
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> Keputusan dan preferensi pengguna yang dikonfirmasi:
-> - **Latar Suasana Kamar Estetik**: Kombinasi antara lemari kayu estetik dan dinding kamar mood lo-fi dengan gantungan tali/strap fisik, paku/hook dinding, serta bayangan pencahayaan hangat (*ambient room lighting*).
-> - **Interaksi Zoom**: Saat foto/nametag diklik, akan memicu **Zoom In modal fokus besar dengan efek 3D tilt penuh** yang interaktif, dan dapat di-zoom out kembali dengan klik tombol tutup atau klik di luar kartu.
-> - **Gelar Profesi**: Mengganti semua penyebutan "Software Engineer" dan istilah berlebihan menjadi **"Full Stack Developer"** yang membumi, kredibel, dan realistis di dunia nyata.
-> - **Pembersihan Kode**: Menghilangkan seluruh komentar JSX dan komentar baris yang tidak penting di file komponen.
+> Ringkasan keputusan desain yang telah dikonfirmasi oleh pengguna melalui sesi klarifikasi:
+
+- **Konsep Visual 3D**: Menggabungkan aliran partikel fluida dinamis Three.js yang merespons kursor mouse dengan objek-objek 3D prosedural representasi pilar LifeFlow (kubus target, cincin waktu Pomodoro, kristal finansial dengan pencahayaan PBR studio).
+- **Tata Letak (Layout)**: Split-screen modern 50/50 di layar desktop (panel kiri kanvas visual 3D imersif dengan branding & kutipan filosofi LifeFlow; panel kanan kartu autentikasi elegan dan responsif yang ramah mobile).
+- **Opsi Autentikasi**: Opsi lengkap dengan switch tab instan (Login vs Registrasi), tombol cepat Google Sign-In, verifikasi biometrik Face Recognition, form Email/Password dengan validasi halus, dan tombol One-Click Guest Demo.
+- **Re-aktivasi Gate Login**: Mengembalikan proteksi login di `App.tsx` dan menyelaraskan `AuthContext` agar alur masuk dan keluar kembali berjalan normal setelah video demo selesai direkam.
 
 ---
 
 ## 1. Overview & Core Concept
 
-- **What It Does**:
-  1. **Nametag Estetik Kamar 3D**: Menggantikan tampilan lanyard kartu biasa dengan adegan gantungan realistis: hook logam di dinding/lemari bertekstur kayu hangat dengan bayangan lembut, tali gantungan bertekstur kain yang jatuh gravitasi, serta nametag ID berbingkai matte akrilik 3D yang merespons pergerakan kursor mouse (*interactive parallax tilt*).
-  2. **Interaktivitas Zoom In / Out**: Pengguna dapat mengklik nametag atau ikon kaca pembesar / klik langsung pada kartu untuk masuk ke mode inspeksi fokus penuh (*Zoomed-In 3D Showcase*), di mana kartu membesar mulus dengan animasi Framer Motion dan tetap memiliki interaksi tilt 3D berglare optik dinamis.
-  3. **Narasi Realistis & Membumi**: Menghilangkan jargon berlebihan (seperti "Distributed Systems Architect", "Senior Full-Stack Software Engineer & High Performance Systems"), digantikan dengan keahlian praktis dunia nyata seorang **Full Stack Developer**: Frontend modern (React, TypeScript, Tailwind), Backend API & Database (Node.js, Express, PostgreSQL/Firestore), serta deployment & integrasi aplikasi web.
+- **Tujuan Utama**: Menghadirkan kesan pertama yang memukau dan berkesan profesional bagi setiap pengguna yang mengunjungi LifeFlow, mencerminkan harmoni antara pengelolaan finansial pribadi dan rutinitas produktivitas sehari-hari.
+- **Target Pengguna**: Profesional muda, kreator digital, mahasiswa, dan individu yang menginginkan sistem manajemen hidup terpadu yang estetik, cepat, dan aman.
+- **Nilai Utama**: Memadukan estetika visual mutakhir (tata letak split-screen dan kanvas 3D bertenaga Three.js tanpa latensi) dengan fungsionalitas autentikasi Firebase yang kokoh dan intuitif.
 
 ---
 
 ## 2. User Experience & Visual Design
 
-### Alur Interaksi Pengguna:
-1. **Membuka Modal Profil**: Pengguna membuka *About Developer* dari menu navigasi samping atau profil.
-2. **Tampilan Hero Kamar Estetik**:
-   - Di sisi kiri kartu hero, terdapat ruang visual dengan dinding kamar lo-fi berpadu panel lemari kayu hangat (`#1c1a17` hingga `#2a2520`).
-   - Sebuah pin / hook logam terpasang di dinding, menahan tali gantungan yang terhubung ke ID card holder.
-   - Nametag berayun dan miring secara 3D mengikuti kursor mouse (menggunakan komponen `TiltedCard` yang ditingkatkan dengan depth visual).
-3. **Klik untuk Zoom In**:
-   - Terdapat label petunjuk halus: *"Klik untuk memperbesar / zoom in"*.
-   - Saat foto atau kartu diklik, kartu bertransisi secara mulus membesar ke tengah layar (mode lightbox 3D) dengan tombol kembali/zoom out, memungkinkan pengguna melihat detail foto dan kartu secara tajam.
-4. **Informasi Karir & Bahasa yang Jujur**:
-   - Gelar: **Full Stack Developer**.
-   - Deskripsi: Pengembang web full-stack yang fokus pada pembangunan antarmuka pengguna interaktif, pembuatan API backend yang andal, dan manajemen database untuk aplikasi web modern.
+### A. Alur Interaksi Pengguna (User Journey)
+1. **Pendaratan Pertama (First Impression)**: Pengguna disambut dengan transisi fade-in halus. Di sisi kiri, kanvas Three.js menampilkan partikel cahaya keemasan & amber hangat yang melayang mengelilingi pilar-pilar geometri 3D (Finansial, Jadwal, Target) yang berotasi perlahan dan berinteraksi secara kinetik terhadap posisi pointer mouse pengguna.
+2. **Tab Switch Login / Registrasi**: Di panel kanan, pengguna dapat berpindah antara tab **Masuk (Login)** dan **Daftar (Register)** dengan animasi tab sliding indicator (`framer-motion layoutId`) tanpa reload halaman.
+3. **Pilihan Autentikasi Fleksibel**:
+   - **Google Sign-In**: Tombol satu klik dengan icon Google resmi dan feedback state loading yang jelas.
+   - **Face Recognition**: Tombol biometrik modern yang membuka dialog pengenalan wajah cerdas.
+   - **Form Email & Password**: Inputfield elegan dengan ikon kontekstual (Mail, Lock), tombol toggle visibilitas kata sandi (Eye/EyeOff), dan tombol submit dengan status interaktif.
+   - **Akses Tamu (Continue as Guest)**: Akses instan untuk eksplorasi kilat tanpa perlu mendaftar akun.
+4. **Respon Sukses & Masuk Dashboard**: Animasi sukses singkat sebelum transisi mulus ke dashboard utama LifeFlow.
+
+### B. Identitas Visual & Palet Warna
+- **Tema & Nuansa**: *Dark Glassmorphism Obsidian & Warm Amber Accent*.
+- **Warna Utama**:
+  - Background Base: `#0c0d12` (deep obsidian canvas)
+  - Card & Surface: `#14161f` dengan border halus `rgba(255, 255, 255, 0.08)` dan aksen ambient `rgba(200, 162, 124, 0.15)`.
+  - Brand Accent: `#C8A27C` (warm amber gold), `#E0C097`, dan `#f77f00`.
+  - Text: `#FFFFFF` (headings), `#E2E8F0` (body), `#94A3B8` (subtitles/placeholders).
+- **Tipografi**: Display font tegas dan modern berpasangan dengan font monospace bersih untuk micro-label dan angka statistik.
 
 ---
 
 ## 3. Key Product Decisions & Trade-Offs
 
-- **Pilihan Efek 3D Kamar Lo-Fi**:
-  - *Pendekatan*: Menggunakan CSS 3D transforms dan Framer Motion springs (`perspective: 1000px`, `transform-style: preserve-3d`) dengan latar gradient kayu & bayangan ambient drop-shadow.
-  - *Rasional*: Sangat ringan, performa 60fps tanpa membebani browser dengan aset 3D WebGL yang berat, namun tetap memberikan ilusi fisik nametag nyata yang menggantung di sudut kamar.
-- **Pembersihan Komentar Kode**:
-  - Menghapus semua komentar JSX `/* ... */` dan komentar internal redundan agar kode rapi, ringkas, dan mudah dirawat.
+- **Three.js Prosedural vs Asset Eksternal (Zero 404s)**:
+  - *Keputusan*: Seluruh geometri 3D, partikel, material PBR (roughness/metalness), dan shader pencahayaan dibangun 100% prosedural via Three.js (BufferGeometry, InstancedMesh, MeshPhysicalMaterial).
+  - *Alasan*: Menjamin performa 60fps tanpa jeda loading file eksternal `.glb`/`.gltf` yang berisiko 404 atau lambat saat diakses jaringan.
+- **Pemisahan Modul Kanvas & Isolasi Render Loop**:
+  - *Keputusan*: Kanvas WebGL dibungkus dalam komponen terisolasi (`LifeFlow3DShowcase.tsx`) dengan `useRef` mandiri dan `requestAnimationFrame` loop yang teratur, dilengkapi fallback deteksi WebGL software (`isSoftwareGl`).
+  - *Alasan*: Mencegah re-render React pada form input mempengaruhi performa putaran 3D di sisi kiri.
+- **Transisi Halus Mobile ke Desktop**:
+  - *Keputusan*: Di layar desktop ($\ge 1024\text{px}$), tampilan split 50/50 penuh. Di layar mobile/tablet, visual 3D beradaptasi menjadi banner ambient compact di bagian atas kartu login sehingga form tetap mudah dijangkau dan nyaman diisi dengan keyboard virtual ponsel.
 
 ---
 
-## 4. Technical Architecture & Implementation Details
+## 4. Technical Architecture & Data Strategy
+
+### A. Diagram Arsitektur Komponen
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        ABOUT DEVELOPER MODAL                           │
-│                                                                        │
-│   ┌────────────────────────────────────────────────────────────────┐   │
-│   │ Header: Nama & Tombol Tutup (ESC)                              │   │
-│   └────────────────────────────────────────────────────────────────┘   │
-│                                                                        │
-│   ┌────────────────────────────────────────────────────────────────┐   │
-│   │ HERO SECTION: KAMAR ESTETIK + NAMETAG 3D                       │   │
-│   │                                                                │   │
-│   │  [ Dinding & Lemari Kayu Lo-Fi ]                               │   │
-│   │      ┌─ [Hook Logam Dinding] ─┐                                │   │
-│   │      │   Tali Gantungan       │                                │   │
-│   │      │   ▼                    │      Deskripsi Full Stack:     │   │
-│   │      │ ┌──────────────────┐   │      - Nama: M. Faiz Dzahin    │   │
-│   │      │ │ ID Nametag 3D    │   │      - Gelar: Full Stack Dev   │   │
-│   │      │ │ Foto + Info      │   │      - Fokus: Web Apps, API,   │   │
-│   │      │ │ (Click to Zoom)  │───┼────>   Modern UI & Database    │   │
-│   │      │ └──────────────────┘   │                                │   │
-│   │      └────────────────────────┘                                │   │
-│   └────────────────────────────────────────────────────────────────┘   │
-│                                                                        │
-│   ┌────────────────────────────────────────────────────────────────┐   │
-│   │ TAB NAVIGASI & KONTEN: Profil, Stack, Layanan, Kontak          │   │
-│   └────────────────────────────────────────────────────────────────┘   │
-│                                                                        │
-│   ┌────────────────────────────────────────────────────────────────┐   │
-│   │ OVERLAY LIGHTBOX: ZOOM IN 3D NAMETAG                           │   │
-│   │ (Aktif saat foto/kartu diklik, tilt 3D penuh + tombol tutup)   │   │
-│   └────────────────────────────────────────────────────────────────┘   │
+│                              src/App.tsx                               │
+│            (Validasi Sesi Pengguna: user == null -> Login)             │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        src/components/Login.tsx                        │
+│                 (Split-Screen Container & Form States)                 │
+├───────────────────────────────────┬────────────────────────────────────┤
+│         PANEL KIRI (3D)           │          PANEL KANAN (FORM)        │
+│ ┌───────────────────────────────┐ │ ┌────────────────────────────────┐ │
+│ │  LifeFlow3DShowcase.tsx       │ │ │ Brand Header & Tagline         │ │
+│ │  - Three.js WebGL Scene       │ │ │ Sliding Tab: Login | Register  │ │
+│ │  - Ambient Partikel Fluida    │ │ │ Social Auth: Google Button     │ │
+│ │  - 3D Productivity Objects    │ │ │ Biometric: Face Recognition    │ │
+│ │  - Kinetic Pointer Tracking   │ │ │ Email & Password Form          │ │
+│ │  - Clean Typography Layer     │ │ │ One-Click Guest Demo Button    │ │
+│ └───────────────────────────────┘ │ └────────────────────────────────┘ │
+└───────────────────────────────────┴────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                      src/contexts/AuthContext.tsx                      │
+│       (Firebase Auth: Google, Email/Pass, Anonymous, Face Auth)        │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Rincian Perubahan Berkas:
-- **`src/components/AboutDeveloperModal.tsx`**:
-  - Hapus semua komentar tidak penting.
-  - Ubah gelar: `Full Stack Developer`.
-  - Hapus teks yang melebih-lebihkan ("Senior Distributed Systems Architect", dsb.).
-  - Bangun container kamar estetik lo-fi (dinding + panel lemari kayu gelap + bayangan cahaya lembut).
-  - Bangun tali gantungan dan pin realistis.
-  - Tambahkan state `isZoomed` dengan dialog modal / portal zoom in 3D animasi penuh.
+### B. Rencana Modifikasi File & Paket
+1. **Dependensi Baru**:
+   - `three` dan `@types/three` dipasang untuk membangun kanvas 3D profesional sesuai standar Three.js skill.
+2. **File Baru & Modifikasi**:
+   - `src/components/auth/LifeFlow3DCanvas.tsx`: Komponen kanvas Three.js modular dengan partikel dinamis dan objek pilar produktivitas.
+   - `src/components/Login.tsx`: Didesain ulang total menjadi split-screen responsif dengan tab switch Login/Register, visual card glassmorphism, dan integrasi auth lengkap.
+   - `src/App.tsx`: Mengaktifkan kembali pengecekan `if (!user) return <Login />` dengan penanganan transisi yang mulus.
+   - `src/contexts/AuthContext.tsx`: Mengembalikan fungsi login sesungguhnya dan memastikan sesi auth tersinkronisasi sempurna dengan Firebase.
