@@ -149,12 +149,8 @@ export default function Login() {
               </p>
             </div>
 
-            <div className="mt-6 rounded-xl bg-[#0f1118] border border-zinc-800/90 p-4 shadow-xl overflow-hidden">
+            <div className="mt-6 rounded-2xl border border-zinc-800/90 shadow-2xl overflow-hidden bg-[#17130F]">
               <LifeFlowHero3D />
-              
-              <div className="mt-3 pt-3 border-t border-zinc-800/80 flex items-center justify-end text-xs font-mono text-zinc-400">
-                <span className="text-[#00f0ff]">Gerakkan kursor untuk mengamati</span>
-              </div>
             </div>
           </div>
 
